@@ -1,0 +1,93 @@
+using System.Windows;
+
+namespace VIMControls
+{
+    public interface IVIMController
+    {
+        void ResetInput();
+        void MissingModeAction(IVIMAction action);
+        void MissingMapping();
+    }
+
+    public interface IVIMCommandController
+    {
+        void EnterCommandMode();
+        void InfoCharacter(char c);
+        void CommandCharacter(char c);
+        void Execute();
+    }
+
+    public interface IVIMContainer : IVIMController
+    {
+        void Navigate(string uri);
+        void StatusLine(string status);
+    }
+
+    public interface IVIMMotionController
+    {
+        void MoveVertically(int i);
+        void MoveHorizontally(int i);
+        void EndOfLine();
+        void BeginningOfLine();
+        void NextLine();
+    }
+
+    public interface IVIMCharacterController
+    {
+        void Output(char c);
+        void NewLine();
+        void Backspace();
+    }
+
+    public interface IVIMActionController
+    {
+        void DeleteAtCursor();
+        void EnterInsertMode(CharacterInsertMode mode);
+        void EnterCommandMode();
+        void EnterNormalMode();
+        void InsertLine(LineInsertMode mode);
+    }
+
+    public enum CharacterInsertMode
+    {
+        Before, After
+    }
+
+    public enum LineInsertMode
+    {
+        Above, Below
+    }
+
+    public interface IVIMPositionController
+    {
+        void Move(GridLength horz, GridLength vert);
+    }
+
+    public interface IVIMPersistable
+    {
+        void Save();
+    }
+
+    public interface IVIMSystemUICommands : IVIMController
+    {
+        void Maximize();
+        void Save();
+    }
+
+    public interface IVIMAction
+    {
+        void Invoke(IVIMController controller);
+    }
+
+    public interface IVIMAllControllers : IVIMContainer,
+        IVIMCharacterController,
+        IVIMMotionController,
+        IVIMPositionController,
+        IVIMCommandController,
+        IVIMActionController,
+        IVIMPersistable
+    {}
+
+    public interface IVIMControlContainer : IVIMAllControllers
+    {}
+}

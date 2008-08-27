@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VIMControls", "VIMControls.csproj", "{0025697C-CD6E-4FEF-8F7C-43F8801E39BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{72F30284-093D-4F25-98C5-FE313F5E1022}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0025697C-CD6E-4FEF-8F7C-43F8801E39BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0025697C-CD6E-4FEF-8F7C-43F8801E39BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0025697C-CD6E-4FEF-8F7C-43F8801E39BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0025697C-CD6E-4FEF-8F7C-43F8801E39BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72F30284-093D-4F25-98C5-FE313F5E1022}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72F30284-093D-4F25-98C5-FE313F5E1022}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72F30284-093D-4F25-98C5-FE313F5E1022}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72F30284-093D-4F25-98C5-FE313F5E1022}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
