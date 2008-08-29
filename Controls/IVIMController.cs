@@ -1,7 +1,31 @@
 using System.Windows;
 
-namespace VIMControls
+namespace VIMControls.Controls
 {
+    public interface IVIMControl
+    {
+        IUIElement GetUIElement();
+    }
+
+    public interface IUIElement
+    {
+    }
+
+    public class UIElementWrapper : IUIElement
+    {
+        public UIElement UiElement { get; set; }
+
+        public UIElementWrapper(UIElement uiElement)
+        {
+            UiElement = uiElement;
+        }
+    }
+
+    public interface IVIMNavigable<T>
+    {
+        void Navigate(T obj);
+    }
+
     public interface IVIMController
     {
         void ResetInput();
@@ -15,11 +39,11 @@ namespace VIMControls
         void InfoCharacter(char c);
         void CommandCharacter(char c);
         void Execute();
+        void CommandBackspace();
     }
 
-    public interface IVIMContainer : IVIMController
+    public interface IVIMContainer : IVIMController, IVIMNavigable<string>, IVIMNavigable<object>
     {
-        void Navigate(string uri);
         void StatusLine(string status);
     }
 
@@ -61,6 +85,7 @@ namespace VIMControls
     public interface IVIMPositionController
     {
         void Move(GridLength horz, GridLength vert);
+        void TogglePositionIndicator();
     }
 
     public interface IVIMPersistable
@@ -80,12 +105,12 @@ namespace VIMControls
     }
 
     public interface IVIMAllControllers : IVIMContainer,
-        IVIMCharacterController,
-        IVIMMotionController,
-        IVIMPositionController,
-        IVIMCommandController,
-        IVIMActionController,
-        IVIMPersistable
+                                          IVIMCharacterController,
+                                          IVIMMotionController,
+                                          IVIMPositionController,
+                                          IVIMCommandController,
+                                          IVIMActionController,
+                                          IVIMPersistable
     {}
 
     public interface IVIMControlContainer : IVIMAllControllers

@@ -1,35 +1,20 @@
 ﻿using System;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
+using VIMControls.Controls;
 
 namespace VIMControls
 {
-    /// <summary>
-    /// Interaction logic for Window1.xaml
-    /// </summary>
-    public partial class Window1 : IVIMSystemUICommands
+    public class Window1 : Window, IVIMSystemUICommands
     {
         private readonly VIMControlContainer vimControlContainer = new VIMControlContainer();
         public Window1()
         {
             Content = vimControlContainer;
-            InitializeComponent();
 
-            vimControlContainer.Navigate("computer");
-
-//            vimControlContainer.Navigate("form");
-
-//            vimControlContainer.Navigate("graph");
-        }
-
-        protected override void OnRender(System.Windows.Media.DrawingContext drawingContext)
-        {
-            try
-            {
-                base.OnRender(drawingContext);
-            }
-            catch
-            {}
+//            vimControlContainer.Navigate("computer");
+            vimControlContainer.Navigate("graph");
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
@@ -42,7 +27,11 @@ namespace VIMControls
                 var actions = KeyMapper.GetVIMCommand(vimControlContainer.Mode, e.Key, keyStates);
                 actions.Do(action => action.Invoke(this));
             }
-            catch(Exception ex)
+            catch (TargetInvocationException ex)
+            {
+                MessageBox.Show(ex.InnerException.Message);
+            }
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }

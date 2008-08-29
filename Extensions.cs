@@ -5,7 +5,6 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Windows;
 
 namespace VIMControls
 {
@@ -48,6 +47,11 @@ namespace VIMControls
 
         public static int Persist(this object src)
         {
+            return Persist(src, null);
+        }
+
+        public static int Persist(this object src, Guid? guid)
+        {
             var stream = new MemoryStream();
             Serializer.Serialize(stream, src);
 
@@ -58,14 +62,10 @@ namespace VIMControls
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.Parameters.Add("data", SqlDbType.Image).Value = stream.GetBuffer();
             cmd.Parameters.Add("class_name", SqlDbType.VarChar, 2000).Value = src.GetType().ToString();
+            if (guid != null)
+                cmd.Parameters.Add("guid", SqlDbType.UniqueIdentifier).Value = guid;
             cmd.ExecuteNonQuery();
 
-/*            stream.Position = 0;
-            var list = Serializer.Deserialize<List<KeyValuePair<string, string>>>(stream);
-
-            MessageBox.Show("Deep down persist!");*/
-
-            MessageBox.Show("Persist succeeded!");
             return  0;
         }
 

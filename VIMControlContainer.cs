@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using VIMControls.Controls;
+using VIMControls.Controls.VIMForms;
 
 namespace VIMControls
 {
-    public class VIMControlContainer : Grid, IVIMControlContainer
+    public class VIMControlContainer : Grid, IVIMControlContainer, IVIMNavigable<object>
     {
         public string Uri { get; set; }
 
@@ -24,7 +25,7 @@ namespace VIMControls
 
         public VIMControlContainer()
         {
-            var db = ServiceLocator.FindService<IDirectoryBrowser>(this)();
+//            var db = ServiceLocator.FindService<IDirectoryBrowser>(this)();
 
             Mode = CommandMode.Normal;
             _commandController = _commandText;
@@ -36,38 +37,14 @@ namespace VIMControls
             Navigate(uri);
         }
 
-        public void Navigate(string uri)
-        {
-            switch (uri.ToLower())
-            {
-                case "computer":
-                    InitializeListNav<VIMDirectoryControl>("file");
-                    break;
-                case "graph":
-                    InitializeRPNGrapher();
-                    break;
-                case "form":
-                    InitializeForm();
-                    break;
-                case "mru":
-                    InitializeMRU();
-                    break;
-                default:
-                    if (_currentViewer == "file")
-                        InitializeMediaViewer(uri);
-                    break;
-            }
-        }
-
-        private void InitializeForm()
+        private void InitializeForm(UIElement elem, IVIMControl ctrl)
         {
             SaveCurrentViewer();
 
-            var mainForm = new VIMFormControl(this);
-            Children.Add(mainForm);
+            Children.Add(elem);
 
             _currentViewer = "form";
-            _characterController = mainForm;
+            _characterController = ctrl as IVIMCharacterController;
 
             _savedViewers[_currentViewer] = Children[0];
         }
@@ -127,7 +104,7 @@ namespace VIMControls
             InitializeListNav<VIMMRUControl>("mru");
         }
 
-        private void InitializeListNav<T>(string type) where T : VIMDirectoryControlBase
+        private void InitializeListNav<T>(string type) where T : VIMListBrowser
         {
             SaveCurrentViewer();
 
@@ -182,22 +159,22 @@ namespace VIMControls
 
         public void Output(char c)
         {
-            _characterController.Output(c);
+            if (_characterController != null) _characterController.Output(c);
         }
 
         public void NewLine()
         {
-            _characterController.NewLine();
+            if (_characterController != null) _characterController.NewLine();
         }
 
         public void Backspace()
         {
-            _characterController.Backspace();
+            if (_characterController != null) _characterController.Backspace();
         }
 
         public void MoveVertically(int i)
         {
-            _motionController.MoveVertically(i);
+            if (_motionController != null) _motionController.MoveVertically(i);
         }
 
         public void MoveHorizontally(int i)
@@ -251,6 +228,14 @@ namespace VIMControls
             }
         }
 
+        public void TogglePositionIndicator()
+        {
+            if (_positionController != null)
+            {
+                _positionController.TogglePositionIndicator();
+            }
+        }
+
         public void InfoCharacter(char c)
         {
             _commandController.InfoCharacter(c);
@@ -264,6 +249,11 @@ namespace VIMControls
         public void Execute()
         {
             _commandController.Execute();
+        }
+
+        public void CommandBackspace()
+        {
+            _commandController.CommandBackspace();
         }
 
         public void DeleteAtCursor()
@@ -298,6 +288,48 @@ namespace VIMControls
             var persist = _savedViewers[_currentViewer] as IVIMPersistable;
             if (persist == null) return;
             persist.Save();
+        }
+
+        //todo: Refactor!
+        public void Navigate(object obj)
+        {
+            var navType = typeof (IVIMNavigable<>).MakeGenericType(obj.GetType());
+            var findServiceGen = typeof (ServiceLocator).GetMethod("FindService", new[] {typeof (object[])});
+            var findService = findServiceGen.MakeGenericMethod(navType);
+            var fnNav = findService.Invoke(null, new object[] {new object[] {this}});
+            var methodType = typeof (Func<>).MakeGenericType(navType);
+            var methodMethodInfo = methodType.GetMethod("Invoke", Type.EmptyTypes);
+            var ctrl = methodMethodInfo.Invoke(fnNav, new object[]{}) as IVIMControl;
+            var elem = ctrl.GetUIElement() as UIElementWrapper;
+
+            InitializeForm(elem.UiElement, ctrl);
+
+            var navigate = navType.GetMethod("Navigate", new [] {obj.GetType()});
+            navigate.Invoke(ctrl, new [] {obj});
+        }
+
+        public void Navigate(string uri)
+        {
+            switch (uri.ToLower())
+            {
+                case "computer":
+                    InitializeListNav<VIMDirectoryControl>("file");
+                    break;
+                case "graph":
+                    InitializeRPNGrapher();
+                    break;
+                case "form":
+                    var ctrl = new VIMFormControl(this);
+                    InitializeForm(ctrl, ctrl);
+                    break;
+                case "mru":
+                    InitializeMRU();
+                    break;
+                default:
+                    if (_currentViewer == "file")
+                        InitializeMediaViewer(uri);
+                    break;
+            }
         }
     }
 }

@@ -8,10 +8,34 @@ namespace VIMControls.Controls
     public class VIMRPNController : VIMTextControl, IVIMCommandController
     {
         private readonly Stack<string> _stack = new Stack<string>();
+        private readonly Dictionary<char, Action> _operators;
+
+        private string LastTextLine
+        {
+            get
+            {
+                return _textData[_textData.Length - 1].Text;
+            }
+            set
+            {
+                _textData[_textData.Length - 1].Text = value;
+            }
+        }
+
+        public VIMRPNController()
+        {
+            _operators = new Dictionary<char, Action>
+                             {
+                                 {'+', Add},
+                                 {'*', Multiply},
+                                 {'-', Subtract},
+                                 {'/', Divide}
+                             };
+        }
 
         public void EnterCommandMode()
         {
-            _textData[_textData.Length - 1].Text = "";
+            LastTextLine = "";
         }
 
         public void InfoCharacter(char c)
@@ -20,20 +44,19 @@ namespace VIMControls.Controls
 
         public void CommandCharacter(char c)
         {
-            if (c == '+')
+            if (_operators.ContainsKey(c))
             {
                 Push();
-                _textData[_textData.Length - 1].Text = "add";
-                Execute();
+                _operators[c]();
+                return;
             }
-            else
-                _textData[_textData.Length - 1].Text += c;
+            LastTextLine += c;
         }
 
         private void Push()
         {
-            if (_textData[_textData.Length - 1].Text.Length > 0)
-                _stack.Push(_textData[_textData.Length - 1].Text);
+            if (LastTextLine.Length > 0)
+                _stack.Push(LastTextLine);
             UpdateDisplayFromStack();
         }
 
@@ -57,14 +80,21 @@ namespace VIMControls.Controls
                 Enumerable.Range(0, imax)
                     .Do(i => _textData[i].Text = "");
 
-            _textData[_textData.Length - 1].Text = "";
+            LastTextLine = "";
         }
 
         public void Execute()
         {
-            var cmd = _textData[_textData.Length - 1].Text;
+            var cmd = LastTextLine;
             Push();
             Process(cmd);
+        }
+
+        public void CommandBackspace()
+        {
+            var length = LastTextLine.Length;
+            if (length > 0)
+                LastTextLine = LastTextLine.Remove(length - 1);
         }
 
         private class Numeric
@@ -84,24 +114,44 @@ namespace VIMControls.Controls
             }
         }
 
-        private static Numeric Add(Numeric a0, Numeric a1)
+        private void Push(object o)
         {
-            return a0 + a1;
+            _stack.Push(o.ToString());
+            UpdateDisplayFromStack();
+        }
+
+        private void Add()
+        {
+            var i0 = Pop<int>();
+            var i1 = Pop<int>();
+            Push(i0 + i1);
+        }
+
+        private void Multiply()
+        {
+            var i0 = Pop<int>();
+            var i1 = Pop<int>();
+            Push(i0*i1);
+        }
+
+        private void Divide()
+        {
+            var i0 = Pop<int>();
+            var i1 = Pop<int>();
+            Push(i1 / i0);
+        }
+
+        private void Subtract()
+        {
+            var i0 = Pop<int>();
+            var i1 = Pop<int>();
+            Push(i1 - i0);
         }
 
         private void Process(string cmd)
         {
-            if (!String.IsNullOrEmpty(cmd))
-            {
-                if (cmd == "add")
-                {
-                    _stack.Pop();
-                    var i0 = Pop<int>();
-                    var i1 = Pop<int>();
-                    _textData[_textData.Length - 1].Text = (i0 + i1).ToString();
-                    Push();
-                }
-            }
+            if (String.IsNullOrEmpty(cmd)) return;
+            if (cmd == "add") Add();
         }
     }
 }

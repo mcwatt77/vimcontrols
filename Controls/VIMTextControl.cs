@@ -11,25 +11,6 @@ namespace VIMControls.Controls
         string Text { get; set; }
     }
 
-    public interface IVIMControl
-    {
-        IUIElement GetUIElement();
-    }
-
-    public interface IUIElement
-    {
-    }
-
-    public class UIElementWrapper : IUIElement
-    {
-        public UIElement UiElement { get; set; }
-
-        public UIElementWrapper(UIElement uiElement)
-        {
-            UiElement = uiElement;
-        }
-    }
-
     public class VIMTextControl : StackPanel, ITextInputProvider
     {
         private const double _lineHeight = 23;
@@ -182,8 +163,8 @@ namespace VIMControls.Controls
 
         public string Text
         {
-            get { return ""; }
-            set { }
+            get { return _textData[0].Text; }
+            set { _textData[0].Text = value; }
         }
     }
 }

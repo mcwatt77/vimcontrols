@@ -5,6 +5,7 @@
         public IUIElement GetUIElement()
         {
 //            WebBrowser
+            return null;
         }
     }
 }
