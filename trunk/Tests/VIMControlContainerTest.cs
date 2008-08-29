@@ -7,6 +7,20 @@ namespace Tests
     {
         [Ignore]
         [Test]
+        public void IWantToInformTheEventRouterThatIHostControls()
+        {
+            Assert.Fail();
+        }
+
+        [Ignore]
+        [Test]
+        public void WhenTheEventRouterIsLookingForTargetItWillAskMeAboutControlsImHosting()
+        {
+            Assert.Fail();
+        }
+
+        [Ignore]
+        [Test]
         public void RequestObjectsOfASpecificInterfaceInASpecificRole()
         {
             Assert.Fail();

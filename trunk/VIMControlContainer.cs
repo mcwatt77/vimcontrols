@@ -290,6 +290,15 @@ namespace VIMControls
             persist.Save();
         }
 
+        public void Delete()
+        {
+            if (_currentViewer != "form") return;
+
+            var persist = _savedViewers[_currentViewer] as IVIMPersistable;
+            if (persist == null) return;
+            persist.Delete();
+        }
+
         //todo: Refactor!
         public void Navigate(object obj)
         {

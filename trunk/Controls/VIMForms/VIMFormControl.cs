@@ -49,6 +49,11 @@ namespace VIMControls.Controls.VIMForms
                 .Persist(VIMMRUControl.Guid);
         }
 
+        public void Delete()
+        {
+            MessageBox.Show("I'm scared to delete!");
+        }
+
         public void Navigate(List<KeyValuePair<string, string>> obj)
         {
             Children.Clear();
