@@ -91,12 +91,14 @@ namespace VIMControls.Controls
     public interface IVIMPersistable
     {
         void Save();
+        void Delete();
     }
 
     public interface IVIMSystemUICommands : IVIMController
     {
         void Maximize();
         void Save();
+        void About();
     }
 
     public interface IVIMAction
@@ -114,5 +116,7 @@ namespace VIMControls.Controls
     {}
 
     public interface IVIMControlContainer : IVIMAllControllers
-    {}
+    {
+        CommandMode Mode { get; set; }
+    }
 }

@@ -1,6 +1,7 @@
-﻿using VIMControls.Controls;
+﻿using VIMControls.Contracts;
+using VIMControls.Controls;
 
-namespace VIMControls
+namespace VIMControls.Controls
 {
     public class VIMCommandText : VIMTextControl, IVIMCommandController
     {
@@ -32,7 +33,10 @@ namespace VIMControls
 
         public void Execute()
         {
-//            var result = ServiceLocator.FindService<ServiceResult>(TextLine.Substring(1))();
+            var mapper = ServiceLocator.FindService<IVIMStringCommandMapper>()();
+            var msg = mapper.MapCommand(TextLine.Substring(1));
+            var msgSvc = ServiceLocator.FindService<IVIMMessageService>()();
+            msgSvc.SendMessage(msg);
         }
 
         public void CommandBackspace()

@@ -20,7 +20,7 @@ namespace VIMControls.Controls
 
         protected override void UpdateData()
         {
-            var sql = string.Format("select top 10 data, class_name from image_data where guid = '{0}' order by id desc", Guid);
+            var sql = string.Format("select top 10 data, class_name from image_data where class_name like 'system.linq.enumerable%' and guid = '{0}' order by id desc", Guid);
 
             var sqlResult = Sql.Exec(sql)
                 .Select(dict => new KeyValuePair<string, object>(dict["class_name"].ToString(), dict["data"]))

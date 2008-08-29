@@ -2,19 +2,24 @@
 using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
+using VIMControls.Contracts;
 using VIMControls.Controls;
 
 namespace VIMControls
 {
     public class Window1 : Window, IVIMSystemUICommands
     {
-        private readonly VIMControlContainer vimControlContainer = new VIMControlContainer();
+        private readonly IVIMControlContainer vimControlContainer;
+        private readonly IVIMMessageService _msg;
+
         public Window1()
         {
-            Content = vimControlContainer;
+            Content = vimControlContainer = ServiceLocator.FindService<IVIMControlContainer>()();
+            _msg = ServiceLocator.FindService<IVIMMessageService>(vimControlContainer)();
+            ServiceLocator.Register<IVIMMessageService>(_msg);
 
-//            vimControlContainer.Navigate("computer");
-            vimControlContainer.Navigate("graph");
+            vimControlContainer.Navigate("computer");
+//            vimControlContainer.Navigate("graph");
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
@@ -48,6 +53,11 @@ namespace VIMControls
             vimControlContainer.Save();
         }
 
+        public void About()
+        {
+            MessageBox.Show("This is like version .05 or something.  Not a lot done yet.  Check back later.");
+        }
+
         public void ResetInput()
         {
             vimControlContainer.ResetInput();
@@ -55,7 +65,7 @@ namespace VIMControls
 
         public void MissingModeAction(IVIMAction action)
         {
-            action.Invoke(vimControlContainer);
+            _msg.SendMessage(action);
         }
 
         public void MissingMapping()
