@@ -7,10 +7,11 @@ namespace VIMControls
 {
     public class ServiceLocator
     {
-        public static Func<T> FindService<T>(string serviceName)
+/*       If I uncommented, 
+ * public static Func<T> FindService<T>(string serviceName)
         {
             return () => default(T);
-        }
+        }*/
 
         public static Func<T> FindService<T>(params object[] dependencies)
         {
@@ -30,8 +31,9 @@ namespace VIMControls
 
             if (types.Count() == 1)
             {
-                var constructor = types.Single().GetConstructor(Type.EmptyTypes);
-                return () => (T)constructor.Invoke(new object[] {});
+                var constructor = types.Single().GetConstructor(dependencies.Select(o => o.GetType()).ToArray());
+                if (constructor == null) return null;
+                return () => (T)constructor.Invoke(dependencies);
             }
             return null;
         }

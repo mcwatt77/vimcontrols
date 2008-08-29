@@ -1,43 +1,11 @@
 ﻿using System;
+using System.Linq;
 using NUnit.Framework;
+using VIMControls.Controls;
 using VIMControls;
 
 namespace Tests
 {
-    public interface IUIElement
-    {}
-
-    public interface IVIMServiceProvider
-    {
-        void RegisterServices(IVIMServiceRegistry registry);
-    }
-
-    public interface IVIMServiceRegistry
-    {
-        void Register(IVIMServiceProvider provider, Type forService, params Type[] providedServices);
-    }
-
-    public interface ITextInputProvider : IVIMCharacterController, IVIMMotionController, IVIMServiceProvider
-    {
-        string Text { get; set; }
-        IUIElement GetUIElement();
-    }
-
-    public class VIMServiceProvider : Attribute
-    {
-        public VIMServiceProvider(Type type)
-        {}
-    }
-
-    [VIMServiceProvider(typeof(ITextInputProvider))]
-    public class TextInputProvider : IVIMServiceProvider
-    {
-        public void RegisterServices(IVIMServiceRegistry registry)
-        {
-            registry.Register(null, typeof(IVIMCharacterController));
-        }
-    }
-
     [TestFixture]
     public class VIMTextControlTest
     {
@@ -49,11 +17,10 @@ namespace Tests
             Assert.Fail();
         }
 
-        [Ignore]
         [Test]
         public void IWantToBeThereWhenTheObjectCreatorNeedsATextInputProviderButMyDataObjectShouldGetTextNotMe()
         {
-            Assert.Fail();
+            Assert.IsTrue(typeof (ITextInputProvider).GetImplementations().Single() == typeof(VIMTextControl), "Should find VIMTextControl when looking for an ITextInputProvider.");
         }
 
         [Ignore]

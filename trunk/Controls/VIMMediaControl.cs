@@ -2,6 +2,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 
 namespace VIMControls.Controls
 {
@@ -10,30 +11,48 @@ namespace VIMControls.Controls
         private readonly IVIMContainer _parent;
         private readonly MediaElement _mediaElement;
         private static readonly MediaElement _singleMediaElement = new MediaElement();
+        private readonly ProgressBar _progress;
+        private TimeSpan _maxTs;
+        private Storyboard _story;
+        private MediaTimeline _timeline;
 
         public VIMMediaControl(IVIMContainer parent)
         {
             _parent = parent;
-//            _mediaElement = new MediaElement();
             if (_singleMediaElement.Parent != null)
                 ((Grid) _singleMediaElement.Parent).Children.Remove(_singleMediaElement);
             _mediaElement = _singleMediaElement;
 
             Children.Add(_mediaElement);
             _mediaElement.MediaEnded += VIMMediaControl_MediaEnded;
+            _mediaElement.MediaOpened += _mediaElement_MediaOpened;
 
-            var progress = new ProgressBar
+            _progress = new ProgressBar
                                {
-                                   Height = 22,
+                                   Height = 18,
                                    VerticalAlignment = VerticalAlignment.Bottom,
                                    Background = Brushes.Transparent,
-                                   Value = 20
+                                   Value = 0
                                };
 
-            var brush = progress.Foreground.Clone();
+            var brush = Brushes.DarkGreen.Clone();
             brush.Opacity = 0.5;
-            progress.Foreground = brush;
-//            Children.Add(progress);
+            _progress.Foreground = brush;
+            Children.Add(_progress);
+        }
+
+        void _mediaElement_MediaOpened(object sender, RoutedEventArgs e)
+        {
+            _maxTs = _mediaElement.NaturalDuration.TimeSpan;
+        }
+
+        public void HeartBeat()
+        {
+            if (_maxTs == default(TimeSpan)) return;
+
+            var pos = _mediaElement.Position;
+            var pct = 100*pos.TotalMilliseconds/_maxTs.TotalMilliseconds;
+            _progress.Value = pct;
         }
 
         public Uri Source
@@ -44,8 +63,22 @@ namespace VIMControls.Controls
             }
             set
             {
-                _mediaElement.Source = value;
+//                _mediaElement.Source = value;
+
+                _timeline = new MediaTimeline(value);
+//                _timeline.CurrentTimeInvalidated += timeline_CurrentTimeInvalidated;
+                var clock = _timeline.CreateClock();
+                _mediaElement.Clock = clock;
+
+                _story = new Storyboard();
+                _story.Children.Add(_timeline);
+                _story.Begin(_mediaElement, true);
             }
+        }
+
+        void timeline_CurrentTimeInvalidated(object sender, EventArgs e)
+        {
+            HeartBeat();
         }
 
         void VIMMediaControl_MediaEnded(object sender, RoutedEventArgs e)
@@ -55,12 +88,16 @@ namespace VIMControls.Controls
 
         public void MoveVertically(int i)
         {
-            _mediaElement.Position = _mediaElement.Position.Add(new TimeSpan(0, 0, 10*i));
+            var ts = _mediaElement.Position.Add(new TimeSpan(0, 0, 10*i));
+            _story.SeekAlignedToLastTick(_mediaElement, ts, TimeSeekOrigin.BeginTime);
+            HeartBeat();
         }
 
         public void MoveHorizontally(int i)
         {
-            _mediaElement.Position = _mediaElement.Position.Add(new TimeSpan(0, 0, 10*i));
+            var ts = _mediaElement.Position.Add(new TimeSpan(0, 0, 10*i));
+            _story.SeekAlignedToLastTick(_mediaElement, ts, TimeSeekOrigin.BeginTime);
+            HeartBeat();
         }
 
         public void EndOfLine()
@@ -81,9 +118,16 @@ namespace VIMControls.Controls
             {
                 if (_mediaElement.NaturalDuration.HasTimeSpan)
                 {
-                    _mediaElement.Position = new TimeSpan(0, 0, 0, 0, (int)(_mediaElement.NaturalDuration.TimeSpan.TotalMilliseconds * horz.Value));
+                    var ts = new TimeSpan(0, 0, 0, 0, (int)(_mediaElement.NaturalDuration.TimeSpan.TotalMilliseconds * horz.Value));
+                    _story.SeekAlignedToLastTick(_mediaElement, ts, TimeSeekOrigin.BeginTime);
                 }
             }
+            HeartBeat();
+        }
+
+        public void TogglePositionIndicator()
+        {
+            HeartBeat();
         }
     }
 }

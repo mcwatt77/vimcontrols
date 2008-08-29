@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
+using VIMControls.Controls;
 
 namespace VIMControls
 {
@@ -30,6 +31,7 @@ namespace VIMControls
                                                                                  {Key.NumPad7, c => c.Move(new GridLength(0.7, GridUnitType.Star), default(GridLength) )},
                                                                                  {Key.NumPad8, c => c.Move(new GridLength(0.8, GridUnitType.Star), default(GridLength) )},
                                                                                  {Key.NumPad9, c => c.Move(new GridLength(0.9, GridUnitType.Star), default(GridLength) )},
+                                                                                 {Key.P, c => c.TogglePositionIndicator()}
                                                                              },
                                                                          new Dictionary<Key, Action<IVIMMotionController>>
                                                                              {
@@ -39,6 +41,10 @@ namespace VIMControls
                                                                          new Dictionary<Key, Action<IVIMController>>
                                                                              {
                                                                                  {Key.Escape, c => c.ResetInput()}
+                                                                             },
+                                                                         new Dictionary<Key, Action<IVIMSystemUICommands>>
+                                                                             {
+                                                                                 {Key.F11, c => c.Maximize()}
                                                                              }
                                                                      }
                                              }
@@ -94,7 +100,8 @@ namespace VIMControls
                                                                          {Key.Add, c => c.CommandCharacter('+')},
                                                                          {Key.Subtract, c => c.CommandCharacter('-')},
                                                                          {Key.Multiply, c => c.CommandCharacter('*')},
-                                                                         {Key.Divide, c => c.CommandCharacter('/')}
+                                                                         {Key.Divide, c => c.CommandCharacter('/')},
+                                                                         {Key.Back, c => c.CommandBackspace()}
                                                                      },
                                                                      new Dictionary<Key, Action<IVIMControlContainer>>
                                                                      {
@@ -265,7 +272,8 @@ namespace VIMControls
                                                                     new Dictionary<Key, Action<IVIMContainer>>
                                                                     {
                                                                         {Key.F2, c => c.Navigate("graph")},
-                                                                        {Key.F3, c => c.Navigate("form")}
+                                                                        {Key.F3, c => c.Navigate("form")},
+                                                                        {Key.F4, c => c.Navigate("mru")}
                                                                     },
                                                                     new Dictionary<Key, Action<IVIMSystemUICommands>>
                                                                     {

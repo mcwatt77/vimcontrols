@@ -4,24 +4,40 @@ namespace VIMControls
 {
     public class VIMCommandText : VIMTextControl, IVIMCommandController
     {
+        private string TextLine
+        {
+            get
+            {
+                return _textData[0].Text;
+            }
+            set
+            {
+                _textData[0].Text = value;
+            }
+        }
         public void EnterCommandMode()
         {
-            _textData[0].Text = ":";
+            TextLine = ":";
         }
 
         public void InfoCharacter(char c)
         {
-            _textData[0].Text = c.ToString();
+            TextLine = c.ToString();
         }
 
         public void CommandCharacter(char c)
         {
-            _textData[0].Text += c;
+            TextLine += c;
         }
 
         public void Execute()
         {
-            var result = ServiceLocator.FindService<ServiceResult>(_textData[0].Text.Substring(1))();
+//            var result = ServiceLocator.FindService<ServiceResult>(TextLine.Substring(1))();
+        }
+
+        public void CommandBackspace()
+        {
+            TextLine = TextLine.Remove(TextLine.Length - 1);
         }
     }
 }

@@ -53,24 +53,16 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <ApplicationDefinition Include="App.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </ApplicationDefinition>
-    <Page Include="Window1.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Compile Include="App.xaml.cs">
-      <DependentUpon>App.xaml</DependentUpon>
-      <SubType>Code</SubType>
     </Compile>
     <Compile Include="Window1.xaml.cs">
-      <DependentUpon>Window1.xaml</DependentUpon>
-      <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controls\TempSqlHelper.cs" />
+    <Compile Include="Controls\VIMForms\VIMFormRow.cs" />
+    <Compile Include="Controls\VIMListBrowser.cs" />
+    <Compile Include="Controls\VIMMRUControl.cs" />
     <Compile Include="Controls\VIMWebBrowser.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="ServiceLocator.cs" />
@@ -92,7 +84,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="Controls\VIMDirectoryControl.cs" />
-    <Compile Include="Controls\VIMFormControl.cs" />
+    <Compile Include="Controls\VIMForms\VIMFormControl.cs" />
     <Compile Include="Controls\VIMMediaControl.cs" />
     <Compile Include="Controls\VIMRPNController.cs" />
     <Compile Include="Controls\VIMCommandText.cs" />
