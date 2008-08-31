@@ -4,9 +4,10 @@ using System.Windows;
 using System.Windows.Controls;
 using VIMControls.Contracts;
 using VIMControls.Controls;
+using VIMControls.Controls.Misc;
 using VIMControls.Controls.VIMForms;
 
-namespace VIMControls.Controls
+namespace VIMControls.Controls.Container
 {
     public class VIMControlContainer : Grid, IVIMControlContainer
     {
@@ -24,6 +25,7 @@ namespace VIMControls.Controls
         private IVIMCommandController _commandController;
         private VIMTextControl _statusLine;
         private readonly VIMCommandText _commandText = new VIMCommandText();
+        private Dictionary<Type, IVIMController> _handlers = new Dictionary<Type, IVIMController>();
 
         public VIMControlContainer()
         {
@@ -135,7 +137,7 @@ namespace VIMControls.Controls
             SetRow(canvas, 1);
             _motionController = directoryBrowser;
 
-            AddCursor<T>(canvas as Canvas, directoryBrowser);
+            AddCursor(canvas as Canvas, directoryBrowser);
 
             var treeInfo = new VIMTextControl();
             treeInfoGrid.Children.Add(treeInfo);
@@ -148,19 +150,20 @@ namespace VIMControls.Controls
             _listController = directoryBrowser;
         }
 
-        private void AddCommandText(Grid statusBarGrid)
+        private void AddCommandText(Panel statusBarGrid)
         {
             if (_commandText.Parent != null)
-                (_commandText.Parent as Grid).Children.Remove(_commandText);
+                ((Grid)_commandText.Parent).Children.Remove(_commandText);
             statusBarGrid.Children.Add(_commandText);
             _commandController = _commandText;
+            _handlers[typeof (IVIMCommandController)] = _commandText;
             SetRow(_commandText, 1);
         }
 
-        private void AddCursor<T>(Canvas canvas, T directoryBrowser)
+        private void AddCursor<T>(Panel canvas, T directoryBrowser)
         {
-            var cursor = ServiceLocator.FindService<IVIMListCursor>(directoryBrowser)();
-            _motionController = cursor;
+            var cursor = Services.Locate<IVIMListCursor>(directoryBrowser)();
+            _motionController = new ListMotionWrapper(cursor);
             var elem = (UIElementWrapper)cursor.GetUIElement();
             canvas.Children.Add(elem.UiElement);
         }
@@ -267,6 +270,10 @@ namespace VIMControls.Controls
 
         public void MissingModeAction(IVIMAction action)
         {
+            if (_handlers.ContainsKey(action.ControllerType))
+            {
+                action.Invoke(_handlers[action.ControllerType]);
+            }
         }
 
         public void MissingMapping()
@@ -321,8 +328,39 @@ namespace VIMControls.Controls
 
         public void EnterCommandMode()
         {
+            if (_handlers.ContainsKey(typeof(IVIMCommandController)))
+            {
+                var ctrl = (IVIMCommandController)_handlers[typeof (IVIMCommandController)];
+                Mode = CommandMode.Command;
+                _commandController.EnterCommandMode();
+                return;
+            }
+
+            var oldChild = Children[0];
+            Children.Remove(oldChild);
+
+            var grid = SetupSplit(Children, Orientation.Vertical, SplitType.DynamicFirst, 1, 23);
+            grid.Children.Add(oldChild);
+            SetRow(oldChild, 0);
+
+            grid.Children.Add(_commandText);
+            SetRow(_commandText, 1);
+
+            _commandText.Text = ":";
+
             Mode = CommandMode.Command;
-            _commandController.EnterCommandMode();
+
+
+/*            if (_commandText.Parent != null)
+                ((Grid)_commandText.Parent).Children.Remove(_commandText);
+            statusBarGrid.Children.Add(_commandText);
+            _commandController = _commandText;
+            _handlers[typeof (IVIMCommandController)] = _commandText;
+            SetRow(_commandText, 1);*/
+
+            //create it
+/*            Mode = CommandMode.Command;
+            _commandController.EnterCommandMode();*/
         }
 
         public void EnterNormalMode()
@@ -353,17 +391,16 @@ namespace VIMControls.Controls
             persist.Delete();
         }
 
-        //todo: Refactor!
         public void Navigate(object obj)
         {
             var navType = typeof (IVIMNavigable<>).MakeGenericType(obj.GetType());
-            var findServiceGen = typeof (ServiceLocator).GetMethod("FindService", new[] {typeof (object[])});
+            var findServiceGen = typeof (Services).GetMethod("FindService", new[] {typeof (object[])});
             var findService = findServiceGen.MakeGenericMethod(navType);
             var fnNav = findService.Invoke(null, new object[] {new object[] {this}});
             var methodType = typeof (Func<>).MakeGenericType(navType);
             var methodMethodInfo = methodType.GetMethod("Invoke", Type.EmptyTypes);
-            var ctrl = methodMethodInfo.Invoke(fnNav, new object[]{}) as IVIMControl;
-            var elem = ctrl.GetUIElement() as UIElementWrapper;
+            var ctrl = (IVIMControl)methodMethodInfo.Invoke(fnNav, new object[]{});
+            var elem = ((UIElementWrapper)ctrl.GetUIElement());
 
             InitializeForm(elem.UiElement, ctrl);
 
@@ -375,6 +412,9 @@ namespace VIMControls.Controls
         {
             switch (uri.ToLower())
             {
+                case "rpn":
+                    IntializeRPN();
+                    break;
                 case "computer":
                     InitializeListNav<VIMDirectoryControl>("file");
                     break;
@@ -393,6 +433,35 @@ namespace VIMControls.Controls
                         InitializeMediaViewer(uri);
                     break;
             }
+        }
+
+        private void IntializeRPN()
+        {
+            var stackPanel = new StackPanel();
+
+            var stackInputController = Services.Locate<IStackInputController>()();
+            var stackCtrl = UIElementWrapper.From(stackInputController);
+
+            var expressionProcessor = Services.Locate<IVIMExpressionProcessor>()();
+            var exprCtrl = (FrameworkElement)UIElementWrapper.From(expressionProcessor);
+            exprCtrl.Height = expressionProcessor.GetRequiredHeight(4);
+            _handlers[typeof(IVIMExpressionProcessor)] = expressionProcessor;
+
+            var fancyDisplayStack = Services.Locate<IFancyDisplayStack>()();
+            var graphPanel = Services.Locate<IVIMGraphPanel>()();
+
+            Children.Add(stackPanel);
+            stackPanel.Children.Add(stackCtrl);
+            stackPanel.Children.Add(exprCtrl);
+
+            _characterController = stackInputController;
+
+//            stackPanel.Children.Add(stackInputController.GetUIElement());
+
+            //stackinput should take one line
+            //expressionprocessor should take 4 lines
+            //fancydisplaystack should take 4 lines
+            //graph panel should take remaining space
         }
 
         public IUIElement GetUIElement()

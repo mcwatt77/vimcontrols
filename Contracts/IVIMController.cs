@@ -1,8 +1,15 @@
+using System;
 using System.Windows;
 using VIMControls.Controls;
 
 namespace VIMControls.Contracts
 {
+
+    public interface IVIMMultiLineTextDisplay
+    {
+        double GetRequiredHeight(int numLines);
+    }
+
     public interface IVIMControl
     {
         IUIElement GetUIElement();
@@ -20,6 +27,14 @@ namespace VIMControls.Contracts
         {
             UiElement = uiElement;
         }
+
+        public static UIElement From(IVIMControl control)
+        {
+            var wrapper = control.GetUIElement() as UIElementWrapper;
+            if (wrapper == null) throw new Exception("Control was not a WPF supported control type");
+
+            return wrapper.UiElement;
+        }
     }
 
     public interface IVIMNavigable<T>
@@ -34,7 +49,7 @@ namespace VIMControls.Contracts
         void MissingMapping();
     }
 
-    public interface IVIMCommandController
+    public interface IVIMCommandController : IVIMControl
     {
         void EnterCommandMode();
         void InfoCharacter(char c);
@@ -48,13 +63,17 @@ namespace VIMControls.Contracts
         void StatusLine(string status);
     }
 
-    public interface IVIMMotionController
+    public interface IVIMListMotionController
     {
         void MoveVertically(int i);
+        void NextLine();
+    }
+
+    public interface IVIMMotionController : IVIMListMotionController
+    {
         void MoveHorizontally(int i);
         void EndOfLine();
         void BeginningOfLine();
-        void NextLine();
     }
 
     public interface IVIMCharacterController
@@ -105,6 +124,7 @@ namespace VIMControls.Contracts
     public interface IVIMAction
     {
         void Invoke(IVIMController controller);
+        Type ControllerType { get; }
     }
 
     public interface IVIMAllControllers : IVIMContainer,

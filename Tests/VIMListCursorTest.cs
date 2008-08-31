@@ -19,7 +19,7 @@ namespace Tests
             _repository = new MockRepository();
             _textStorage = _repository.StrictMock<IVIMTextStorage>();
 
-            _cursor = ServiceLocator.FindService<IVIMListCursor>(_textStorage)();
+            _cursor = Services.Locate<IVIMListCursor>(_textStorage)();
         }
 
         [Ignore]

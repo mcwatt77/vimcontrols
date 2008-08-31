@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using VIMControls.Contracts;
-using VIMControls.Controls;
+using VIMControls.Controls.Misc;
 
 namespace VIMControls.Controls
 {

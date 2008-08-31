@@ -13,7 +13,8 @@ namespace VIMControls.Controls
     {
         private readonly Dictionary<string, Delegate> _commandLookup = new Dictionary<string, Delegate>
                                                                   {
-                                                                      {"delete", (Action<IVIMPersistable>)(c => c.Delete())}
+                                                                      {"delete", (Action<IVIMPersistable>)(c => c.Delete())},
+                                                                      {"reset", (Action<IVIMController>)(c => c.ResetInput())}
                                                                   };
         public IVIMAction MapCommand(string cmd)
         {

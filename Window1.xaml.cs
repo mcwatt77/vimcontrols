@@ -13,12 +13,12 @@ namespace VIMControls
 
         public Window1()
         {
-            Content = vimControlContainer = ServiceLocator.FindService<IVIMControlContainer>()();
-            _msg = ServiceLocator.FindService<IVIMMessageService>(vimControlContainer)();
-            ServiceLocator.Register<IVIMMessageService>(_msg);
+            Content = vimControlContainer = Services.Locate<IVIMControlContainer>()();
+            _msg = Services.Locate<IVIMMessageService>(vimControlContainer)();
+            Services.Register<IVIMMessageService>(_msg);
 
-            vimControlContainer.Navigate("computer");
-//            vimControlContainer.Navigate("graph");
+//            vimControlContainer.Navigate("computer");
+            vimControlContainer.Navigate("rpn");
         }
 
         protected override void OnKeyDown(KeyEventArgs e)

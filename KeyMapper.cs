@@ -359,8 +359,9 @@ namespace VIMControls
     public class VIMAction : IVIMAction
     {
         private readonly object _vimAction;
-        private readonly Type _controllerType;
         private readonly MethodInfo _method;
+
+        public Type ControllerType { get; private set; }
 
         internal VIMAction() : this(null)
         {
@@ -373,11 +374,11 @@ namespace VIMControls
             {
                 var typeOfAction = _vimAction.GetType();
                 var typesInActionParameters = typeOfAction.GetGenericArguments();
-                _controllerType = typesInActionParameters[0];
+                ControllerType = typesInActionParameters[0];
             }
             else
             {
-                _controllerType = typeof (IVIMController);
+                ControllerType = typeof (IVIMController);
                 _vimAction = (Action<IVIMController>) (c => c.MissingMapping());
             }
             _method = _vimAction.GetType().GetMethod("Invoke");
@@ -385,7 +386,7 @@ namespace VIMControls
 
         public void Invoke(IVIMController controller)
         {
-            if (_controllerType.IsAssignableFrom(controller.GetType()))
+            if (ControllerType.IsAssignableFrom(controller.GetType()))
                 _method.Invoke(_vimAction, new object[] {controller});
             else
                 controller.MissingModeAction(this);

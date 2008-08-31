@@ -6,7 +6,7 @@ using VIMControls.Controls;
 
 namespace VIMControls.Contracts
 {
-    public class VIMListCursor : TextBlock, IVIMListCursor, ICanvasChild
+    public class VIMListCursor : TextBlock, IVIMListCursor, ICanvasChild, IVIMTextCursor
     {
         private readonly IVIMTextStorage _textStorage;
         private readonly VIMTextDataPosition _textDataPosition = new VIMTextDataPosition();
@@ -34,23 +34,11 @@ namespace VIMControls.Contracts
             base.Height = 23;
         }
 
-        public void MoveHorizontally(int i)
-        {
-        }
-
-        public void EndOfLine()
-        {
-        }
-
-        public void BeginningOfLine()
-        {
-        }
-
         public void NextLine()
         {
             Action<IListController> fn = b => b.Select(_textDataPosition.Line);
             object o = fn;
-            var msgSvc = ServiceLocator.FindService<IVIMMessageService>()();
+            var msgSvc = Services.Locate<IVIMMessageService>()();
             msgSvc.SendMessage(new VIMAction(o));
             _textDataPosition.Line = 0;
             MoveVertically(0);
@@ -95,10 +83,22 @@ namespace VIMControls.Contracts
         {
             get { return true; }
         }
+
+        public void MoveHorizontally(int i)
+        {
+        }
+
+        public void EndOfLine()
+        {
+        }
+
+        public void BeginningOfLine()
+        {
+        }
     }
 
     [DependsOn(typeof(IVIMViewport), typeof(IVIMTextStorage))]
-    public interface IVIMListCursor : IVIMMotionController, IVIMControl
+    public interface IVIMListCursor : IVIMListMotionController, IVIMControl
     {
         VIMTextDataPosition TextPosition { get; }
         Point RenderPosition { get; }
@@ -130,5 +130,9 @@ namespace VIMControls.Contracts
     {
         public int Column { get; set; }
         public int Line { get; set; }
+    }
+
+    public interface IVIMTextCursor : IVIMListCursor, IVIMMotionController
+    {
     }
 }

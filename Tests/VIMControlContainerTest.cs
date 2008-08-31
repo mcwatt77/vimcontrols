@@ -7,6 +7,16 @@ namespace Tests
     {
         [Ignore]
         [Test]
+        public void IfAskingFor_rpn_CreateStackPanelWith_StackInputController_ExpressionStack_FancyDisplayStack_GraphDisplay()
+        {}
+
+        [Ignore]
+        [Test]
+        public void IfHandlingMessageForCommandPopItUpOnBottomForAnyView()
+        {}
+
+        [Ignore]
+        [Test]
         public void IWantToInformTheEventRouterThatIHostControls()
         {
             Assert.Fail();

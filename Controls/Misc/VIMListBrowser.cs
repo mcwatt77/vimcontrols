@@ -1,5 +1,6 @@
 using System.Linq;
 using VIMControls.Contracts;
+using VIMControls.Controls.Misc;
 
 namespace VIMControls.Controls
 {
@@ -86,6 +87,38 @@ namespace VIMControls.Controls
         public bool Fill
         {
             get { return true; }
+        }
+    }
+
+    public class ListMotionWrapper : IVIMMotionController
+    {
+        private readonly IVIMListMotionController _controller;
+
+        public ListMotionWrapper(IVIMListMotionController controller)
+        {
+            _controller = controller;
+        }
+
+        public void MoveVertically(int i)
+        {
+            _controller.MoveVertically(i);
+        }
+
+        public void NextLine()
+        {
+            _controller.NextLine();
+        }
+
+        public void MoveHorizontally(int i)
+        {
+        }
+
+        public void EndOfLine()
+        {
+        }
+
+        public void BeginningOfLine()
+        {
         }
     }
 
