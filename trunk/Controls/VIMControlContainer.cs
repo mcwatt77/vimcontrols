@@ -2,17 +2,19 @@
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using VIMControls.Contracts;
 using VIMControls.Controls;
 using VIMControls.Controls.VIMForms;
 
-namespace VIMControls
+namespace VIMControls.Controls
 {
-    public class VIMControlContainer : Grid, IVIMControlContainer, IVIMNavigable<object>
+    public class VIMControlContainer : Grid, IVIMControlContainer
     {
         public string Uri { get; set; }
 
         public CommandMode Mode { get; set; }
 
+        private IListController _listController;
         private IVIMMotionController _motionController;
         private IVIMPositionController _positionController;
         private IVIMCharacterController _characterController;
@@ -25,8 +27,6 @@ namespace VIMControls
 
         public VIMControlContainer()
         {
-//            var db = ServiceLocator.FindService<IDirectoryBrowser>(this)();
-
             Mode = CommandMode.Normal;
             _commandController = _commandText;
         }
@@ -104,28 +104,23 @@ namespace VIMControls
             InitializeListNav<VIMMRUControl>("mru");
         }
 
+        private enum SplitType
+        {
+            DynamicFirst, DynamicSecond, DynamicBoth
+        }
+
         private void InitializeListNav<T>(string type) where T : VIMListBrowser
         {
             SaveCurrentViewer();
 
-            var statusBarGrid = new Grid {ShowGridLines = true};
-            Children.Add(statusBarGrid);
-            statusBarGrid.RowDefinitions.Add(new RowDefinition {Height = new GridLength(1, GridUnitType.Star)});
-            statusBarGrid.RowDefinitions.Add(new RowDefinition {Height = new GridLength(23, GridUnitType.Pixel)});
+            var statusBarGrid = SetupSplit(Children, Orientation.Vertical, SplitType.DynamicFirst, 1, 23);
 
-            var treeInfoGrid = new Grid {ShowGridLines = true};
-            statusBarGrid.Children.Add(treeInfoGrid);
+            AddCommandText(statusBarGrid);
+            var treeInfoGrid = SetupSplit(statusBarGrid.Children, Orientation.Horizontal, SplitType.DynamicBoth, 0.75);
             SetRow(treeInfoGrid, 0);
-            treeInfoGrid.ColumnDefinitions.Add(new ColumnDefinition
-                                                   {Width = new GridLength(0.75, GridUnitType.Star)});
-            treeInfoGrid.ColumnDefinitions.Add(new ColumnDefinition
-                                                   {Width = new GridLength(0.25, GridUnitType.Star)});
 
-            var lineInfoGrid = new Grid {ShowGridLines = true};
-            treeInfoGrid.Children.Add(lineInfoGrid);
+            var lineInfoGrid = SetupSplit(treeInfoGrid.Children, Orientation.Vertical, SplitType.DynamicSecond, 23, 1);
             SetColumn(lineInfoGrid, 0);
-            lineInfoGrid.RowDefinitions.Add(new RowDefinition {Height = new GridLength(23, GridUnitType.Pixel)});
-            lineInfoGrid.RowDefinitions.Add(new RowDefinition {Height = new GridLength(1, GridUnitType.Star)});
 
             var lineInfo = new VIMTextControl();
             _statusLine = lineInfo;
@@ -133,23 +128,81 @@ namespace VIMControls
             SetRow(lineInfo, 0);
 
             var newObj = typeof (T).GetConstructor(new []{typeof(IVIMContainer)}).Invoke(new object[] {this});
-            var directoryBrowser = newObj as T;
-//            var directoryBrowser = new T(this);
-            lineInfoGrid.Children.Add(directoryBrowser);
-            SetRow(directoryBrowser, 1);
+            var directoryBrowser = (T)newObj;
+
+            var canvas = DecorateWithCanvas(directoryBrowser);
+            lineInfoGrid.Children.Add(canvas);
+            SetRow(canvas, 1);
             _motionController = directoryBrowser;
+
+            AddCursor<T>(canvas as Canvas, directoryBrowser);
 
             var treeInfo = new VIMTextControl();
             treeInfoGrid.Children.Add(treeInfo);
             SetColumn(treeInfo, 1);
 
+            _currentViewer = type;
+
+            _savedViewers[_currentViewer] = Children[0];
+
+            _listController = directoryBrowser;
+        }
+
+        private void AddCommandText(Grid statusBarGrid)
+        {
             if (_commandText.Parent != null)
                 (_commandText.Parent as Grid).Children.Remove(_commandText);
             statusBarGrid.Children.Add(_commandText);
             _commandController = _commandText;
             SetRow(_commandText, 1);
+        }
 
-            _currentViewer = type;
+        private void AddCursor<T>(Canvas canvas, T directoryBrowser)
+        {
+            var cursor = ServiceLocator.FindService<IVIMListCursor>(directoryBrowser)();
+            _motionController = cursor;
+            var elem = (UIElementWrapper)cursor.GetUIElement();
+            canvas.Children.Add(elem.UiElement);
+        }
+
+        private static Grid SetupSplit(UIElementCollection elements, Orientation o, SplitType splitType, double val1)
+        {
+            return SetupSplit(elements, o, splitType, val1, null);
+        }
+
+        private static Grid SetupSplit(UIElementCollection elements, Orientation o, SplitType splitType, double val1, double? val2)
+        {
+            var grid = new Grid {ShowGridLines = true};
+            elements.Add(grid);
+            var grid1 = new GridLength(val1,
+                                       splitType == SplitType.DynamicFirst || splitType == SplitType.DynamicBoth
+                                           ? GridUnitType.Star
+                                           : GridUnitType.Pixel);
+            var grid2 = new GridLength(val2 ?? 1.0 - val1,
+                                       splitType == SplitType.DynamicSecond || splitType == SplitType.DynamicBoth
+                                           ? GridUnitType.Star
+                                           : GridUnitType.Pixel);
+
+            if (o == Orientation.Vertical)
+            {
+                grid.RowDefinitions.Add(new RowDefinition {Height = grid1});
+                grid.RowDefinitions.Add(new RowDefinition {Height = grid2});
+            }
+            else
+            {
+                grid.ColumnDefinitions.Add(new ColumnDefinition {Width = grid1});
+                grid.ColumnDefinitions.Add(new ColumnDefinition {Width = grid2});
+            }
+            return grid;
+        }
+
+        private static FrameworkElement DecorateWithCanvas(UIElement elem)
+        {
+            var canvas = new FillableCanvas();
+            canvas.Children.Add(elem);
+            Canvas.SetLeft(elem, 0);
+            Canvas.SetTop(elem, 0);
+            return canvas;
         }
 
         public void StatusLine(string status)
@@ -249,6 +302,7 @@ namespace VIMControls
         public void Execute()
         {
             _commandController.Execute();
+            Mode = CommandMode.Normal;
         }
 
         public void CommandBackspace()
@@ -338,6 +392,19 @@ namespace VIMControls
                     if (_currentViewer == "file")
                         InitializeMediaViewer(uri);
                     break;
+            }
+        }
+
+        public IUIElement GetUIElement()
+        {
+            return new UIElementWrapper(this);
+        }
+
+        public void Select(int index)
+        {
+            if (_currentViewer == "file")
+            {
+                _listController.Select(index);
             }
         }
     }

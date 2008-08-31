@@ -1,12 +1,27 @@
-﻿using System;
-using NUnit.Framework;
-using VIMControls.Controls;
+﻿using NUnit.Framework;
+using Rhino.Mocks;
+using VIMControls;
+using VIMControls.Contracts;
 
 namespace Tests
 {
     [TestFixture]
-    public class VIMListCursor
+    public class VIMListCursorTest
     {
+        private IVIMListCursor _cursor;
+
+        private IVIMTextStorage _textStorage;
+        private MockRepository _repository;
+
+        [SetUp]
+        public void Setup()
+        {
+            _repository = new MockRepository();
+            _textStorage = _repository.StrictMock<IVIMTextStorage>();
+
+            _cursor = ServiceLocator.FindService<IVIMListCursor>(_textStorage)();
+        }
+
         [Ignore]
         [Test]
         public void IKnowWhereIPointInsideTheViewport()
@@ -25,7 +40,12 @@ namespace Tests
         [Test]
         public void ICanRespondToMovementRequests()
         {
-            Assert.Fail();
+            _textStorage.Expect(e => e.ConvertPosition(null)).Return(new Point{X = 0, Y = 0});
+            _repository.ReplayAll();
+
+            _cursor.MoveVertically(1);
+
+            _repository.VerifyAll();
         }
 
         [Ignore]
@@ -48,40 +68,5 @@ namespace Tests
         {
             Assert.Fail();
         }
-    }
-
-    [DependsOn(typeof(IVIMViewport), typeof(IVIMTextStorage))]
-    public interface IVIMListCursor : IVIMMotionController, IVIMControl
-    {
-        IVIMTextDataPosition TextPosition { get; }
-        IPoint RenderPosition { get; }
-    }
-
-    public class DependsOn : Attribute
-    {
-        public DependsOn(params Type[] types)
-        {}
-    }
-
-    public interface IVIMTextStorage
-    {
-        IPoint ConvertPosition(IVIMTextDataPosition pos);
-    }
-
-    public interface IVIMViewport
-    {
-        void SetDataLine(int line);
-    }
-
-    public interface IPoint
-    {
-        double X { get; }
-        double Y { get; }
-    }
-
-    public interface IVIMTextDataPosition
-    {
-        int Column { get; }
-        int Line { get; }
     }
 }

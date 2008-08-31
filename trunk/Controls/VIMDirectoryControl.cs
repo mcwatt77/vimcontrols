@@ -1,33 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using VIMControls.Contracts;
 
 namespace VIMControls.Controls
 {
-    //IDirectoryBrowser implementations are gonna want to call Navigate back to a container
-    public interface IFactory<T>
-    {
-    }
-
-    public interface IDirectoryBrowserFactory : IFactory<IDirectoryBrowser>
-    {
-        IDirectoryBrowser Create(IVIMContainer container);
-    }
-
-    public interface IDirectoryBrowser : IVIMMotionController, IVIMCharacterController, IVIMControl
-    {
-//        void NavigateToDirectory(string uri);
-    }
-
-    //in the future the ServiceLocator could implicitly create this
-    public class DirectoryBrowserFactory : IDirectoryBrowserFactory
-    {
-        public IDirectoryBrowser Create(IVIMContainer container)
-        {
-            return new VIMDirectoryControl(container);
-        }
-    }
 
     public class VIMDirectoryControl : VIMListBrowser
     {
@@ -50,7 +27,6 @@ namespace VIMControls.Controls
 
                 data = data.Substring(1, data.Length - 2);
 
-                Unhilight(_selectedIndex);
                 _selectedIndex = 0;
                 var oldDirectory = _directory;
                 _directory = new DirectoryInfo(Path.Combine(_directory, data)).FullName;

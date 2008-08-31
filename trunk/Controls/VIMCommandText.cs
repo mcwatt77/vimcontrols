@@ -33,8 +33,10 @@ namespace VIMControls.Controls
 
         public void Execute()
         {
+            var cmd = TextLine.Substring(1);
+            TextLine = "";
             var mapper = ServiceLocator.FindService<IVIMStringCommandMapper>()();
-            var msg = mapper.MapCommand(TextLine.Substring(1));
+            var msg = mapper.MapCommand(cmd.Split(' ')[0]);
             var msgSvc = ServiceLocator.FindService<IVIMMessageService>()();
             msgSvc.SendMessage(msg);
         }

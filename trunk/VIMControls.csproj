@@ -59,6 +59,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Contracts\IVIMListCursor.cs" />
     <Compile Include="Controls\IVIMStringCommandMapper.cs" />
     <Compile Include="Controls\TempSqlHelper.cs" />
     <Compile Include="Controls\VIMForms\VIMFormRow.cs" />
@@ -67,11 +68,12 @@
     <Compile Include="Controls\VIMWebBrowser.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Contracts\IVIMMessageService.cs" />
+    <Compile Include="FillableCanvas.cs" />
     <Compile Include="ServiceLocator.cs" />
     <Compile Include="Contracts\IVIMController.cs" />
     <Compile Include="KeyMapper.cs" />
     <Compile Include="Serializer.cs" />
-    <Compile Include="VIMControlContainer.cs" />
+    <Compile Include="Controls\VIMControlContainer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

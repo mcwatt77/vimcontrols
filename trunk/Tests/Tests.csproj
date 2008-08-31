@@ -38,6 +38,7 @@
     <Reference Include="PresentationFramework">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
+    <Reference Include="Rhino.Mocks, Version=3.5.0.2, Culture=neutral, PublicKeyToken=0b3305902db7183f, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -57,7 +58,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VIMControlContainerTest.cs" />
-    <Compile Include="VIMListCursor.cs" />
+    <Compile Include="VIMListCursorTest.cs" />
     <Compile Include="VIMMessageServiceTest.cs" />
     <Compile Include="VIMStringCommandMapperTest.cs" />
     <Compile Include="VIMTextControlTest.cs" />

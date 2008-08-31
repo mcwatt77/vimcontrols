@@ -3,7 +3,6 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
 using VIMControls.Contracts;
-using VIMControls.Controls;
 
 namespace VIMControls
 {
