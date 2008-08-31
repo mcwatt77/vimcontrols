@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
-using VIMControls.Controls;
+using VIMControls.Contracts;
 
 namespace VIMControls
 {

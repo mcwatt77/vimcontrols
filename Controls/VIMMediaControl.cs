@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using VIMControls.Contracts;
 
 namespace VIMControls.Controls
 {
@@ -15,6 +16,8 @@ namespace VIMControls.Controls
         private TimeSpan _maxTs;
         private Storyboard _story;
         private MediaTimeline _timeline;
+        private DateTime _visibleStartTime = DateTime.Now;
+        private bool _alwaysVisible;
 
         public VIMMediaControl(IVIMContainer parent)
         {
@@ -29,10 +32,12 @@ namespace VIMControls.Controls
 
             _progress = new ProgressBar
                                {
-                                   Height = 18,
+                                   Height = 12,
                                    VerticalAlignment = VerticalAlignment.Bottom,
                                    Background = Brushes.Transparent,
-                                   Value = 0
+                                   Value = 0,
+                                   Visibility = Visibility.Hidden,
+                                   Margin = new Thickness(0, 0, 0, 10)
                                };
 
             var brush = Brushes.DarkGreen.Clone();
@@ -50,6 +55,12 @@ namespace VIMControls.Controls
         {
             if (_maxTs == default(TimeSpan)) return;
 
+            if (DateTime.Now.Subtract(_visibleStartTime).TotalSeconds > 5 && !_alwaysVisible)
+            {
+                SetHidden();
+                return;
+            }
+
             var pos = _mediaElement.Position;
             var pct = 100*pos.TotalMilliseconds/_maxTs.TotalMilliseconds;
             _progress.Value = pct;
@@ -66,7 +77,7 @@ namespace VIMControls.Controls
 //                _mediaElement.Source = value;
 
                 _timeline = new MediaTimeline(value);
-//                _timeline.CurrentTimeInvalidated += timeline_CurrentTimeInvalidated;
+                _timeline.CurrentTimeInvalidated += timeline_CurrentTimeInvalidated;
                 var clock = _timeline.CreateClock();
                 _mediaElement.Clock = clock;
 
@@ -76,9 +87,28 @@ namespace VIMControls.Controls
             }
         }
 
+        private void SetVisible()
+        {
+            _visibleStartTime = DateTime.Now;
+
+            if (_progress.Visibility == Visibility.Visible) return;
+
+            _progress.Visibility = Visibility.Visible;
+//            _timeline.CurrentTimeInvalidated += timeline_CurrentTimeInvalidated;
+        }
+
+        private void SetHidden()
+        {
+            if (_progress.Visibility == Visibility.Hidden) return;
+
+            _progress.Visibility = Visibility.Hidden;
+//            _timeline.CurrentTimeInvalidated -= timeline_CurrentTimeInvalidated;
+        }
+
         void timeline_CurrentTimeInvalidated(object sender, EventArgs e)
         {
-            HeartBeat();
+            if (_progress.Visibility == Visibility.Visible)
+                HeartBeat();
         }
 
         void VIMMediaControl_MediaEnded(object sender, RoutedEventArgs e)
@@ -88,14 +118,22 @@ namespace VIMControls.Controls
 
         public void MoveVertically(int i)
         {
+            SetVisible();
+
             var ts = _mediaElement.Position.Add(new TimeSpan(0, 0, 10*i));
+            if (ts.TotalMilliseconds == 0) return;
+
             _story.SeekAlignedToLastTick(_mediaElement, ts, TimeSeekOrigin.BeginTime);
             HeartBeat();
         }
 
         public void MoveHorizontally(int i)
         {
+            SetVisible();
+
             var ts = _mediaElement.Position.Add(new TimeSpan(0, 0, 10*i));
+            if (ts.TotalMilliseconds == 0) return;
+
             _story.SeekAlignedToLastTick(_mediaElement, ts, TimeSeekOrigin.BeginTime);
             HeartBeat();
         }
@@ -114,6 +152,8 @@ namespace VIMControls.Controls
 
         public void Move(GridLength horz, GridLength vert)
         {
+            SetVisible();
+            
             if (horz.GridUnitType == GridUnitType.Star)
             {
                 if (_mediaElement.NaturalDuration.HasTimeSpan)
@@ -127,7 +167,16 @@ namespace VIMControls.Controls
 
         public void TogglePositionIndicator()
         {
-            HeartBeat();
+            if (_alwaysVisible)
+            {
+                SetHidden();
+                _alwaysVisible = false;
+            }
+            else
+            {
+                SetVisible();
+                _alwaysVisible = true;
+            }
         }
     }
 }

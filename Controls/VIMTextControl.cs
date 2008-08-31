@@ -3,6 +3,8 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using VIMControls.Contracts;
+using Point=VIMControls.Contracts.Point;
 
 namespace VIMControls.Controls
 {
@@ -11,7 +13,7 @@ namespace VIMControls.Controls
         string Text { get; set; }
     }
 
-    public class VIMTextControl : StackPanel, ITextInputProvider
+    public class VIMTextControl : StackPanel, ITextInputProvider, IVIMTextStorage
     {
         private const double _lineHeight = 23;
         private int _numberOfLines;
@@ -165,6 +167,11 @@ namespace VIMControls.Controls
         {
             get { return _textData[0].Text; }
             set { _textData[0].Text = value; }
+        }
+
+        public Point ConvertPosition(VIMTextDataPosition pos)
+        {
+            return new Point {X = 0, Y = _lineHeight*pos.Line};
         }
     }
 }

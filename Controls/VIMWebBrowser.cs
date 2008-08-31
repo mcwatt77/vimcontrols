@@ -1,4 +1,6 @@
-﻿namespace VIMControls.Controls
+﻿using VIMControls.Contracts;
+
+namespace VIMControls.Controls
 {
     public class VIMWebBrowser : IVIMControl
     {

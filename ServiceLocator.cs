@@ -2,20 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using VIMControls.Controls;
-
 namespace VIMControls
 {
     public class ServiceLocator
     {
         //is this going to be a threading issue?
-        private static Dictionary<Type, object> _serviceRegistry = new Dictionary<Type, object>();
-
-/*       If I uncommented, 
- * public static Func<T> FindService<T>(string serviceName)
-        {
-            return () => default(T);
-        }*/
+        private static readonly Dictionary<Type, object> _serviceRegistry = new Dictionary<Type, object>();
 
         public static Func<T> FindService<T>(params object[] dependencies)
         {
@@ -24,16 +16,6 @@ namespace VIMControls
                 return () => (T)_serviceRegistry[typeof (T)];
             }
                     
-            var factories = typeof (IFactory<T>).GetImplementations();
-            if (factories.Count() == 1)
-            {
-                var obj = factories.Single().GetConstructor(Type.EmptyTypes).Invoke(new object[] {});
-                var methodInfo = factories.Single().GetMethods().Where(method => method.Name == "Create").Single();
-                return () => (T)methodInfo.Invoke(obj, dependencies);
-            }
-
-            //create a factory of interfaceType
-            //IFactory<T> factory = 
             var types = typeof (ServiceLocator).Assembly
                 .GetTypes()
                 .Where(type => typeof (T).IsAssignableFrom(type) &&

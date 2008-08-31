@@ -1,9 +1,21 @@
 using System.Linq;
-using System.Windows.Media;
+using VIMControls.Contracts;
 
 namespace VIMControls.Controls
 {
-    public abstract class VIMListBrowser : VIMTextControl, IDirectoryBrowser
+    public interface IListController : IVIMMotionController, IVIMCharacterController, IVIMControl
+    {
+        void Select(int index);
+    }
+
+    public interface ICanvasChild
+    {
+        bool Fill { get; }
+        double Height { set; }
+        double Width { set; }
+    }
+
+    public abstract class VIMListBrowser : VIMTextControl, IListController, ICanvasChild
     {
         protected IVIMContainer _parent;
         protected string _directory = "computer";
@@ -41,29 +53,15 @@ namespace VIMControls.Controls
             _textData
                 .Skip(_itemList.Count())
                 .Do(text => text.Text = "");
-
-            Hilight(_selectedIndex);
-        }
-
-        protected void Hilight(int index)
-        {
-            _textData[index].Background = Brushes.LightGray;
-        }
-
-        protected void Unhilight(int index)
-        {
-            _textData[index].Background = Brushes.White;
         }
 
         public void MoveVertically(int i)
         {
-            Unhilight(_selectedIndex);
             _selectedIndex += i;
             if (_selectedIndex >= _textData.Length)
                 _selectedIndex = _textData.Length - 1;
             if (_selectedIndex < 0)
                 _selectedIndex = 0;
-            Hilight(_selectedIndex);
         }
 
         public new void MoveHorizontally(int i)
@@ -79,6 +77,16 @@ namespace VIMControls.Controls
         }
 
         public new abstract void NextLine();
+        public void Select(int index)
+        {
+            _selectedIndex = index;
+            NextLine();
+        }
+
+        public bool Fill
+        {
+            get { return true; }
+        }
     }
 
     public class VIMListCursor

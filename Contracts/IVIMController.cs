@@ -1,6 +1,7 @@
 using System.Windows;
+using VIMControls.Controls;
 
-namespace VIMControls.Controls
+namespace VIMControls.Contracts
 {
     public interface IVIMControl
     {
@@ -107,12 +108,11 @@ namespace VIMControls.Controls
     }
 
     public interface IVIMAllControllers : IVIMContainer,
-                                          IVIMCharacterController,
-                                          IVIMMotionController,
                                           IVIMPositionController,
                                           IVIMCommandController,
                                           IVIMActionController,
-                                          IVIMPersistable
+                                          IVIMPersistable,
+                                          IListController
     {}
 
     public interface IVIMControlContainer : IVIMAllControllers
