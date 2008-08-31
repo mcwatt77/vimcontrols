@@ -4,19 +4,19 @@ using System.Linq;
 
 namespace VIMControls
 {
-    public class ServiceLocator
+    public class Services
     {
         //is this going to be a threading issue?
         private static readonly Dictionary<Type, object> _serviceRegistry = new Dictionary<Type, object>();
 
-        public static Func<T> FindService<T>(params object[] dependencies)
+        public static Func<T> Locate<T>(params object[] dependencies)
         {
             if (_serviceRegistry.ContainsKey(typeof(T)))
             {
                 return () => (T)_serviceRegistry[typeof (T)];
             }
                     
-            var types = typeof (ServiceLocator).Assembly
+            var types = typeof (Services).Assembly
                 .GetTypes()
                 .Where(type => typeof (T).IsAssignableFrom(type) &&
                                !type.IsAbstract);
@@ -37,7 +37,4 @@ namespace VIMControls
             _serviceRegistry[typeof (T)] = serviceResponder;
         }
     }
-
-    public class ServiceResult
-    {}
 }

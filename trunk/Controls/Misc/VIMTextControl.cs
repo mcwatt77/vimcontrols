@@ -6,18 +6,51 @@ using System.Windows.Media;
 using VIMControls.Contracts;
 using Point=VIMControls.Contracts.Point;
 
-namespace VIMControls.Controls
+namespace VIMControls.Controls.Misc
 {
     public interface ITextInputProvider : IVIMCharacterController, IVIMMotionController, IVIMControl
     {
         string Text { get; set; }
     }
 
-    public class VIMTextControl : StackPanel, ITextInputProvider, IVIMTextStorage
+    public class VIMTextControl : StackPanel, ITextInputProvider, IVIMTextStorage, IVIMMultiLineTextDisplay, IVIMController
     {
         private const double _lineHeight = 23;
         private int _numberOfLines;
         protected TextBlock[] _textData;
+
+        private bool _applyBorders;
+        public bool ApplyBorders
+        { 
+            get
+            {
+                return _applyBorders;
+            }
+            set
+            {
+                _applyBorders = value;
+                //look at each child, and replace
+                if (_applyBorders)
+                {
+                    var fElems = Children
+                        .OfType<FrameworkElement>()
+                        .ToList();
+
+                    fElems.Do(fe => Children.Remove(fe));
+                    fElems.Select(fe =>
+                                      {
+                                          var border = new Border
+                                                           {
+                                                               BorderThickness = new Thickness(1),
+                                                               BorderBrush = Brushes.LightGray,
+                                                               Child = fe
+                                                           };
+                                          return border;
+                                      })
+                        .Do(border => Children.Add(border));
+                }
+            }
+        }
 
         public string Value
         {
@@ -33,26 +66,18 @@ namespace VIMControls.Controls
 
         public VIMTextControl()
         {
-            _textData = new []{new TextBlock()};
-            _textData[0].Height = _lineHeight;
-
-            var border = new Border
-                             {
-                                 BorderThickness = new Thickness(1),
-                                 BorderBrush = Brushes.LightGray,
-                                 Child = _textData[0]
-                             };
-            Children.Add(border);
-//            Children.Add(_textData[0]);
-
-            _numberOfLines = _textData.Length;
+            _textData = new TextBlock[0];
+            _numberOfLines = 1;
+            AddNewTextBlocks();
+            AddTextBlocksToVisualDisplayFromIndex(0, Children);
         }
 
         public double LineHeight
         {
             get
             {
-                return _lineHeight;
+                if (!ApplyBorders) return _lineHeight;
+                return _lineHeight + 2;
             }
         }
 
@@ -76,12 +101,19 @@ namespace VIMControls.Controls
 
         private void CalculateNumberOfLines(SizeChangedInfo sizeInfo)
         {
-            _numberOfLines = (int)Math.Round(sizeInfo.NewSize.Height/_lineHeight);
+            _numberOfLines = (int)Math.Round(sizeInfo.NewSize.Height/LineHeight);
+
+            if (_numberOfLines > 1000)
+            {
+                _numberOfLines = 40;
+
+                MessageBox.Show("What the hell is going?  WPF has lost its mind!");
+            }
         }
 
         private void ReduceSize()
         {
-            RemoveTextBlocksFromVisualDisplay(Children);
+            RemoveTextBlocksFromVisualDisplay();
             RemoveTextBlocks();
         }
 
@@ -92,7 +124,7 @@ namespace VIMControls.Controls
             AddTextBlocksToVisualDisplayFromIndex(oldLength, Children);
         }
 
-        private void RemoveTextBlocksFromVisualDisplay(UIElementCollection children)
+        private void RemoveTextBlocksFromVisualDisplay()
         {
             _textData
                 .Skip(_numberOfLines)
@@ -111,8 +143,18 @@ namespace VIMControls.Controls
             Enumerable.Range(oldLength, _numberOfLines - oldLength)
                 .Do(i =>
                         {
-                            _textData[i].Height = _lineHeight;
-                            children.Add(_textData[i]);
+                            FrameworkElement ctrl = _textData[i];
+                            ctrl.Height = _lineHeight;
+                            if (ApplyBorders)
+                            {
+                                ctrl = new Border
+                                           {
+                                               BorderThickness = new Thickness(1),
+                                               BorderBrush = Brushes.LightGray,
+                                               Child = ctrl
+                                           };
+                            }
+                            children.Add(ctrl);
                         });
         }
 
@@ -172,6 +214,23 @@ namespace VIMControls.Controls
         public Point ConvertPosition(VIMTextDataPosition pos)
         {
             return new Point {X = 0, Y = _lineHeight*pos.Line};
+        }
+
+        public double GetRequiredHeight(int numLines)
+        {
+            return _lineHeight*numLines;
+        }
+
+        public void ResetInput()
+        {
+        }
+
+        public void MissingModeAction(IVIMAction action)
+        {
+        }
+
+        public void MissingMapping()
+        {
         }
     }
 }

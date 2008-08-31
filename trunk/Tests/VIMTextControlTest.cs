@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
 using NUnit.Framework;
-using VIMControls.Controls;
 using VIMControls;
+using VIMControls.Controls.Misc;
 
 namespace Tests
 {

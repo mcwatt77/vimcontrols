@@ -1,7 +1,7 @@
 ﻿using VIMControls.Contracts;
 using VIMControls.Controls;
 
-namespace VIMControls.Controls
+namespace VIMControls.Controls.Misc
 {
     public class VIMCommandText : VIMTextControl, IVIMCommandController
     {
@@ -35,9 +35,9 @@ namespace VIMControls.Controls
         {
             var cmd = TextLine.Substring(1);
             TextLine = "";
-            var mapper = ServiceLocator.FindService<IVIMStringCommandMapper>()();
+            var mapper = Services.Locate<IVIMStringCommandMapper>()();
             var msg = mapper.MapCommand(cmd.Split(' ')[0]);
-            var msgSvc = ServiceLocator.FindService<IVIMMessageService>()();
+            var msgSvc = Services.Locate<IVIMMessageService>()();
             msgSvc.SendMessage(msg);
         }
 

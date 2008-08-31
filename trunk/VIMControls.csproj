@@ -60,20 +60,23 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Contracts\IVIMListCursor.cs" />
+    <Compile Include="Controls\StackProcessor\IVIMExpressionProcessor.cs" />
     <Compile Include="Controls\IVIMStringCommandMapper.cs" />
+    <Compile Include="Controls\StackProcessor\StackInputController.cs" />
     <Compile Include="Controls\TempSqlHelper.cs" />
     <Compile Include="Controls\VIMForms\VIMFormRow.cs" />
-    <Compile Include="Controls\VIMListBrowser.cs" />
-    <Compile Include="Controls\VIMMRUControl.cs" />
-    <Compile Include="Controls\VIMWebBrowser.cs" />
+    <Compile Include="Controls\StackProcessor\VIMGraphPanel.cs" />
+    <Compile Include="Controls\Misc\VIMListBrowser.cs" />
+    <Compile Include="Controls\Misc\VIMMRUControl.cs" />
+    <Compile Include="Controls\Misc\VIMWebBrowser.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Contracts\IVIMMessageService.cs" />
-    <Compile Include="FillableCanvas.cs" />
-    <Compile Include="ServiceLocator.cs" />
+    <Compile Include="WPF\FillableCanvas.cs" />
+    <Compile Include="Services.cs" />
     <Compile Include="Contracts\IVIMController.cs" />
     <Compile Include="KeyMapper.cs" />
     <Compile Include="Serializer.cs" />
-    <Compile Include="Controls\VIMControlContainer.cs" />
+    <Compile Include="Controls\Container\VIMControlContainer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -87,12 +90,12 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="Controls\VIMDirectoryControl.cs" />
+    <Compile Include="Controls\Misc\VIMDirectoryControl.cs" />
     <Compile Include="Controls\VIMForms\VIMFormControl.cs" />
-    <Compile Include="Controls\VIMMediaControl.cs" />
-    <Compile Include="Controls\VIMRPNController.cs" />
-    <Compile Include="Controls\VIMCommandText.cs" />
-    <Compile Include="Controls\VIMTextControl.cs" />
+    <Compile Include="Controls\Misc\VIMMediaControl.cs" />
+    <Compile Include="Controls\Misc\VIMRPNController.cs" />
+    <Compile Include="Controls\Misc\VIMCommandText.cs" />
+    <Compile Include="Controls\Misc\VIMTextControl.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

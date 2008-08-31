@@ -1,3 +1,5 @@
+using System;
+
 namespace VIMControls.Contracts
 {
     public interface IVIMMessageService
@@ -9,6 +11,13 @@ namespace VIMControls.Contracts
     public class VIMMessageService : IVIMMessageService
     {
         private readonly IVIMControlContainer _container;
+
+        public static void SendMessage<TContract>(Action<TContract> fn)
+        {
+            var action = new VIMAction(fn);
+            var msgSvc = Services.Locate<IVIMMessageService>()();
+            msgSvc.SendMessage(action);
+        }
 
         public VIMMessageService(IVIMControlContainer container)
         {

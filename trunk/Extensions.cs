@@ -12,7 +12,7 @@ namespace VIMControls
     {
         public static IEnumerable<Type> GetImplementations(this Type interfaceType)
         {
-            return typeof (ServiceLocator).Assembly
+            return typeof (Services).Assembly
                 .GetTypes()
                 .Where(type => interfaceType.IsAssignableFrom(type)
                                && !type.IsAbstract);
