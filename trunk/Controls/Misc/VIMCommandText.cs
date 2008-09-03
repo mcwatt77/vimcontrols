@@ -1,4 +1,5 @@
-﻿using VIMControls.Contracts;
+﻿using System.Windows;
+using VIMControls.Contracts;
 using VIMControls.Controls;
 
 namespace VIMControls.Controls.Misc
@@ -16,6 +17,13 @@ namespace VIMControls.Controls.Misc
                 _textData[0].Text = value;
             }
         }
+
+        public void InvalidCommand(string cmd)
+        {
+            MessageBox.Show("Invalid command: " + cmd);
+            VIMMessageService.SendMessage<IVIMController>(c => c.ResetInput());
+        }
+
         public void EnterCommandMode()
         {
             TextLine = ":";

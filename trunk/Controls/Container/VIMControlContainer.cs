@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using VIMControls.Contracts;
 using VIMControls.Controls;
 using VIMControls.Controls.Misc;
+using VIMControls.Controls.StackProcessor;
 using VIMControls.Controls.VIMForms;
 
 namespace VIMControls.Controls.Container
@@ -13,7 +14,19 @@ namespace VIMControls.Controls.Container
     {
         public string Uri { get; set; }
 
-        public CommandMode Mode { get; set; }
+        private CommandMode _mode = CommandMode.Normal;
+        public CommandMode Mode
+        {
+            get
+            {
+                return _mode;
+            }
+            set
+            {
+                _mode = value;
+                VIMMessageService.SendMessage<IVIMSystemUICommands>(c => c.UpdateTitle());
+            }
+        }
 
         private IListController _listController;
         private IVIMMotionController _motionController;
@@ -25,11 +38,10 @@ namespace VIMControls.Controls.Container
         private IVIMCommandController _commandController;
         private VIMTextControl _statusLine;
         private readonly VIMCommandText _commandText = new VIMCommandText();
-        private Dictionary<Type, IVIMController> _handlers = new Dictionary<Type, IVIMController>();
+        private readonly Dictionary<Type, IVIMController> _handlers = new Dictionary<Type, IVIMController>();
 
         public VIMControlContainer()
         {
-            Mode = CommandMode.Normal;
             _commandController = _commandText;
         }
 
@@ -49,6 +61,8 @@ namespace VIMControls.Controls.Container
             _characterController = ctrl as IVIMCharacterController;
 
             _savedViewers[_currentViewer] = Children[0];
+
+            _handlers[typeof (IVIMForm)] = (IVIMForm)ctrl;
         }
 
         private void InitializeRPNGrapher()
@@ -61,13 +75,15 @@ namespace VIMControls.Controls.Container
             mainGrid.RowDefinitions.Add(new RowDefinition {Height = new GridLength(115, GridUnitType.Pixel)});
 
             var graphicDisplay = new VIMTextControl();
-            mainGrid.Children.Add(graphicDisplay);
-            SetRow(graphicDisplay, 0);
+            var gdUiElement = UIElementWrapper.From(graphicDisplay);
+            mainGrid.Children.Add(gdUiElement);
+            SetRow(gdUiElement, 0);
 
             var rpnCommand = new VIMRPNController();
+            var rpnUiElement = UIElementWrapper.From(rpnCommand);
             _commandController = rpnCommand;
-            mainGrid.Children.Add(rpnCommand);
-            SetRow(rpnCommand, 1);
+            mainGrid.Children.Add(rpnUiElement);
+            SetRow(rpnUiElement, 1);
 
             _currentViewer = "graph";
 
@@ -125,14 +141,16 @@ namespace VIMControls.Controls.Container
             SetColumn(lineInfoGrid, 0);
 
             var lineInfo = new VIMTextControl();
+            var liUiElement = UIElementWrapper.From(lineInfo);
             _statusLine = lineInfo;
-            lineInfoGrid.Children.Add(lineInfo);
-            SetRow(lineInfo, 0);
+            lineInfoGrid.Children.Add(liUiElement);
+            SetRow(liUiElement, 0);
 
             var newObj = typeof (T).GetConstructor(new []{typeof(IVIMContainer)}).Invoke(new object[] {this});
             var directoryBrowser = (T)newObj;
+            var dbUiElement = UIElementWrapper.From(directoryBrowser);
 
-            var canvas = DecorateWithCanvas(directoryBrowser);
+            var canvas = DecorateWithCanvas(dbUiElement);
             lineInfoGrid.Children.Add(canvas);
             SetRow(canvas, 1);
             _motionController = directoryBrowser;
@@ -140,8 +158,9 @@ namespace VIMControls.Controls.Container
             AddCursor(canvas as Canvas, directoryBrowser);
 
             var treeInfo = new VIMTextControl();
-            treeInfoGrid.Children.Add(treeInfo);
-            SetColumn(treeInfo, 1);
+            var tiUiElement = UIElementWrapper.From(treeInfo);
+            treeInfoGrid.Children.Add(tiUiElement);
+            SetColumn(tiUiElement, 1);
 
             _currentViewer = type;
 
@@ -152,12 +171,13 @@ namespace VIMControls.Controls.Container
 
         private void AddCommandText(Panel statusBarGrid)
         {
-            if (_commandText.Parent != null)
-                ((Grid)_commandText.Parent).Children.Remove(_commandText);
-            statusBarGrid.Children.Add(_commandText);
+            var ctUiElement = (StackPanel)UIElementWrapper.From(_commandText);
+            if (ctUiElement.Parent != null)
+                ((Grid)ctUiElement.Parent).Children.Remove(ctUiElement);
+            statusBarGrid.Children.Add(ctUiElement);
             _commandController = _commandText;
             _handlers[typeof (IVIMCommandController)] = _commandText;
-            SetRow(_commandText, 1);
+            SetRow(ctUiElement, 1);
         }
 
         private void AddCursor<T>(Panel canvas, T directoryBrowser)
@@ -252,6 +272,11 @@ namespace VIMControls.Controls.Container
 
         public void ResetInput()
         {
+            Mode = CommandMode.Normal;
+        }
+
+        public void OldResetInput()
+        {
             if (_currentViewer == "file") return;
 
             Children.RemoveAt(0);
@@ -326,14 +351,33 @@ namespace VIMControls.Controls.Container
             Mode = CommandMode.Insert;
         }
 
+        public void InvalidCommand(string cmd)
+        {
+            _commandController.InvalidCommand(cmd);
+        }
+
         public void EnterCommandMode()
         {
-            if (_handlers.ContainsKey(typeof(IVIMCommandController)))
+            if (!_handlers.ContainsKey(typeof(IVIMCommandController)))
             {
-                var ctrl = (IVIMCommandController)_handlers[typeof (IVIMCommandController)];
-                Mode = CommandMode.Command;
-                _commandController.EnterCommandMode();
-                return;
+                _handlers[typeof (IVIMCommandController)] = _commandText;
+            }
+
+            var ctUiElement = (StackPanel)UIElementWrapper.From(_commandText);
+            if (!ctUiElement.IsLoaded)
+                InsertCommandTextInCurrentView();
+
+            _commandText.Text = ":";
+            Mode = CommandMode.Command;
+        }
+
+        private void InsertCommandTextInCurrentView()
+        {
+            var ctUiElement = (StackPanel) UIElementWrapper.From(_commandText);
+            if (ctUiElement.Parent != null)
+            {
+                var obj = (Grid)ctUiElement.Parent;
+                obj.Children.Remove(ctUiElement);
             }
 
             var oldChild = Children[0];
@@ -343,24 +387,8 @@ namespace VIMControls.Controls.Container
             grid.Children.Add(oldChild);
             SetRow(oldChild, 0);
 
-            grid.Children.Add(_commandText);
-            SetRow(_commandText, 1);
-
-            _commandText.Text = ":";
-
-            Mode = CommandMode.Command;
-
-
-/*            if (_commandText.Parent != null)
-                ((Grid)_commandText.Parent).Children.Remove(_commandText);
-            statusBarGrid.Children.Add(_commandText);
-            _commandController = _commandText;
-            _handlers[typeof (IVIMCommandController)] = _commandText;
-            SetRow(_commandText, 1);*/
-
-            //create it
-/*            Mode = CommandMode.Command;
-            _commandController.EnterCommandMode();*/
+            grid.Children.Add(ctUiElement);
+            SetRow(ctUiElement, 1);
         }
 
         public void EnterNormalMode()
@@ -394,7 +422,7 @@ namespace VIMControls.Controls.Container
         public void Navigate(object obj)
         {
             var navType = typeof (IVIMNavigable<>).MakeGenericType(obj.GetType());
-            var findServiceGen = typeof (Services).GetMethod("FindService", new[] {typeof (object[])});
+            var findServiceGen = typeof (Services).GetMethod("Locate", new[] {typeof (object[])});
             var findService = findServiceGen.MakeGenericMethod(navType);
             var fnNav = findService.Invoke(null, new object[] {new object[] {this}});
             var methodType = typeof (Func<>).MakeGenericType(navType);
@@ -410,6 +438,11 @@ namespace VIMControls.Controls.Container
 
         public void Navigate(string uri)
         {
+            if (uri == ".")
+            {
+                OldResetInput();
+                return;
+            }
             switch (uri.ToLower())
             {
                 case "rpn":
@@ -440,7 +473,9 @@ namespace VIMControls.Controls.Container
             var stackPanel = new StackPanel();
 
             var stackInputController = Services.Locate<IStackInputController>()();
-            var stackCtrl = UIElementWrapper.From(stackInputController);
+            var stackCtrl = (FrameworkElement)UIElementWrapper.From(stackInputController);
+//            stackCtrl.Height = 23;
+            _handlers[typeof (IStackInputController)] = stackInputController;
 
             var expressionProcessor = Services.Locate<IVIMExpressionProcessor>()();
             var exprCtrl = (FrameworkElement)UIElementWrapper.From(expressionProcessor);
@@ -454,7 +489,11 @@ namespace VIMControls.Controls.Container
             stackPanel.Children.Add(stackCtrl);
             stackPanel.Children.Add(exprCtrl);
 
+            _currentViewer = "rpn";
+
             _characterController = stackInputController;
+
+            Mode = CommandMode.StackInsert;
 
 //            stackPanel.Children.Add(stackInputController.GetUIElement());
 

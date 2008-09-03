@@ -1,40 +1,18 @@
 using System;
+using System.Collections.Generic;
 using System.Windows;
 using VIMControls.Controls;
 
 namespace VIMControls.Contracts
 {
+    public interface ITextInputProvider : IVIMCharacterController, IVIMMotionController
+    {
+        string Text { get; set; }
+    }
 
     public interface IVIMMultiLineTextDisplay
     {
         double GetRequiredHeight(int numLines);
-    }
-
-    public interface IVIMControl
-    {
-        IUIElement GetUIElement();
-    }
-
-    public interface IUIElement
-    {
-    }
-
-    public class UIElementWrapper : IUIElement
-    {
-        public UIElement UiElement { get; set; }
-
-        public UIElementWrapper(UIElement uiElement)
-        {
-            UiElement = uiElement;
-        }
-
-        public static UIElement From(IVIMControl control)
-        {
-            var wrapper = control.GetUIElement() as UIElementWrapper;
-            if (wrapper == null) throw new Exception("Control was not a WPF supported control type");
-
-            return wrapper.UiElement;
-        }
     }
 
     public interface IVIMNavigable<T>
@@ -51,6 +29,7 @@ namespace VIMControls.Contracts
 
     public interface IVIMCommandController : IVIMControl
     {
+        void InvalidCommand(string cmd);
         void EnterCommandMode();
         void InfoCharacter(char c);
         void CommandCharacter(char c);
@@ -76,7 +55,7 @@ namespace VIMControls.Contracts
         void BeginningOfLine();
     }
 
-    public interface IVIMCharacterController
+    public interface IVIMCharacterController : IVIMController, IVIMControl
     {
         void Output(char c);
         void NewLine();
@@ -104,8 +83,17 @@ namespace VIMControls.Contracts
 
     public interface IVIMPositionController
     {
+        [NumberMapper(NumberMapperType.KeyPad, typeof(PositionMapper))]
         void Move(GridLength horz, GridLength vert);
         void TogglePositionIndicator();
+    }
+
+    public class PositionMapper : INumberMapper
+    {
+        public Func<int, object[]> Map()
+        {
+            return i => new object[]{new GridLength(i * 0.1, GridUnitType.Star), default(GridLength)};
+        }
     }
 
     public interface IVIMPersistable
@@ -114,11 +102,22 @@ namespace VIMControls.Contracts
         void Delete();
     }
 
+    public interface IVIMFormConstraint
+    {
+        bool Multiline { get; }
+    }
+
+    public interface IVIMForm : IVIMCharacterController, IVIMPersistable, IVIMNavigable<List<KeyValuePair<string, string>>>
+    {
+        void SetMode(IVIMFormConstraint constraint);
+    }
+
     public interface IVIMSystemUICommands : IVIMController
     {
         void Maximize();
         void Save();
         void About();
+        void UpdateTitle();
     }
 
     public interface IVIMAction

@@ -14,7 +14,7 @@ namespace VIMControls
         public Window1()
         {
             Content = vimControlContainer = Services.Locate<IVIMControlContainer>()();
-            _msg = Services.Locate<IVIMMessageService>(vimControlContainer)();
+            _msg = Services.Locate<IVIMMessageService>(this)();
             Services.Register<IVIMMessageService>(_msg);
 
 //            vimControlContainer.Navigate("computer");
@@ -57,6 +57,11 @@ namespace VIMControls
             MessageBox.Show("This is like version .05 or something.  Not a lot done yet.  Check back later.");
         }
 
+        public void UpdateTitle()
+        {
+            Title = vimControlContainer.Mode.ToString();
+        }
+
         public void ResetInput()
         {
             vimControlContainer.ResetInput();
@@ -64,7 +69,7 @@ namespace VIMControls
 
         public void MissingModeAction(IVIMAction action)
         {
-            _msg.SendMessage(action);
+            action.Invoke(vimControlContainer);
         }
 
         public void MissingMapping()

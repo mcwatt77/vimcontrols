@@ -36,6 +36,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.DirectX.DirectSound, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -60,17 +61,23 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Contracts\IVIMListCursor.cs" />
+    <Compile Include="Contracts\UIElementWrapper.cs" />
+    <Compile Include="Controls\Misc\IText.cs" />
+    <Compile Include="Controls\StackProcessor\IExpression.cs" />
     <Compile Include="Controls\StackProcessor\IVIMExpressionProcessor.cs" />
     <Compile Include="Controls\IVIMStringCommandMapper.cs" />
     <Compile Include="Controls\StackProcessor\StackInputController.cs" />
     <Compile Include="Controls\TempSqlHelper.cs" />
+    <Compile Include="Controls\VIMForms\VIMFormConstraint.cs" />
     <Compile Include="Controls\VIMForms\VIMFormRow.cs" />
     <Compile Include="Controls\StackProcessor\VIMGraphPanel.cs" />
     <Compile Include="Controls\Misc\VIMListBrowser.cs" />
     <Compile Include="Controls\Misc\VIMMRUControl.cs" />
     <Compile Include="Controls\Misc\VIMWebBrowser.cs" />
+    <Compile Include="EventableList.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Contracts\IVIMMessageService.cs" />
+    <Compile Include="Log.cs" />
     <Compile Include="WPF\FillableCanvas.cs" />
     <Compile Include="Services.cs" />
     <Compile Include="Contracts\IVIMController.cs" />

@@ -6,7 +6,7 @@ using VIMControls.Controls;
 
 namespace VIMControls.Contracts
 {
-    public class VIMListCursor : TextBlock, IVIMListCursor, ICanvasChild, IVIMTextCursor
+    public class VIMListCursor : TextBlock, IVIMTextCursor, ICanvasChild
     {
         private readonly IVIMTextStorage _textStorage;
         private readonly VIMTextDataPosition _textDataPosition = new VIMTextDataPosition();
@@ -82,6 +82,7 @@ namespace VIMControls.Contracts
         public bool Fill
         {
             get { return true; }
+            set {  }
         }
 
         public void MoveHorizontally(int i)

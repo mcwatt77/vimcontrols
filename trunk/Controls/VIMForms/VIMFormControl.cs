@@ -6,14 +6,15 @@ using VIMControls.Contracts;
 
 namespace VIMControls.Controls.VIMForms
 {
-    public class VIMFormControl : StackPanel, IVIMCharacterController, IVIMPersistable, IVIMNavigable<List<KeyValuePair<string, string>>>, IVIMControl
+    public class VIMFormControl : StackPanel, IVIMForm
     {
         public int _editingFieldIndex;
         public List<VIMFormRow> _rows;
+        private IVIMFormConstraint _defaultConstraint = VIMFormConstraint.Default;
 
         public VIMFormControl(IVIMActionController container)
         {
-            var row = new VIMFormRow(this);
+            var row = new VIMFormRow(this, _defaultConstraint);
             _rows = new List<VIMFormRow> {row};
             Children.Add(row);
 
@@ -31,7 +32,7 @@ namespace VIMControls.Controls.VIMForms
 
         public void NewLine()
         {
-            var row = new VIMFormRow(this);
+            var row = new VIMFormRow(this, _defaultConstraint);
             Children.Add(row);
             _rows.Add(row);
             _editingFieldIndex++;
@@ -61,17 +62,36 @@ namespace VIMControls.Controls.VIMForms
             obj
                 .Select(row =>
                             {
-                                var vimRow = new VIMFormRow(this);
-                                vimRow.FieldName.Text = row.Key;
-                                vimRow.Value.Text = row.Value;
+                                var vimRow = new VIMFormRow(this, _defaultConstraint)
+                                                 {
+                                                     FieldName = {Text = row.Key},
+                                                     Value = {Text = row.Value}
+                                                 };
                                 return vimRow;
                             })
                 .Do(vimRow => Children.Add(vimRow));
         }
 
+        public void SetMode(IVIMFormConstraint constraint)
+        {
+            _defaultConstraint = constraint;
+        }
+
         public IUIElement GetUIElement()
         {
             return new UIElementWrapper(this);
+        }
+
+        public void ResetInput()
+        {
+        }
+
+        public void MissingModeAction(IVIMAction action)
+        {
+        }
+
+        public void MissingMapping()
+        {
         }
     }
 }

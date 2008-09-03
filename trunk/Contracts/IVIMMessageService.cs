@@ -10,7 +10,7 @@ namespace VIMControls.Contracts
 
     public class VIMMessageService : IVIMMessageService
     {
-        private readonly IVIMControlContainer _container;
+        private readonly IVIMController _controller;
 
         public static void SendMessage<TContract>(Action<TContract> fn)
         {
@@ -19,19 +19,19 @@ namespace VIMControls.Contracts
             msgSvc.SendMessage(action);
         }
 
-        public VIMMessageService(IVIMControlContainer container)
+        public VIMMessageService(IVIMController controller)
         {
-            _container = container;
+            _controller = controller;
         }
 
         public void SendMessage(IVIMAction msg)
         {
-            msg.Invoke(_container);
+            msg.Invoke(_controller);
         }
 
         public void SendMessage(IVIMAction msg, params object[] @params)
         {
-            msg.Invoke(_container);
+            msg.Invoke(_controller);
         }
     }
 }
