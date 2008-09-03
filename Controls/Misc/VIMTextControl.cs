@@ -1,54 +1,44 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
 using VIMControls.Contracts;
 using Point=VIMControls.Contracts.Point;
 
 namespace VIMControls.Controls.Misc
 {
-    public interface ITextInputProvider : IVIMCharacterController, IVIMMotionController, IVIMControl
+    public class VIMTextControl : ITextInputProvider, IVIMTextStorage, IVIMMultiLineTextDisplay
     {
-        string Text { get; set; }
-    }
+        private readonly ITextFactory _textFactory;
+        private readonly IStackPanelFactory _panelFactory;
+        protected readonly IStackPanel _panel;
 
-    public class VIMTextControl : StackPanel, ITextInputProvider, IVIMTextStorage, IVIMMultiLineTextDisplay, IVIMController
-    {
         private const double _lineHeight = 23;
         private int _numberOfLines;
-        protected TextBlock[] _textData;
+        protected IText[] _textData;
 
-        private bool _applyBorders;
+        public VIMTextControl()
+        {
+            _textFactory = Services.Locate<ITextFactory>()();
+            _panelFactory = Services.Locate<IStackPanelFactory>()();
+
+            _panel = _panelFactory.Create();
+            _panel.RenderSizeChanged += UpdateRenderMetrics;
+            _textData = new TextLine[0];
+            _numberOfLines = 1;
+            AddNewTextBlocks();
+            AddTextBlocksToVisualDisplayFromIndex(0, _panel.Children);
+        }
+
         public bool ApplyBorders
         { 
             get
             {
-                return _applyBorders;
+                return _panel.ApplyBorders;
             }
             set
             {
-                _applyBorders = value;
-                //look at each child, and replace
-                if (_applyBorders)
-                {
-                    var fElems = Children
-                        .OfType<FrameworkElement>()
-                        .ToList();
-
-                    fElems.Do(fe => Children.Remove(fe));
-                    fElems.Select(fe =>
-                                      {
-                                          var border = new Border
-                                                           {
-                                                               BorderThickness = new Thickness(1),
-                                                               BorderBrush = Brushes.LightGray,
-                                                               Child = fe
-                                                           };
-                                          return border;
-                                      })
-                        .Do(border => Children.Add(border));
-                }
+                _panel.ApplyBorders = value;
             }
         }
 
@@ -64,14 +54,6 @@ namespace VIMControls.Controls.Misc
             }
         }
 
-        public VIMTextControl()
-        {
-            _textData = new TextBlock[0];
-            _numberOfLines = 1;
-            AddNewTextBlocks();
-            AddTextBlocksToVisualDisplayFromIndex(0, Children);
-        }
-
         public double LineHeight
         {
             get
@@ -81,22 +63,15 @@ namespace VIMControls.Controls.Misc
             }
         }
 
-        protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
+        protected virtual void UpdateRenderMetrics(SizeChangedInfo sizeInfo)
         {
-            try
-            {
-                CalculateNumberOfLines(sizeInfo);
+            CalculateNumberOfLines(sizeInfo);
 
-                if (_numberOfLines == _textData.Length) return;
-                if (_numberOfLines > _textData.Length)
-                    IncreaseSize();
-                else if (_numberOfLines < _textData.Length)
-                    ReduceSize();
-
-                base.OnRenderSizeChanged(sizeInfo);
-            }
-            catch
-            {}
+            if (_numberOfLines == _textData.Length) return;
+            if (_numberOfLines > _textData.Length)
+                IncreaseSize();
+            else if (_numberOfLines < _textData.Length)
+                ReduceSize();
         }
 
         private void CalculateNumberOfLines(SizeChangedInfo sizeInfo)
@@ -121,7 +96,7 @@ namespace VIMControls.Controls.Misc
         {
             var oldLength = _textData.Length;
             AddNewTextBlocks();
-            AddTextBlocksToVisualDisplayFromIndex(oldLength, Children);
+            AddTextBlocksToVisualDisplayFromIndex(oldLength, _panel.Children);
         }
 
         private void RemoveTextBlocksFromVisualDisplay()
@@ -138,22 +113,13 @@ namespace VIMControls.Controls.Misc
                 .ToArray();
         }
 
-        private void AddTextBlocksToVisualDisplayFromIndex(int oldLength, UIElementCollection children)
+        private void AddTextBlocksToVisualDisplayFromIndex(int oldLength, ICollection<IUIElement> children)
         {
             Enumerable.Range(oldLength, _numberOfLines - oldLength)
                 .Do(i =>
                         {
-                            FrameworkElement ctrl = _textData[i];
+                            var ctrl = _textData[i];
                             ctrl.Height = _lineHeight;
-                            if (ApplyBorders)
-                            {
-                                ctrl = new Border
-                                           {
-                                               BorderThickness = new Thickness(1),
-                                               BorderBrush = Brushes.LightGray,
-                                               Child = ctrl
-                                           };
-                            }
                             children.Add(ctrl);
                         });
         }
@@ -161,7 +127,7 @@ namespace VIMControls.Controls.Misc
         private void AddNewTextBlocks()
         {
             _textData = _textData
-                .Concat(Enumerable.Range(0, _numberOfLines - _textData.Length).Select(i => new TextBlock()))
+                .Concat(Enumerable.Range(0, _numberOfLines - _textData.Length).Select(i => _textFactory.Create()))
                 .ToArray();
         }
 
@@ -202,7 +168,7 @@ namespace VIMControls.Controls.Misc
 
         public IUIElement GetUIElement()
         {
-            return new UIElementWrapper(this);
+            return _panel;
         }
 
         public string Text
@@ -231,6 +197,16 @@ namespace VIMControls.Controls.Misc
 
         public void MissingMapping()
         {
+        }
+
+        public double Height
+        {
+            set { _panel.Height = value; }
+        }
+
+        public double Width
+        {
+            set { _panel.Width = value; }
         }
     }
 }

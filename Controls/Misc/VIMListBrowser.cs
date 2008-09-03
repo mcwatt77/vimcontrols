@@ -1,22 +1,23 @@
 using System.Linq;
+using System.Windows;
 using VIMControls.Contracts;
 using VIMControls.Controls.Misc;
 
 namespace VIMControls.Controls
 {
-    public interface IListController : IVIMMotionController, IVIMCharacterController, IVIMControl
+    public interface IListController : IVIMMotionController, IVIMCharacterController
     {
         void Select(int index);
     }
 
     public interface ICanvasChild
     {
-        bool Fill { get; }
+        bool Fill { get; set; }
         double Height { set; }
         double Width { set; }
     }
 
-    public abstract class VIMListBrowser : VIMTextControl, IListController, ICanvasChild
+    public abstract class VIMListBrowser : VIMTextControl, IListController
     {
         protected IVIMContainer _parent;
         protected string _directory = "computer";
@@ -30,16 +31,16 @@ namespace VIMControls.Controls
         protected VIMListBrowser(IVIMContainer parent)
         {
             _parent = parent;
+            _panel.Fill = true;
         }
 
         public string SelectedFile { get; set; }
 
         protected abstract void UpdateData();
 
-        protected override void OnRenderSizeChanged(System.Windows.SizeChangedInfo sizeInfo)
+        protected override void UpdateRenderMetrics(SizeChangedInfo sizeInfo)
         {
-            base.OnRenderSizeChanged(sizeInfo);
-
+            base.UpdateRenderMetrics(sizeInfo);
             RenderLines();
         }
 
@@ -56,7 +57,7 @@ namespace VIMControls.Controls
                 .Do(text => text.Text = "");
         }
 
-        public void MoveVertically(int i)
+        public new void MoveVertically(int i)
         {
             _selectedIndex += i;
             if (_selectedIndex >= _textData.Length)
@@ -82,11 +83,6 @@ namespace VIMControls.Controls
         {
             _selectedIndex = index;
             NextLine();
-        }
-
-        public bool Fill
-        {
-            get { return true; }
         }
     }
 

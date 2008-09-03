@@ -34,6 +34,10 @@ namespace VIMControls.Controls
                              };
         }
 
+        public void InvalidCommand(string cmd)
+        {
+        }
+
         public void EnterCommandMode()
         {
             LastTextLine = "";

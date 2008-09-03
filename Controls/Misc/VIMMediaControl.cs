@@ -5,7 +5,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using VIMControls.Contracts;
 
-namespace VIMControls.Controls
+namespace VIMControls.Controls.Misc
 {
     public class VIMMediaControl : Grid, IVIMMotionController, IVIMPositionController
     {
@@ -31,14 +31,14 @@ namespace VIMControls.Controls
             _mediaElement.MediaOpened += _mediaElement_MediaOpened;
 
             _progress = new ProgressBar
-                               {
-                                   Height = 12,
-                                   VerticalAlignment = VerticalAlignment.Bottom,
-                                   Background = Brushes.Transparent,
-                                   Value = 0,
-                                   Visibility = Visibility.Hidden,
-                                   Margin = new Thickness(0, 0, 0, 10)
-                               };
+                            {
+                                Height = 12,
+                                VerticalAlignment = VerticalAlignment.Bottom,
+                                Background = Brushes.Transparent,
+                                Value = 0,
+                                Visibility = Visibility.Hidden,
+                                Margin = new Thickness(0, 0, 0, 10)
+                            };
 
             var brush = Brushes.DarkGreen.Clone();
             brush.Opacity = 0.5;
@@ -113,7 +113,7 @@ namespace VIMControls.Controls
 
         void VIMMediaControl_MediaEnded(object sender, RoutedEventArgs e)
         {
-            _parent.ResetInput();
+            _parent.Navigate(".");
         }
 
         public void MoveVertically(int i)
@@ -122,6 +122,12 @@ namespace VIMControls.Controls
 
             var ts = _mediaElement.Position.Add(new TimeSpan(0, 0, 10*i));
             if (ts.TotalMilliseconds == 0) return;
+
+            if (ts > _maxTs)
+            {
+                VIMMediaControl_MediaEnded(null, null);
+                return;
+            }
 
             _story.SeekAlignedToLastTick(_mediaElement, ts, TimeSeekOrigin.BeginTime);
             HeartBeat();

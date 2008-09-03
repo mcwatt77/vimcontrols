@@ -2,6 +2,7 @@
 using System.Linq;
 using NUnit.Framework;
 using VIMControls;
+using VIMControls.Contracts;
 using VIMControls.Controls.Misc;
 
 namespace Tests
