@@ -37,7 +37,9 @@ namespace VIMControls
                                                                          new Dictionary<Key, Action<IVIMMotionController>>
                                                                              {
                                                                                  {Key.J, c => c.MoveVertically(1)},
-                                                                                 {Key.K, c => c.MoveVertically(-1)}
+                                                                                 {Key.K, c => c.MoveVertically(-1)},
+                                                                                 {Key.H, c => c.MoveHorizontally(-1)},
+                                                                                 {Key.L, c => c.MoveHorizontally(1)}
                                                                              },
                                                                          new Dictionary<Key, Action<IVIMController>>
                                                                              {

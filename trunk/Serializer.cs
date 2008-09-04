@@ -37,6 +37,18 @@ namespace VIMControls
                 fn);
         }
 
+        [SerializeFor(typeof(double))]
+        private static void SerializeDouble(Stream stream, object o)
+        {
+            SerializeString(stream, o.ToString());
+        }
+
+        [DeserializeFor(typeof(double))]
+        private static double DeserializeDouble(Stream stream)
+        {
+            return double.Parse(DeserializeString(stream));
+        }
+
         [SerializeFor(typeof(int))]
         private static void SerializeInt(Stream stream, object o)
         {
@@ -55,6 +67,18 @@ namespace VIMControls
             i |= stream.ReadByte() << 8;
             i |= stream.ReadByte() << 12;
             return i;
+        }
+
+        [SerializeFor(typeof(Guid))]
+        private static void SerializeGuid(Stream stream, object o)
+        {
+            SerializeString(stream, o.ToString());
+        }
+
+        [DeserializeFor(typeof(Guid))]
+        private static Guid DeserializeGuid(Stream stream)
+        {
+            return new Guid(DeserializeString(stream));
         }
 
         [SerializeFor(typeof(string))]
@@ -151,26 +175,76 @@ namespace VIMControls
             {
                 var genericType = type.GetGenericTypeDefinition();
                 _serializerDictionary[genericType](stream, o);
+                return;
             }
 
-            //need to be careful with this, could hit recursion
-            //have to do this differently, actually, and explicitly handle the fact that these could be
-            //object references
+            SerializeClass(stream, o, type);
+        }
 
-//            SerializeClass(stream, o, type);
+        private static object DeserializeClass(Stream stream)
+        {
+            var className = DeserializeString(stream);
+            var type = Type.GetType(className);
+
+            var constructor = type.GetConstructor(BindingFlags.NonPublic | BindingFlags.CreateInstance | BindingFlags.Instance, null, Type.EmptyTypes, null);
+            var obj = constructor.Invoke(new object[0]);
+
+            type
+                .GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                .Where(property => property.HasSetter())
+                .Do(property => property.SetValue(obj, typeof (Serializer)
+                                    .GetMethod("Deserialize")
+                                    .MakeGenericMethod(new [] {property.PropertyType})
+                                    .Invoke(null, new object[] {stream}), null));
+            type
+                .GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                .Do(field => field.SetValue(obj, typeof(Serializer)
+                                    .GetMethod("Deserialize")
+                                    .MakeGenericMethod(new [] {field.FieldType})
+                                    .Invoke(null, new object[] {stream})));
+
+            return obj;
         }
 
         private static void SerializeClass(Stream stream, object o, Type type)
         {
+            if (!CanSerializeType(type)) throw new Exception("Recursive type definition in " + type);
+
             SerializeString(stream, type.FullName + ", " + type.Assembly.GetName().Name);
 
-            type
+            var values = type
                 .GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                .Do(property => Serialize(stream, property.GetValue(o, null)));
+                .Where(property => property.HasSetter())
+                .Select(property => property.GetValue(o, null));
 
-            type
+            values = values.Concat(type
                 .GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                .Do(field => Serialize(stream, field.GetValue(o)));
+                .Select(field => field.GetValue(o)));
+
+            values
+                .Do(field => Serialize(stream, field));
+        }
+
+        private static bool CanSerializeType(Type type)
+        {
+            var canSerialize = new Dictionary<Type, bool>();
+            canSerialize[type] = false;
+
+            Func<Type, IEnumerable<Type>> fn = subtype => subtype
+                                                              .GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                                                              .Where(member => member is FieldInfo || ((member is PropertyInfo) ? ((PropertyInfo) member).HasSetter() : false))
+                                                              .Select(member => member.SystemType())
+                                                              .Where(finaltype => !_serializerDictionary.ContainsKey(finaltype));
+
+            var toCheck = canSerialize.Where(keyValuePair => keyValuePair.Value == false).Select(keyValuePair => keyValuePair.Key).ToList();
+
+            while (toCheck.Count() > 0)
+            {
+                toCheck.Do(subtype => canSerialize[subtype] = true);
+                toCheck = toCheck.Select(subtype => fn(subtype).AsEnumerable()).Flatten().ToList();
+                if (toCheck.Where(canSerialize.ContainsKey).Count() > 0) return false;
+            }
+            return true;
         }
 
         public static T Deserialize<T>(Stream stream)
@@ -185,7 +259,7 @@ namespace VIMControls
                 return (T)method.Invoke(null, new object[]{stream});
             }
 
-            throw new Exception("Failed to find a type deserializer.");
+            return (T)DeserializeClass(stream);
         }
 
         private interface ISerializeAttribute
