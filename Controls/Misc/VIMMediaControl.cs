@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -94,7 +96,6 @@ namespace VIMControls.Controls.Misc
             if (_progress.Visibility == Visibility.Visible) return;
 
             _progress.Visibility = Visibility.Visible;
-//            _timeline.CurrentTimeInvalidated += timeline_CurrentTimeInvalidated;
         }
 
         private void SetHidden()
@@ -102,7 +103,6 @@ namespace VIMControls.Controls.Misc
             if (_progress.Visibility == Visibility.Hidden) return;
 
             _progress.Visibility = Visibility.Hidden;
-//            _timeline.CurrentTimeInvalidated -= timeline_CurrentTimeInvalidated;
         }
 
         void timeline_CurrentTimeInvalidated(object sender, EventArgs e)
@@ -113,7 +113,7 @@ namespace VIMControls.Controls.Misc
 
         void VIMMediaControl_MediaEnded(object sender, RoutedEventArgs e)
         {
-            _parent.Navigate(".");
+            MoveHorizontally(1);
         }
 
         public void MoveVertically(int i)
@@ -135,13 +135,15 @@ namespace VIMControls.Controls.Misc
 
         public void MoveHorizontally(int i)
         {
-            SetVisible();
-
-            var ts = _mediaElement.Position.Add(new TimeSpan(0, 0, 10*i));
-            if (ts.TotalMilliseconds == 0) return;
-
-            _story.SeekAlignedToLastTick(_mediaElement, ts, TimeSeekOrigin.BeginTime);
-            HeartBeat();
+            var fileName = _timeline.Source.ToString().Replace("file:///", "");
+            var fileInfo = new FileInfo(fileName);
+            var files = fileInfo.Directory.GetFiles().ToList();
+            var fileNames = files.Select(file => file.Name);
+            var index = fileNames.IndexOf(fileInfo.Name);
+            index += i;
+            if (index < 0) index = files.Count - 1;
+            if (index > files.Count - 1) index = 0;
+            _parent.Navigate(files[index].FullName);
         }
 
         public void EndOfLine()
@@ -173,7 +175,12 @@ namespace VIMControls.Controls.Misc
 
         public void TogglePositionIndicator()
         {
-            if (_alwaysVisible)
+            if (_progress.Visibility == Visibility.Visible)
+            {
+                SetHidden();
+                _alwaysVisible = false;
+            }
+            else if (_alwaysVisible)
             {
                 SetHidden();
                 _alwaysVisible = false;

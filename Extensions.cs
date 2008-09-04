@@ -5,6 +5,7 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using VIMControls.Controls;
 
 namespace VIMControls
 {
@@ -31,6 +32,33 @@ namespace VIMControls
                 fn(i++, item);
         }
 
+        public static Type SystemType(this MemberInfo src)
+        {
+            if (src is PropertyInfo) return ((PropertyInfo) src).PropertyType;
+            if (src is FieldInfo) return ((FieldInfo) src).FieldType;
+            return null;
+        }
+
+        public static int IndexOf<TItem>(this IEnumerable<TItem> src, TItem item)
+        {
+            var e = src.GetEnumerator();
+            var i = 0;
+            while (e.MoveNext())
+            {
+                if (e.Current.Equals(item))
+                    return i;
+                i++;
+            }
+            return -1;
+        }
+
+        public static IEnumerable<TItem> Flatten<TItem>(this IEnumerable<IEnumerable<TItem>> src)
+        {
+            foreach (var list in src)
+                foreach (var item in list)
+                    yield return item;
+        }
+
         public static IEnumerable<TAttributeType> AttributesOfType<TAttributeType>(this ICustomAttributeProvider attr)
         {
             return attr
@@ -43,6 +71,13 @@ namespace VIMControls
         {
             object o = Delegate.CreateDelegate(typeof (TDelegateType), method);
             return (TDelegateType) o;
+        }
+
+        public static bool HasSetter(this PropertyInfo propertyInfo)
+        {
+            var accessors = propertyInfo.GetAccessors();
+            if (accessors == null) return false;
+            return accessors.Count() == 2;
         }
 
         public static int Persist(this object src)
@@ -58,8 +93,7 @@ namespace VIMControls
             var sql = "binary_data_insert";
             var conn = new SqlConnection("Data Source=localhost;Initial Catalog=vim_persist;UID=sa;PWD=d0nkey");
             conn.Open();
-            var cmd = new SqlCommand(sql, conn);
-            cmd.CommandType = CommandType.StoredProcedure;
+            var cmd = new SqlCommand(sql, conn) {CommandType = CommandType.StoredProcedure};
             cmd.Parameters.Add("data", SqlDbType.Image).Value = stream.GetBuffer();
             cmd.Parameters.Add("class_name", SqlDbType.VarChar, 2000).Value = src.GetType().ToString();
             if (guid != null)
@@ -73,9 +107,22 @@ namespace VIMControls
         {
         }
 
-        public static TData Load<TData>(int id)
+        public static TData Load<TData>(this Guid guid) where TData : class
         {
-            return default(TData);
+            var fields = Sql.Exec(string.Format("select top 1 data, class_name from image_data where guid = '{0}' order by id desc", guid))
+                .FirstOrDefault();
+            if (fields == null) return null;
+
+            var objVal = fields["data"];
+            var stream = new MemoryStream((byte[]) objVal);
+
+            if (!typeof(TData).IsAbstract) return Serializer.Deserialize<TData>(stream);
+
+            var classType = Type.GetType(fields["class_name"].ToString());
+            return (TData)typeof (Serializer)
+                .GetMethod("Deserialize")
+                .MakeGenericMethod(new[] {classType})
+                .Invoke(null, new object[] {stream});
         }
     }
 }

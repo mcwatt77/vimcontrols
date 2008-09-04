@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using VIMControls.Contracts;
@@ -94,12 +95,22 @@ namespace VIMControls.Controls.Container
             Mode = CommandMode.Command;
         }
 
+        private MediaElement _audio;
         private void InitializeMediaViewer(string uri)
         {
             Mode = CommandMode.Navigation;
+            var fileInfo = new FileInfo(uri);
+            if (fileInfo.Extension == ".mp3")
+            {
+                _audio = new MediaElement() {Source = new Uri(uri)};
+                _audio.LoadedBehavior = MediaState.Manual;
+                _audio.Play();
+                return;
+            }
 
             SaveCurrentViewer();
             var media = new VIMMediaControl(this) {Source = new Uri(uri)};
+
             Children.Add(media);
             _currentViewer = "media";
             _motionController = media;
@@ -255,6 +266,7 @@ namespace VIMControls.Controls.Container
 
         public void MoveHorizontally(int i)
         {
+            if (_motionController != null) _motionController.MoveHorizontally(i);
         }
 
         public void EndOfLine()
@@ -462,7 +474,7 @@ namespace VIMControls.Controls.Container
                     InitializeMRU();
                     break;
                 default:
-                    if (_currentViewer == "file")
+//                    if (_currentViewer == "file")
                         InitializeMediaViewer(uri);
                     break;
             }

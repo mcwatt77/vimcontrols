@@ -12,7 +12,6 @@ namespace Tests
     [TestFixture]
     public class VIMExpressionProcessorTest
     {
-        [Ignore]
         [Test]
         public void Input_4_5_x_add_eval_returns_9()
         {

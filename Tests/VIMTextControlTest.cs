@@ -21,7 +21,7 @@ namespace Tests
         [Test]
         public void IWantToBeThereWhenTheObjectCreatorNeedsATextInputProviderButMyDataObjectShouldGetTextNotMe()
         {
-            Assert.IsTrue(typeof (ITextInputProvider).GetImplementations().Single() == typeof(VIMTextControl), "Should find VIMTextControl when looking for an ITextInputProvider.");
+            Assert.AreEqual(typeof (VIMTextControl), Services.Locate<ITextInputProvider>()().GetType(), "Should find VIMTextControl when looking for an ITextInputProvider.");
         }
 
         [Ignore]

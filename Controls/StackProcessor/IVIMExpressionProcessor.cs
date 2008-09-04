@@ -30,7 +30,7 @@ namespace VIMControls.Controls.StackProcessor
                 return;
             }
 
-            _expressions.Add(expr);
+            if (expr != null) _expressions.Add(expr);
 
             _textData
                 .Skip(_expressions.Count)

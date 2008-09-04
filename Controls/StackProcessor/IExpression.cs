@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Windows;
 using VIMControls.Contracts;
 
 namespace VIMControls.Controls.StackProcessor
@@ -14,6 +13,9 @@ namespace VIMControls.Controls.StackProcessor
     public class DoubleExpression : INumericExpression
     {
         private readonly double _dVal;
+
+        private DoubleExpression()
+        {}
 
         public DoubleExpression(double dVal)
         {
@@ -120,9 +122,50 @@ namespace VIMControls.Controls.StackProcessor
         }
     }
 
+    public class StoExpression : IFuncExpression
+    {
+        private const string _rpnStoGuid = "{56A84837-1459-48a5-96A5-26A9F532657F}";
+        private Dictionary<string, Guid> _nameLookups = new Dictionary<string, Guid>();
+
+        public static IExpression GetValue(string name)
+        {
+            var rpnGuid = new Guid(_rpnStoGuid);
+            var nameLookups = rpnGuid.Load<Dictionary<string, Guid>>();
+            if (nameLookups == null) return null;
+            return !nameLookups.ContainsKey(name) ? null : nameLookups[name].Load<IExpression>();
+        }
+
+        public IExpression Eval(IEnumerable<IExpression> args)
+        {
+            var name = args.First().ToString();
+
+            var guid = Guid.NewGuid();
+            var rpnGuid = new Guid(_rpnStoGuid);
+            _nameLookups = rpnGuid.Load<Dictionary<string, Guid>>() ?? new Dictionary<string, Guid>();
+            if (!_nameLookups.ContainsKey(name))
+            {
+                _nameLookups[args.First().ToString()] = guid;
+                _nameLookups.Persist(rpnGuid);
+            }
+            else
+                guid = _nameLookups[name];
+
+            args.Last().Persist(guid);
+            return null;
+        }
+
+        public int StackArgs
+        {
+            get { return 2; }
+        }
+    }
+
     public class StringExpression : IExpression
     {
         private readonly string _expr;
+
+        private StringExpression()
+        {}
 
         public StringExpression(string expr)
         {
@@ -198,7 +241,10 @@ namespace VIMControls.Controls.StackProcessor
                                                                               {"pi", new DoubleExpression(Math.PI)},
                                                                               {"e", new DoubleExpression(Math.E)},
                                                                               {"reset", new NullExpression(Reset)},
-                                                                              {"eval", new EvalExpression()}
+                                                                              {"eval", new EvalExpression()},
+                                                                              {"sto", new StoExpression()},
+                                                                              {"stoa", new StoExpression()},
+                                                                              {"cmd", new StoExpression()}
                                                                           };
 
         private static void Reset()
@@ -208,7 +254,8 @@ namespace VIMControls.Controls.StackProcessor
 
         public static IExpression FromString(string expr)
         {
-            return _expressions.ContainsKey(expr) ? _expressions[expr] : new StringExpression(expr);
+            var val = StoExpression.GetValue(expr);
+            return val ?? (_expressions.ContainsKey(expr) ? _expressions[expr] : new StringExpression(expr));
         }
 
         public static IExpression GetFunc<TExpr>() where TExpr : IFuncExpression
