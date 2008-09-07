@@ -318,10 +318,10 @@ namespace VIMControls
                                                                         {Key.Enter, c => c.NewLine()},
                                                                         {Key.Back, c => c.Backspace()},
                                                                         {Key.Tab, c => c.Output('\t')},
-                                                                        {Key.Add, c => c.Function(new BinaryMathExpression((d0, d1) => d0 + d1))},
-                                                                        {Key.Multiply, c => c.Function(new BinaryMathExpression((d0, d1) => d0 * d1))},
-                                                                        {Key.Subtract, c => c.Function(new BinaryMathExpression((d0, d1) => d0 - d1))},
-                                                                        {Key.Divide, c => c.Function(new BinaryMathExpression((d0, d1) => d0 / d1))}
+                                                                        {Key.Add, c => c.Function(StackOpExpression.Add)},
+                                                                        {Key.Subtract, c => c.Function(StackOpExpression.Subtract)},
+                                                                        {Key.Multiply, c => c.Function(StackOpExpression.Multiply)},
+                                                                        {Key.Divide, c => c.Function(StackOpExpression.Divide)}
                                                                     },
                                                                     new Dictionary<Key, Action<IVIMActionController>>
                                                                     {

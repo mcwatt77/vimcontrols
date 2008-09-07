@@ -28,7 +28,7 @@ namespace VIMControls.Controls.StackProcessor
             if (expr is IFuncExpression)
                 VIMMessageService.SendMessage<IVIMExpressionProcessor>(a => a.Eval((IFuncExpression)expr));
             else
-                VIMMessageService.SendMessage<IVIMExpressionProcessor>(a => a.Process(expr));
+                VIMMessageService.SendMessage<IVIMExpressionProcessor>(a => a.Push(expr));
         }
 
         public void Function(IFuncExpression expr)

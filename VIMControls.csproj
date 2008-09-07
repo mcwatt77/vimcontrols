@@ -62,6 +62,7 @@
   <ItemGroup>
     <Compile Include="Contracts\IVIMListCursor.cs" />
     <Compile Include="Contracts\UIElementWrapper.cs" />
+    <Compile Include="Controls\Misc\Copy of VIMMediaControl.cs" />
     <Compile Include="Controls\Misc\IText.cs" />
     <Compile Include="Controls\StackProcessor\IExpression.cs" />
     <Compile Include="Controls\StackProcessor\IVIMExpressionProcessor.cs" />

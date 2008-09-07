@@ -290,6 +290,9 @@ namespace VIMControls.Controls.Container
         public void OldResetInput()
         {
             if (_currentViewer == "file") return;
+            
+/*            var media = _motionController as VIMMediaControl;
+            if (media != null) media.Close();*/
 
             Children.RemoveAt(0);
             _currentViewer = "file";
@@ -486,7 +489,7 @@ namespace VIMControls.Controls.Container
 
             var stackInputController = Services.Locate<IStackInputController>()();
             var stackCtrl = (FrameworkElement)UIElementWrapper.From(stackInputController);
-//            stackCtrl.Height = 23;
+            stackCtrl.Height = 25;
             _handlers[typeof (IStackInputController)] = stackInputController;
 
             var expressionProcessor = Services.Locate<IVIMExpressionProcessor>()();
@@ -496,10 +499,21 @@ namespace VIMControls.Controls.Container
 
             var fancyDisplayStack = Services.Locate<IFancyDisplayStack>()();
             var graphPanel = Services.Locate<IVIMGraphPanel>()();
+            _handlers[typeof (IVIMGraphPanel)] = graphPanel;
+            var graphCtrl = (FrameworkElement) UIElementWrapper.From(graphPanel);
 
-            Children.Add(stackPanel);
+            var splitGrid = SetupSplit(Children, Orientation.Vertical, SplitType.DynamicSecond,
+                                       exprCtrl.Height + stackCtrl.Height, 1);
+
+//            Children.Add(stackPanel);
+            splitGrid.Children.Add(stackPanel);
+            SetRow(stackPanel, 0);
+
             stackPanel.Children.Add(stackCtrl);
             stackPanel.Children.Add(exprCtrl);
+
+            splitGrid.Children.Add(graphCtrl);
+            SetRow(graphCtrl, 1);
 
             _currentViewer = "rpn";
 

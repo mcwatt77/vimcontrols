@@ -16,7 +16,7 @@ namespace VIMControls.Controls.Misc
 
     public class StackPanelEventWrapper : StackPanel, IStackPanel
     {
-        public event Action<SizeChangedInfo> RenderSizeChanged;
+        public event Action<Size> RenderSizeChanged;
         private readonly EventableList<IUIElement> _list = new EventableList<IUIElement>();
 
         public StackPanelEventWrapper()
@@ -44,7 +44,7 @@ namespace VIMControls.Controls.Misc
             try
             {
                 if (RenderSizeChanged != null)
-                    RenderSizeChanged(sizeInfo);
+                    RenderSizeChanged(sizeInfo.NewSize);
 
                 base.OnRenderSizeChanged(sizeInfo);
             }
@@ -117,7 +117,7 @@ namespace VIMControls.Controls.Misc
 
     public class TextLine : TextBlock, IText
     {
-        public event Action<SizeChangedInfo> RenderSizeChanged;
+        public event Action<Size> RenderSizeChanged;
     }
 
     public interface ITextFactory

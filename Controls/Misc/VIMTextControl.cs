@@ -63,7 +63,7 @@ namespace VIMControls.Controls.Misc
             }
         }
 
-        protected virtual void UpdateRenderMetrics(SizeChangedInfo sizeInfo)
+        protected virtual void UpdateRenderMetrics(Size sizeInfo)
         {
             CalculateNumberOfLines(sizeInfo);
 
@@ -74,9 +74,9 @@ namespace VIMControls.Controls.Misc
                 ReduceSize();
         }
 
-        private void CalculateNumberOfLines(SizeChangedInfo sizeInfo)
+        private void CalculateNumberOfLines(Size sizeInfo)
         {
-            _numberOfLines = (int)Math.Round(sizeInfo.NewSize.Height/LineHeight);
+            _numberOfLines = (int)Math.Round(sizeInfo.Height/LineHeight);
 
             if (_numberOfLines > 1000)
             {
@@ -184,7 +184,7 @@ namespace VIMControls.Controls.Misc
 
         public double GetRequiredHeight(int numLines)
         {
-            return _lineHeight*numLines;
+            return (_lineHeight + (ApplyBorders ? 3 : 0))*numLines;
         }
 
         public void ResetInput()
