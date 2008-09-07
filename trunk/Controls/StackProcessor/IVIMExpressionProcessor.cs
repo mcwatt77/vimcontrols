@@ -8,12 +8,12 @@ namespace VIMControls.Controls.StackProcessor
 {
     public interface IVIMExpressionProcessor : IVIMControl, IVIMMultiLineTextDisplay, IVIMController
     {
-        void Process(IExpression expr);
+        void Push(IExpression expr);
         void Eval(IFuncExpression expr);
         IExpression Pop();
     }
 
-    public class ExpressionProcessor : VIMTextControl, IVIMExpressionProcessor
+    public class ExpressionProcessor : VIMTextControl, IVIMExpressionProcessor, IVIMStack
     {
         private readonly List<IExpression> _expressions = new List<IExpression>();
 
@@ -22,31 +22,38 @@ namespace VIMControls.Controls.StackProcessor
             ApplyBorders = true;
         }
 
-        public void Process(IExpression expr)
+        public void Push(IExpression expr)
         {
-            if (expr is EvalExpression)
-            {
-                Eval((IFuncExpression)expr);
-                return;
-            }
-
             if (expr != null) _expressions.Add(expr);
 
+            RefreshStackView();
+        }
+
+        public int Count
+        {
+            get { return _expressions.Count; }
+        }
+
+        private void RefreshStackView()
+        {
             _textData
                 .Skip(_expressions.Count)
                 .Do(tb => tb.Text = String.Empty);
 
             Enumerable.Range(0, Math.Min(_expressions.Count, _textData.Length - 1))
-                .Do(i => _textData[_expressions.Count - i - 1].Text = _expressions[i].ToString());
+                .Do(i => _textData[i].Text = _expressions[_expressions.Count - i - 1].ToString());
         }
 
         public void Eval(IFuncExpression expr)
         {
-            if (expr is IEvalExpression)
+            if (expr is StackOpExpression)
             {
-                var eval = (IEvalExpression) expr;
-                eval.SetStackArgs(_expressions.Last());
-                _expressions.RemoveAt(_expressions.Count - 1);
+                var st = (StackOpExpression) expr;
+                st.Eval(this);
+
+                //maybe this should be some sort of message?
+                RefreshStackView();
+                return;
             }
 
             var vals = _expressions
@@ -58,7 +65,7 @@ namespace VIMControls.Controls.StackProcessor
             var eVal = expr.Eval(vals);
             _expressions.RemoveRange(_expressions.Count - expr.StackArgs, expr.StackArgs);
             if (expr is NullExpression) return;
-            Process(eVal);
+            Push(eVal);
         }
 
         public IExpression Pop()

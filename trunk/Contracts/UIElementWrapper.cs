@@ -20,7 +20,7 @@ namespace VIMControls.Contracts
             return wrapper.UiElement;
         }
 
-        public event Action<SizeChangedInfo> RenderSizeChanged;
+        public event Action<Size> RenderSizeChanged;
     }
 
     public interface IVIMControl
@@ -30,6 +30,6 @@ namespace VIMControls.Contracts
 
     public interface IUIElement
     {
-        event Action<SizeChangedInfo> RenderSizeChanged;
+        event Action<Size> RenderSizeChanged;
     }
 }

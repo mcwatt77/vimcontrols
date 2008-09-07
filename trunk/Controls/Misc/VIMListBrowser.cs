@@ -38,7 +38,7 @@ namespace VIMControls.Controls
 
         protected abstract void UpdateData();
 
-        protected override void UpdateRenderMetrics(SizeChangedInfo sizeInfo)
+        protected override void UpdateRenderMetrics(Size sizeInfo)
         {
             base.UpdateRenderMetrics(sizeInfo);
             RenderLines();
