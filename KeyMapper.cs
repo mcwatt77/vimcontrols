@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Input;
 using VIMControls.Contracts;
 using VIMControls.Controls.StackProcessor;
+using VIMControls.Controls.StackProcessor.MathExpressions;
 
 namespace VIMControls
 {
@@ -318,6 +319,7 @@ namespace VIMControls
                                                                         {Key.Enter, c => c.NewLine()},
                                                                         {Key.Back, c => c.Backspace()},
                                                                         {Key.Tab, c => c.Output('\t')},
+                                                                        {Key.OemMinus, c => c.Function(StackOpExpression.Subtract)},
                                                                         {Key.Add, c => c.Function(StackOpExpression.Add)},
                                                                         {Key.Subtract, c => c.Function(StackOpExpression.Subtract)},
                                                                         {Key.Multiply, c => c.Function(StackOpExpression.Multiply)},
@@ -336,7 +338,6 @@ namespace VIMControls
                                             {
                                                 KeyStates.Ctrl, new List<IDictionary>
                                                                 {
-
                                                                     new Dictionary<Key, Action<IVIMActionController>>
                                                                     {
                                                                         {Key.C, c => c.EnterNormalMode()}
@@ -389,8 +390,11 @@ namespace VIMControls
                                                                          {Key.D7, c => c.Output('&')},
                                                                          {Key.D8, c => c.Output('*')},
                                                                          {Key.D9, c => c.Output('(')}
-
-                                                                     }
+                                                                     },
+                                                                    new Dictionary<Key, Action<IStackInputController>>
+                                                                    {
+                                                                        {Key.OemPlus, c => c.Function(StackOpExpression.Add)}
+                                                                    }
                                                                  }
                                                 }
                                         }

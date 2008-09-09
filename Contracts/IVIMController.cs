@@ -42,7 +42,7 @@ namespace VIMControls.Contracts
         void StatusLine(string status);
     }
 
-    public interface IVIMListMotionController
+    public interface IVIMListMotionController : IVIMController
     {
         void MoveVertically(int i);
         void NextLine();
@@ -131,7 +131,8 @@ namespace VIMControls.Contracts
                                           IVIMCommandController,
                                           IVIMActionController,
                                           IVIMPersistable,
-                                          IListController
+                                          IListController,
+                                          ITextInputProvider
     {}
 
     public interface IVIMControlContainer : IVIMAllControllers

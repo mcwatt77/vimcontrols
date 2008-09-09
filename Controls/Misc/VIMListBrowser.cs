@@ -116,6 +116,18 @@ namespace VIMControls.Controls
         public void BeginningOfLine()
         {
         }
+
+        public void ResetInput()
+        {
+        }
+
+        public void MissingModeAction(IVIMAction action)
+        {
+        }
+
+        public void MissingMapping()
+        {
+        }
     }
 
     public class VIMListCursor

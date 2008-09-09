@@ -7,6 +7,7 @@ using VIMControls.Contracts;
 using VIMControls.Controls.Misc;
 using VIMControls.Controls.StackProcessor;
 using Rhino.Mocks;
+using VIMControls.Controls.StackProcessor.MathExpressions;
 
 namespace Tests
 {

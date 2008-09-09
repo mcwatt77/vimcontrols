@@ -22,6 +22,12 @@ namespace Tests
             _cursor = Services.Locate<IVIMListCursor>(_textStorage)();
         }
 
+        [Test]
+        public void ValidateCursor()
+        {
+            Assert.IsNotNull(_cursor);
+        }
+
         [Ignore]
         [Test]
         public void IKnowWhereIPointInsideTheViewport()

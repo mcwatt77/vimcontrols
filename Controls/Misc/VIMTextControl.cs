@@ -134,16 +134,19 @@ namespace VIMControls.Controls.Misc
         public void Output(char c)
         {
             _textData[0].Text += c;
+            VIMMessageService.SendMessage<IVIMTextCursor>(cursor => cursor.MoveHorizontally(1));
         }
 
         public void NewLine()
         {
+            VIMMessageService.SendMessage<IVIMTextCursor>(cursor => cursor.MoveVertically(1));
         }
 
         public void Backspace()
         {
             if (_textData[0].Text.Length > 0)
                 _textData[0].Text = _textData[0].Text.Remove(_textData[0].Text.Length - 1);
+            VIMMessageService.SendMessage<IVIMTextCursor>(cursor => cursor.MoveHorizontally(-1));
         }
 
         public void MoveVertically(int i)
@@ -179,7 +182,8 @@ namespace VIMControls.Controls.Misc
 
         public Point ConvertPosition(VIMTextDataPosition pos)
         {
-            return new Point {X = 0, Y = _lineHeight*pos.Line};
+            //this involves text metrics
+            return new Point {X = pos.Column * 10, Y = _lineHeight*pos.Line};
         }
 
         public double GetRequiredHeight(int numLines)

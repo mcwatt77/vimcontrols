@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using VIMControls.Contracts;
 using VIMControls.Controls.Misc;
+using VIMControls.Controls.StackProcessor.MathExpressions;
 
 namespace VIMControls.Controls.StackProcessor
 {
