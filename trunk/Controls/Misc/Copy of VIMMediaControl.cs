@@ -287,5 +287,17 @@ namespace VIMControls.Controls.Misc
                 _alwaysVisible = true;
             }
         }
+
+        public void ResetInput()
+        {
+        }
+
+        public void MissingModeAction(IVIMAction action)
+        {
+        }
+
+        public void MissingMapping()
+        {
+        }
     }
 }

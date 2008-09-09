@@ -62,16 +62,26 @@
   <ItemGroup>
     <Compile Include="Contracts\IVIMListCursor.cs" />
     <Compile Include="Contracts\UIElementWrapper.cs" />
+    <Compile Include="Contracts\VIMTextCursor.cs" />
     <Compile Include="Controls\Misc\Copy of VIMMediaControl.cs" />
     <Compile Include="Controls\Misc\IText.cs" />
+    <Compile Include="Controls\StackProcessor\Graphing\IVIMGraphableFunction.cs" />
+    <Compile Include="Controls\StackProcessor\MathExpressions\BinarySysExpression.cs" />
+    <Compile Include="Controls\StackProcessor\MathExpressions\DoubleExpression.cs" />
     <Compile Include="Controls\StackProcessor\IExpression.cs" />
     <Compile Include="Controls\StackProcessor\IVIMExpressionProcessor.cs" />
     <Compile Include="Controls\IVIMStringCommandMapper.cs" />
+    <Compile Include="Controls\StackProcessor\MathExpressions\StackOpExpression.cs" />
+    <Compile Include="Controls\StackProcessor\MathExpressions\StackSystemExpression.cs" />
+    <Compile Include="Controls\StackProcessor\MathExpressions\StoExpression.cs" />
+    <Compile Include="Controls\StackProcessor\MathExpressions\StringExpression.cs" />
+    <Compile Include="Controls\StackProcessor\MathExpressions\UnarySysExpression.cs" />
+    <Compile Include="Controls\StackProcessor\MathExpressions\VariableExpression.cs" />
     <Compile Include="Controls\StackProcessor\StackInputController.cs" />
     <Compile Include="Controls\TempSqlHelper.cs" />
     <Compile Include="Controls\VIMForms\VIMFormConstraint.cs" />
     <Compile Include="Controls\VIMForms\VIMFormRow.cs" />
-    <Compile Include="Controls\StackProcessor\VIMGraphPanel.cs" />
+    <Compile Include="Controls\StackProcessor\Graphing\VIMGraphPanel.cs" />
     <Compile Include="Controls\Misc\VIMListBrowser.cs" />
     <Compile Include="Controls\Misc\VIMMRUControl.cs" />
     <Compile Include="Controls\Misc\VIMWebBrowser.cs" />

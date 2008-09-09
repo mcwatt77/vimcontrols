@@ -7,6 +7,7 @@ using VIMControls.Contracts;
 using VIMControls.Controls;
 using VIMControls.Controls.Misc;
 using VIMControls.Controls.StackProcessor;
+using VIMControls.Controls.StackProcessor.Graphing;
 using VIMControls.Controls.VIMForms;
 
 namespace VIMControls.Controls.Container
@@ -539,6 +540,38 @@ namespace VIMControls.Controls.Container
             if (_currentViewer == "file")
             {
                 _listController.Select(index);
+            }
+        }
+
+        public string Text
+        {
+            get { return String.Empty; }
+            set
+            {
+                SaveCurrentViewer();
+
+                var text = new VIMTextControl();
+                var elem = UIElementWrapper.From(text);
+
+                var canvas = (Canvas)DecorateWithCanvas(elem);
+                Children.Add(canvas);
+
+                _currentViewer = "edit";
+                _characterController = text;
+
+                _savedViewers[_currentViewer] = Children[0];
+
+                _handlers[typeof (ITextInputProvider)] = text;
+
+                text.Text = value;
+
+                Mode = CommandMode.Insert;
+
+                var cursor = Services.Locate<IVIMTextCursor>(text)();
+                _handlers[typeof (IVIMTextCursor)] = cursor;
+                _motionController = new ListMotionWrapper(cursor);
+                var cElem = (UIElementWrapper)cursor.GetUIElement();
+                canvas.Children.Add(cElem.UiElement);
             }
         }
     }

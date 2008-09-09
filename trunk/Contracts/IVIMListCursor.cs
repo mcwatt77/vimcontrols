@@ -6,7 +6,7 @@ using VIMControls.Controls;
 
 namespace VIMControls.Contracts
 {
-    public class VIMListCursor : TextBlock, IVIMTextCursor, ICanvasChild
+    public class VIMListCursor : TextBlock, IVIMListCursor, ICanvasChild
     {
         private readonly IVIMTextStorage _textStorage;
         private readonly VIMTextDataPosition _textDataPosition = new VIMTextDataPosition();
@@ -96,13 +96,29 @@ namespace VIMControls.Contracts
         public void BeginningOfLine()
         {
         }
+
+        public void ResetInput()
+        {
+        }
+
+        public void MissingModeAction(IVIMAction action)
+        {
+        }
+
+        public void MissingMapping()
+        {
+        }
     }
 
-    [DependsOn(typeof(IVIMViewport), typeof(IVIMTextStorage))]
-    public interface IVIMListCursor : IVIMListMotionController, IVIMControl
+    public interface IVIMCursor : IVIMListMotionController, IVIMControl
     {
         VIMTextDataPosition TextPosition { get; }
         Point RenderPosition { get; }
+    }
+
+    [DependsOn(typeof(IVIMViewport), typeof(IVIMTextStorage))]
+    public interface IVIMListCursor : IVIMCursor
+    {
     }
 
     public class DependsOn : Attribute
@@ -133,7 +149,7 @@ namespace VIMControls.Contracts
         public int Line { get; set; }
     }
 
-    public interface IVIMTextCursor : IVIMListCursor, IVIMMotionController
+    public interface IVIMTextCursor : IVIMCursor, IVIMMotionController
     {
     }
 }

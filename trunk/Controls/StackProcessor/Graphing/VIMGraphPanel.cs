@@ -7,10 +7,12 @@ using System.Windows.Media;
 using VIMControls.Contracts;
 using Point=System.Windows.Point;
 
-namespace VIMControls.Controls.StackProcessor
+namespace VIMControls.Controls.StackProcessor.Graphing
 {
     public class VIMGraphPanel : IVIMGraphPanel
     {
+        private GraphParameters _parameters = new GraphParameters
+                                                  {MinX = -10, MaxX = 10, MinY = -10, MaxY = 10, MaxSteps = 200};
         private const int _steps = 200;
         private const double _granularity = 0.1;
 
@@ -82,6 +84,21 @@ namespace VIMControls.Controls.StackProcessor
             _canvas.InvalidateVisual();
         }
 
+        public void Graph(IVIMGraphableFunction fn)
+        {
+            var drawing = new DrawingVisual();
+            var dc = drawing.RenderOpen();
+
+            fn.FromGraphParameters(_parameters)
+                .OfType<IWPFGraphPrimitive>()
+                .Do(prim => prim.Draw(dc, new PointMapper(_parameters, _canvas.ActualHeight, _canvas.ActualWidth)));
+
+            dc.Close();
+
+            _canvas.AddDrawing(drawing.Drawing);
+            _canvas.InvalidateVisual();
+        }
+
         public void ResetInput()
         {
         }
@@ -92,6 +109,26 @@ namespace VIMControls.Controls.StackProcessor
 
         public void MissingMapping()
         {
+        }
+    }
+
+    public class PointMapper
+    {
+        private readonly Func<Point, Point> _fn;
+
+        public PointMapper(GraphParameters parameters, double height, double width)
+        {
+            var lwidth = parameters.MaxX - parameters.MinX;
+            var lheight = parameters.MaxY - parameters.MinY;
+            var wMul = width/lwidth;
+            var hMul = height/lheight;
+
+            _fn = p => new Point((p.X - parameters.MinX) * wMul, (p.Y - parameters.MinY) * hMul);
+        }
+
+        public Point Map(Point point)
+        {
+            return _fn(point);
         }
     }
 
@@ -131,5 +168,6 @@ namespace VIMControls.Controls.StackProcessor
     public interface IVIMGraphPanel : IVIMControl, IVIMController
     {
         void Graph(Delegate fn);
+        void Graph(IVIMGraphableFunction fn);
     }
 }
