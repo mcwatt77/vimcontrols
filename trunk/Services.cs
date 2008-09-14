@@ -15,11 +15,13 @@ namespace VIMControls
             {
                 return () => (T)_serviceRegistry[typeof (T)];
             }
-                    
+
             var types = typeof (Services).Assembly
                 .GetTypes()
                 .Where(type => typeof (T).IsAssignableFrom(type) &&
                                !type.IsAbstract);
+            if (types.Count() > 1)
+                types = types.Where(type => type.BaseType == typeof(object));
 
             if (types.Count() == 1)
             {

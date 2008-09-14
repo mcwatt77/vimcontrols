@@ -1,6 +1,5 @@
-﻿using System;
-using System.Linq;
-using NUnit.Framework;
+﻿using NUnit.Framework;
+using Rhino.Mocks;
 using VIMControls;
 using VIMControls.Contracts;
 using VIMControls.Controls.Misc;
@@ -10,6 +9,16 @@ namespace Tests
     [TestFixture]
     public class VIMTextControlTest
     {
+        private MockRepository repository;
+
+        [SetUp]
+        public void Setup()
+        {
+            var setup = new TestFactorySetup();
+            setup.Initialize();
+            repository = setup.Repository;
+        }
+
         [Ignore]
         [Test]
         public void IDontDirectlyImplementInAnyCapacityAllOfTheMethodsImResponsibleForButITellObjectCreatorWhoDoes()
@@ -19,9 +28,29 @@ namespace Tests
         }
 
         [Test]
+        public void testsomething()
+        {
+            repository.ReplayAll();
+
+            var textInput = Services.Locate<ITextInputProvider>()();
+            textInput.Output('a');
+            textInput.Output('p');
+            textInput.Output('p');
+            textInput.Backspace();
+
+            Assert.AreEqual("ap", textInput.Text);
+
+            repository.VerifyAll();
+        }
+
+        [Test]
         public void IWantToBeThereWhenTheObjectCreatorNeedsATextInputProviderButMyDataObjectShouldGetTextNotMe()
         {
+            repository.ReplayAll();
+
             Assert.AreEqual(typeof (VIMTextControl), Services.Locate<ITextInputProvider>()().GetType(), "Should find VIMTextControl when looking for an ITextInputProvider.");
+
+            repository.VerifyAll();
         }
 
         [Ignore]

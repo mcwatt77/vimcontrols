@@ -21,13 +21,22 @@ namespace VIMControls.Contracts
             base.Height = 23;
             base.Width = 13;
 
-            _textDataPosition.Column = 2;
+            _textDataPosition.Column = 0;
             UpdateMargin();
+        }
+
+        private void CheckBoundaries()
+        {
+            if (_textDataPosition.Column < 0) _textDataPosition.Column = 0;
+            if (_textDataPosition.Line < 0) _textDataPosition.Line = 0;
         }
 
         private void UpdateMargin()
         {
+            CheckBoundaries();
+
             var pos = _textStorage.ConvertPosition(_textDataPosition);
+            if (pos == null) return;
             Margin = new Thickness(pos.X, pos.Y, 0, 0);
             base.Height = 23;
             base.Width = 13;
@@ -63,7 +72,7 @@ namespace VIMControls.Contracts
 
         public VIMTextDataPosition TextPosition
         {
-            get { throw new System.NotImplementedException(); }
+            get { return _textDataPosition; }
         }
 
         public Point RenderPosition
@@ -84,7 +93,7 @@ namespace VIMControls.Contracts
 
         public void BeginningOfLine()
         {
-            throw new System.NotImplementedException();
+            _textDataPosition.Column = 0;
         }
 
         public bool Fill

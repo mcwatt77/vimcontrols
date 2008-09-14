@@ -133,19 +133,57 @@ namespace VIMControls.Controls.Misc
 
         public void Output(char c)
         {
-            _textData[0].Text += c;
-            VIMMessageService.SendMessage<IVIMTextCursor>(cursor => cursor.MoveHorizontally(1));
+            _textData[Pos.Line].Text = _textData[Pos.Line].Text.Insert(Pos.Column, c.ToString());
+
+            VIMMessageService.SendMessage<IVIMTextCursor>(a => a.MoveHorizontally(1));
         }
 
         public void NewLine()
         {
-            VIMMessageService.SendMessage<IVIMTextCursor>(cursor => cursor.MoveVertically(1));
+            VIMMessageService.SendMessage<IVIMTextCursor>(a => a.BeginningOfLine());
+            VIMMessageService.SendMessage<IVIMTextCursor>(a => a.MoveVertically(1));
+        }
+
+        private VIMTextDataPosition Pos
+        {
+            get
+            {
+                VIMTextDataPosition pos = null;
+                VIMMessageService.SendMessage<IVIMTextCursor>(a => pos = a.TextPosition);
+                return pos ?? new VIMTextDataPosition{Column = _textData[0].Text.Length, Line = 0};
+            }
+        }
+
+        private void RemoveLine()
+        {
+            Enumerable.Range(Pos.Line, _textData.Length - Pos.Line - 1)
+                .Do(i => _textData[i].Text = _textData[i + 1].Text);
+        }
+
+        private void JoinLines(int lowRange, int highRange)
+        {
+            if (Pos.Line - lowRange > 0)
+            {
+                _textData[Pos.Line - lowRange].Text += _textData[Pos.Line - lowRange + 1];
+                RemoveLine();
+                VIMMessageService.SendMessage<IVIMTextCursor>(cursor =>
+                                                                  {
+                                                                      cursor.MoveVertically(-1);
+                                                                      cursor.BeginningOfLine();
+                                                                      cursor.MoveHorizontally(Text.Length);
+                                                                  });
+            }
         }
 
         public void Backspace()
         {
-            if (_textData[0].Text.Length > 0)
-                _textData[0].Text = _textData[0].Text.Remove(_textData[0].Text.Length - 1);
+            if (Pos.Column <= 0)
+            {
+                JoinLines(-1, 0);
+                return;
+            }
+
+            Text = Text.Remove(Pos.Column - 1, 1);
             VIMMessageService.SendMessage<IVIMTextCursor>(cursor => cursor.MoveHorizontally(-1));
         }
 
@@ -176,14 +214,14 @@ namespace VIMControls.Controls.Misc
 
         public string Text
         {
-            get { return _textData[0].Text; }
-            set { _textData[0].Text = value; }
+            get { return _textData[Pos.Line].Text; }
+            set { _textData[Pos.Line].Text = value; }
         }
 
         public Point ConvertPosition(VIMTextDataPosition pos)
         {
-            //this involves text metrics
-            return new Point {X = pos.Column * 10, Y = _lineHeight*pos.Line};
+            var x = _textData[pos.Line].GetWidthAtIndex(pos.Column);
+            return new Point {X = x, Y = _lineHeight*pos.Line};
         }
 
         public double GetRequiredHeight(int numLines)

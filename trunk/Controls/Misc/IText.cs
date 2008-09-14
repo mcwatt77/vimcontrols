@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using VIMControls.Contracts;
+using Point=System.Windows.Point;
 
 namespace VIMControls.Controls.Misc
 {
@@ -12,6 +14,7 @@ namespace VIMControls.Controls.Misc
     {
         string Text { get; set; }
         double Height { get; set; }
+        double GetWidthAtIndex(int index);
     }
 
     public class StackPanelEventWrapper : StackPanel, IStackPanel
@@ -115,9 +118,48 @@ namespace VIMControls.Controls.Misc
         }
     }
 
-    public class TextLine : TextBlock, IText
+//    public class TextLine : TextBlock, IText
+    public class TextLine : Canvas, IText
     {
+        private string _text = String.Empty;
+        public string Text
+        {
+            get
+            {
+                return _text;
+            }
+            set
+            {
+                _text = value;
+                UpdateDrawing();
+            }
+        }
+        private FormattedText _metrics;
+
         public event Action<Size> RenderSizeChanged;
+        public double GetWidthAtIndex(int index)
+        {
+            var text = _text.Substring(0, Math.Min(index, _text.Length));
+            var tf = new Typeface(new FontFamily("Courier New"), FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
+            var metrics = new FormattedText(text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, tf, 15, Brushes.Black);
+
+            return metrics.WidthIncludingTrailingWhitespace;
+        }
+
+        protected override void OnRender(DrawingContext dc)
+        {
+            base.OnRender(dc);
+
+            dc.DrawText(_metrics, new Point(0, 0));
+        }
+
+        private void UpdateDrawing()
+        {
+            var tf = new Typeface(new FontFamily("Courier New"), FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
+            _metrics = new FormattedText(Text ?? "", CultureInfo.CurrentCulture, FlowDirection.LeftToRight, tf, 15, Brushes.Black);
+
+            InvalidateVisual();
+        }
     }
 
     public interface ITextFactory
