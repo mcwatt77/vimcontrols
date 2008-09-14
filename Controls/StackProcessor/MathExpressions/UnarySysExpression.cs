@@ -25,7 +25,8 @@ namespace VIMControls.Controls.StackProcessor.MathExpressions
 
         public Expression GetParameterizedExpression()
         {
-            return null;
+            if (_op1.ParameterList.Count() == 0) return (Expression<Func<double>>) (() => F(((Func<double>)_op1.GetDelegate())()));
+            return (Expression<Func<double, double>>)(d => F(((Func<double, double>)_op1.GetDelegate())(d)));
         }
 
         public IEnumerable<string> ParameterList

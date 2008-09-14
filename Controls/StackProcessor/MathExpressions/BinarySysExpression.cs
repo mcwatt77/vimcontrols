@@ -42,7 +42,25 @@ namespace VIMControls.Controls.StackProcessor.MathExpressions
 
         public Expression GetParameterizedExpression()
         {
-            return null;
+            var op1Count = _op1.ParameterList.Count();
+            var op2Count = _op2.ParameterList.Count();
+
+            var dVals = new List<double>();
+            if (op1Count == 0) dVals.Add(((Func<double>)_op1.GetDelegate())());
+            if (op2Count == 0) dVals.Add(((Func<double>)_op2.GetDelegate())());
+
+            if (op1Count == 0 && op2Count == 0) return (Expression<Func<double>>)(() => F(dVals[0], dVals[1]));
+            if (op1Count == 0 && op2Count == 1)
+                return (Expression<Func<double, double>>) (d => F(dVals[0], ((Func<double, double>)_op2.GetDelegate())(d)));
+            if (op1Count == 1 && op2Count == 0)
+                return (Expression<Func<double, double>>) (d => F(((Func<double, double>)_op1.GetDelegate())(d), dVals[0]));
+            if (ParameterList.Count() == 1)
+                return (Expression<Func<double, double>>) (d => F(((Func<double, double>) _op1.GetDelegate())(d),
+                                                      ((Func<double, double>) _op2.GetDelegate())(d)));
+
+            var expr = (Expression<Func<double, double, double>>) ((d0, d1) => F(((Func<double, double>)_op1.GetDelegate())(d0),
+                                                                 ((Func<double, double>)_op2.GetDelegate())(d1)));
+            return Expression.Lambda(expr, Expression.Parameter(typeof (double), _op1.ParameterList.Single()), Expression.Parameter(typeof(double), _op2.ParameterList.Single()));
         }
 
         public IEnumerable<string> ParameterList

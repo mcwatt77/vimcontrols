@@ -250,8 +250,8 @@ namespace VIMControls
                                                                          {Key.D6, c => c.Output('^')},
                                                                          {Key.D7, c => c.Output('&')},
                                                                          {Key.D8, c => c.Output('*')},
-                                                                         {Key.D9, c => c.Output('(')}
-
+                                                                         {Key.D9, c => c.Output('(')},
+                                                                         {Key.Space, c => c.Output(' ')}
                                                                      }
                                                                  }
                                                 }
@@ -459,6 +459,11 @@ namespace VIMControls
                                                                      {
                                                                          {Key.O, c => c.InsertLine(LineInsertMode.Above)},
                                                                          {Key.OemSemicolon, c => c.EnterCommandMode()}
+                                                                     },
+                                                                     new Dictionary<Key, Action<IVIMExpressionProcessor>>
+                                                                     {
+                                                                         {Key.Q, c => { c.Push(new TextPointerExpression());
+                                                                             VIMMessageService.SendMessage<IVIMControlContainer>(a => a.Focus(c));}}
                                                                      }
                                                                  }
 

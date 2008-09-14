@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Windows;
 using VIMControls.Controls;
+using VIMControls.Controls.StackProcessor;
 
 namespace VIMControls.Contracts
 {
@@ -138,5 +139,6 @@ namespace VIMControls.Contracts
     public interface IVIMControlContainer : IVIMAllControllers
     {
         CommandMode Mode { get; set; }
+        void Focus(IVIMController controller);
     }
 }

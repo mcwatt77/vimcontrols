@@ -30,6 +30,14 @@ namespace VIMControls.Controls.Container
             }
         }
 
+        public void Focus(IVIMController controller)
+        {
+            if (controller is IVIMExpressionProcessor)
+            {
+                IntializeRPN();
+            }
+        }
+
         private IListController _listController;
         private IVIMMotionController _motionController;
         private IVIMPositionController _positionController;
@@ -486,6 +494,8 @@ namespace VIMControls.Controls.Container
 
         private void IntializeRPN()
         {
+            SaveCurrentViewer();
+
             var stackPanel = new StackPanel();
 
             var stackInputController = Services.Locate<IStackInputController>()();
@@ -569,7 +579,7 @@ namespace VIMControls.Controls.Container
 
                 var cursor = Services.Locate<IVIMTextCursor>(text)();
                 _handlers[typeof (IVIMTextCursor)] = cursor;
-                _motionController = new ListMotionWrapper(cursor);
+                _motionController = cursor;
                 var cElem = (UIElementWrapper)cursor.GetUIElement();
                 canvas.Children.Add(cElem.UiElement);
             }

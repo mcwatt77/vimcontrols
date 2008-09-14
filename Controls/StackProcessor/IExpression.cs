@@ -22,6 +22,9 @@ namespace VIMControls.Controls.StackProcessor
         int StackArgs { get; }
     }
 
+    public class TextPointerExpression : IExpression
+    {}
+
     public abstract class MathExpression<TFunc> : IFuncExpression
     {
         protected readonly Expression<TFunc> _fn;
@@ -100,9 +103,31 @@ namespace VIMControls.Controls.StackProcessor
         }
     }
 
+    public static class ExpressionMaps
+    {
+        [StackCmdRegister("mru")]
+        public static void mru(IVIMStack stack)
+        {
+            VIMMessageService.SendMessage<IVIMControlContainer>(a => a.Navigate("mru"));
+        }
+    }
+
+    public class StackCmdRegisterAttribute : Attribute
+    {
+        public string Name { get; private set; }
+        public StackCmdRegisterAttribute(string name)
+        {
+            Name = name;
+        }
+    }
+
     public static class VIMExpression
     {
-        private static readonly Dictionary<string, IExpression> _expressions = new Dictionary<string, IExpression>
+        private static readonly Dictionary<string, IExpression> _expressions = SetupExpressionDictionary();
+
+        private static Dictionary<string, IExpression> SetupExpressionDictionary()
+        {
+            var dict = new Dictionary<string, IExpression>
                                                                                    {
                                                                                        {"pow", StackOpExpression.Power},
                                                                                        {"log", StackOpExpression.Log},
@@ -123,8 +148,18 @@ namespace VIMControls.Controls.StackProcessor
                                                                                        {"swap", StackOpExpression.Swap},
                                                                                        {"graph", StackOpExpression.Graph},
                                                                                        {"edit", StackOpExpression.Edit},
-                                                                                       {"array", StackOpExpression.Array}
+                                                                                       {"array", StackOpExpression.Array},
+                                                                                       {"regparser", StackOpExpression.RegParser},
+                                                                                       {"fn", StackOpExpression.Fn}
                                                                                    };
+
+            var methods = typeof (IExpression).Assembly.GetMethodsWithCustomAttribute<StackCmdRegisterAttribute>();
+            methods.Select(method => new {name = method.AttributesOfType<StackCmdRegisterAttribute>().Single().Name,
+                expr = new StackOpExpression(s => method.Invoke(null, new object[]{s}))})
+                .Do(a => dict[a.name] = a.expr);
+
+            return dict;
+        }
 
         private static void Reset()
         {

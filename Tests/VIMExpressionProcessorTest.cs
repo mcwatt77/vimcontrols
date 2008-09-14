@@ -33,7 +33,6 @@ namespace Tests
             textFactory.Expect(factory => factory.Create()).Return(text).Repeat.Any();
             stackPanelFactory.Expect(factory => factory.Create()).Return(stackPanel);
             stackPanel.Expect(a => a.Children).Return(panelChildren).Repeat.Any();
-
         }
 
         [Ignore]
@@ -101,6 +100,53 @@ namespace Tests
             var numExpr = (INumericExpression) expr;
 
             Assert.AreEqual(29, numExpr.dVal);
+
+            repository.VerifyAll();
+        }
+
+        [Test]
+        public void Input_x_2_pow_t_mul_1_evals_to_4_when_t_is_4()
+        {
+            repository.ReplayAll();
+
+            var eProcessor = new ExpressionProcessor();
+            eProcessor.Push(new DoubleExpression(4));
+            eProcessor.Push(new StringExpression("t"));
+            eProcessor.Eval((IFuncExpression)VIMExpression.FromString("sto"));
+            eProcessor.Push(new DoubleExpression(2));
+            PushFxOfPowX2(eProcessor);
+
+            eProcessor.Eval((IFuncExpression)VIMExpression.FromString("eval"));
+            //might need some sort of context eval
+
+            var stackVal = eProcessor.Pop().ToString();
+            Assert.AreEqual("16", stackVal);
+
+            repository.VerifyAll();
+        }
+
+        private static void PushFxOfPowX2(IVIMExpressionProcessor eProcessor)
+        {
+            eProcessor.Push(new StringExpression("x"));
+            eProcessor.Push(new DoubleExpression(2));
+            eProcessor.Eval((IFuncExpression)VIMExpression.FromString("pow"));
+            eProcessor.Push(new StringExpression("t"));
+            eProcessor.Eval(StackOpExpression.Multiply);
+            eProcessor.Push(new StringExpression("x"));
+            eProcessor.Push(new DoubleExpression(1));
+            eProcessor.Eval((IFuncExpression)VIMExpression.FromString("fn"));
+        }
+
+        [Test]
+        public void CanBuildFnStatements()
+        {
+            repository.ReplayAll();
+
+            var eProcessor = new ExpressionProcessor();
+            PushFxOfPowX2(eProcessor);
+
+            var stackVal = eProcessor.Pop().ToString();
+            Assert.AreEqual("f(x) = ((x^2) * t)", stackVal);
 
             repository.VerifyAll();
         }

@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
+using System.Text;
 using VIMControls.Contracts;
 using VIMControls.Controls.StackProcessor.Graphing;
 
@@ -70,6 +72,8 @@ namespace VIMControls.Controls.StackProcessor.MathExpressions
         public static StackOpExpression ATan = new StackSystemExpression<ATanExpression>();
         public static StackOpExpression Array = new StackOpExpression(fnArray);
         public static StackOpExpression Edit = new StackOpExpression(fnEdit);
+        public static StackOpExpression RegParser = new StackOpExpression(fnRegParser);
+        public static StackOpExpression Fn = new StackOpExpression(fnFn);
 
         private readonly Action<IVIMStack> _fn;
 
@@ -142,6 +146,29 @@ namespace VIMControls.Controls.StackProcessor.MathExpressions
             stack.Push(new ArrayExpression(arrayVals));
         }
 
+        private static void fnRegParser(IVIMStack stack)
+        {
+            var parserName = stack.Pop().ToString();
+            var parserText = stack.Pop().ToString();
+            var dict = new Dictionary<string, string> {{parserName, parserText}};
+            var guid = new Guid("{9AAC2521-41C8-4a26-8A74-DFBB7FA85ADE}");
+            dict.Persist(guid);
+        }
+
+        private static void fnFn(IVIMStack stack)
+        {
+            var numExpr = (DoubleExpression) stack.Pop();
+            var numArgs = (int) numExpr.dVal;
+
+            var exprs = Enumerable.Range(0, numArgs)
+                .Select(i => stack.Pop())
+                .Cast<StringExpression>()
+                .Reverse()
+                .ToList();
+
+            stack.Push(new FunctionExpression(exprs, (ISystemExpression)stack.Pop()));
+        }
+
         public IExpression Eval(IEnumerable<IExpression> args)
         {
             return null;
@@ -150,6 +177,71 @@ namespace VIMControls.Controls.StackProcessor.MathExpressions
         public int StackArgs
         {
             get { return 0; }
+        }
+    }
+
+    public class FunctionExpression : ISystemExpression
+    {
+        private readonly List<string> _argNames;
+        private readonly ISystemExpression _evaluator;
+
+        public FunctionExpression(IEnumerable<StringExpression> args, ISystemExpression evaluator)
+        {
+            _argNames = args.Select(expr => expr.ToString()).ToList();
+            _evaluator = evaluator;
+        }
+
+        public override string ToString()
+        {
+            return "f(" + _argNames.Delimit(",") + ") = " + _evaluator;
+        }
+
+        public Delegate GetDelegate()
+        {
+            var expr = _evaluator.GetParameterizedExpression();
+            var l = (LambdaExpression) expr;
+            //I could search through l, and replace any ParameterExpression where it's t with 4
+            //something like l.TreeReplace()
+
+            var inParams = l.Parameters.Select(pExpr => pExpr.Name);
+            var lParams = inParams
+                .Where(s => _argNames.Contains(s))
+                .Select(s => Expression.Parameter(typeof(double), s))
+                .AsEnumerable();
+
+            var fn = ((Func<double, double, double>) _evaluator.GetDelegate());
+
+            var ex = ((Expression<Func<double, double>>) (x => (fn(x, 4))));
+
+            var ex2 = ((Expression<Func<double, Func<double, double, double>, double>>) ((x, f) => f(x, 4)));
+            
+
+/*            var memberinfo = ((MemberExpression) ((InvocationExpression) ex.Body).Expression).Member;
+
+            var body = MakeExpression(fn, memberinfo);
+            var lambda = Expression.Lambda(body, lParams.ToArray());
+            return lambda.Compile();*/
+
+            return ex.Compile();
+        }
+
+        private Expression MakeExpression(Func<double, double, double> fn, MemberInfo memberinfo)
+        {
+            var fnCon = Expression.Constant(fn);
+            var parm = Expression.Parameter(typeof (double), "x");
+            var con = Expression.Constant(4.0);
+            var invoke = Expression.Invoke(fnCon, parm, con);
+            return invoke;
+        }
+
+        public Expression GetParameterizedExpression()
+        {
+            return _evaluator.GetParameterizedExpression();
+        }
+
+        public IEnumerable<string> ParameterList
+        {
+            get { return _evaluator.ParameterList; }
         }
     }
 }

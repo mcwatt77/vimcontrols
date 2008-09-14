@@ -5,6 +5,7 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using VIMControls.Controls;
 
 namespace VIMControls
@@ -59,6 +60,15 @@ namespace VIMControls
                     yield return item;
         }
 
+        public static IEnumerable<MethodInfo> GetMethodsWithCustomAttribute<T>(this Assembly assembly)
+        {
+            return assembly
+                .GetTypes()
+                .Select(type => type.GetMethods(BindingFlags.Public | BindingFlags.Static).AsEnumerable())
+                .Flatten()
+                .Where(method => method.AttributesOfType<T>().Count() == 1);
+        }
+
         public static IEnumerable<TAttributeType> AttributesOfType<TAttributeType>(this ICustomAttributeProvider attr)
         {
             return attr
@@ -78,6 +88,28 @@ namespace VIMControls
             var accessors = propertyInfo.GetAccessors();
             if (accessors == null) return false;
             return accessors.Count() == 2;
+        }
+
+        public static string Delimit<TItem>(this IEnumerable<TItem> items, string delimiter)
+        {
+            var sb = new StringBuilder();
+            var e = items.GetEnumerator();
+            var hasRecords = e.MoveNext();
+            if (hasRecords)
+            {
+                var prevRecord = e.Current;
+
+                while (e.MoveNext())
+                {
+                    sb.Append(prevRecord.ToString());
+                    sb.Append(delimiter);
+                    prevRecord = e.Current;
+                }
+
+                sb.Append(prevRecord);
+            }
+
+            return sb.ToString();
         }
 
         public static int Persist(this object src)
