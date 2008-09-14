@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using VIMControls.Contracts;
+using VIMControls.Controls.StackProcessor;
+using VIMControls.Controls.StackProcessor.MathExpressions;
 using VIMControls.Controls.VIMForms;
 
 namespace VIMControls.Controls
