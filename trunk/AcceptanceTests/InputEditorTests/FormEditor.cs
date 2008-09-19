@@ -1,10 +1,12 @@
 ﻿using System.Linq;
-using AcceptanceTests.Interfaces;
 using NUnit.Framework;
 using Rhino.Mocks;
+using VIMControls.Interfaces;
+using VIMControls.Interfaces.Framework;
 
 namespace AcceptanceTests.InputEditorTests
 {
+    [TestFixture]
     public class FormEditor
     {
         private MockRepository _repository;

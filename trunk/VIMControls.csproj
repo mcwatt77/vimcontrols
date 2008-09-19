@@ -60,42 +60,66 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Contracts\IVIMListCursor.cs" />
-    <Compile Include="Contracts\UIElementWrapper.cs" />
-    <Compile Include="Contracts\VIMTextCursor.cs" />
-    <Compile Include="Controls\Misc\Copy of VIMMediaControl.cs" />
-    <Compile Include="Controls\Misc\IText.cs" />
-    <Compile Include="Controls\StackProcessor\Graphing\IVIMGraphableFunction.cs" />
-    <Compile Include="Controls\StackProcessor\MathExpressions\BinarySysExpression.cs" />
-    <Compile Include="Controls\StackProcessor\MathExpressions\DoubleExpression.cs" />
-    <Compile Include="Controls\StackProcessor\IExpression.cs" />
-    <Compile Include="Controls\StackProcessor\IVIMExpressionProcessor.cs" />
-    <Compile Include="Controls\IVIMStringCommandMapper.cs" />
-    <Compile Include="Controls\StackProcessor\MathExpressions\StackOpExpression.cs" />
-    <Compile Include="Controls\StackProcessor\MathExpressions\StackSystemExpression.cs" />
-    <Compile Include="Controls\StackProcessor\MathExpressions\StoExpression.cs" />
-    <Compile Include="Controls\StackProcessor\MathExpressions\StringExpression.cs" />
-    <Compile Include="Controls\StackProcessor\MathExpressions\UnarySysExpression.cs" />
-    <Compile Include="Controls\StackProcessor\MathExpressions\VariableExpression.cs" />
-    <Compile Include="Controls\StackProcessor\StackInputController.cs" />
-    <Compile Include="Controls\TempSqlHelper.cs" />
-    <Compile Include="Controls\VIMForms\VIMFormConstraint.cs" />
-    <Compile Include="Controls\VIMForms\VIMFormRow.cs" />
-    <Compile Include="Controls\StackProcessor\Graphing\VIMGraphPanel.cs" />
-    <Compile Include="Controls\Misc\VIMListBrowser.cs" />
-    <Compile Include="Controls\Misc\VIMMRUControl.cs" />
-    <Compile Include="Controls\Misc\VIMWebBrowser.cs" />
-    <Compile Include="EventableList.cs" />
-    <Compile Include="Extensions.cs" />
-    <Compile Include="Contracts\IVIMMessageService.cs" />
-    <Compile Include="Log.cs" />
-    <Compile Include="Parser.cs" />
-    <Compile Include="WPF\FillableCanvas.cs" />
-    <Compile Include="Services.cs" />
-    <Compile Include="Contracts\IVIMController.cs" />
-    <Compile Include="KeyMapper.cs" />
-    <Compile Include="Serializer.cs" />
-    <Compile Include="Controls\Container\VIMControlContainer.cs" />
+    <Compile Include="Interfaces\Framework\KeyMapAttribute.cs" />
+    <Compile Include="Interfaces\Input\ICommand.cs" />
+    <Compile Include="Interfaces\Input\ICommandable.cs" />
+    <Compile Include="Interfaces\Input\IKeyCommandGenerator.cs" />
+    <Compile Include="Input\KeyCommandGenerator.cs" />
+    <Compile Include="LinkedList.cs" />
+    <Compile Include="VIMApplication.cs" />
+    <Compile Include="Old\Contracts\IVIMListCursor.cs" />
+    <Compile Include="Old\Contracts\UIElementWrapper.cs" />
+    <Compile Include="Old\Contracts\VIMTextCursor.cs" />
+    <Compile Include="Old\Controls_Old\Misc\Copy of VIMMediaControl.cs" />
+    <Compile Include="Old\Controls_Old\Misc\IText.cs" />
+    <Compile Include="Old\Controls_Old\StackProcessor\Graphing\IVIMGraphableFunction.cs" />
+    <Compile Include="Old\Controls_Old\StackProcessor\MathExpressions\BinarySysExpression.cs" />
+    <Compile Include="Old\Controls_Old\StackProcessor\MathExpressions\DoubleExpression.cs" />
+    <Compile Include="Old\Controls_Old\StackProcessor\IExpression.cs" />
+    <Compile Include="Old\Controls_Old\StackProcessor\IVIMExpressionProcessor.cs" />
+    <Compile Include="Old\Controls_Old\IVIMStringCommandMapper.cs" />
+    <Compile Include="Old\Controls_Old\StackProcessor\MathExpressions\StackOpExpression.cs" />
+    <Compile Include="Old\Controls_Old\StackProcessor\MathExpressions\StackSystemExpression.cs" />
+    <Compile Include="Old\Controls_Old\StackProcessor\MathExpressions\StoExpression.cs" />
+    <Compile Include="Old\Controls_Old\StackProcessor\MathExpressions\StringExpression.cs" />
+    <Compile Include="Old\Controls_Old\StackProcessor\MathExpressions\UnarySysExpression.cs" />
+    <Compile Include="Old\Controls_Old\StackProcessor\MathExpressions\VariableExpression.cs" />
+    <Compile Include="Old\Controls_Old\StackProcessor\StackInputController.cs" />
+    <Compile Include="Old\Controls_Old\TempSqlHelper.cs" />
+    <Compile Include="Old\Controls_Old\VIMForms\VIMFormConstraint.cs" />
+    <Compile Include="Old\Controls_Old\VIMForms\VIMFormRow.cs" />
+    <Compile Include="Old\Controls_Old\StackProcessor\Graphing\VIMGraphPanel.cs" />
+    <Compile Include="Old\Controls_Old\Misc\VIMListBrowser.cs" />
+    <Compile Include="Old\Controls_Old\Misc\VIMMRUControl.cs" />
+    <Compile Include="Old\Controls_Old\Misc\VIMWebBrowser.cs" />
+    <Compile Include="Old\EventableList.cs" />
+    <Compile Include="Old\Extensions.cs" />
+    <Compile Include="Old\Contracts\IVIMMessageService.cs" />
+    <Compile Include="Interfaces\Graphing\IGraphable.cs" />
+    <Compile Include="Interfaces\Graphing\IGraphView.cs" />
+    <Compile Include="Interfaces\Graphing\ILine.cs" />
+    <Compile Include="Interfaces\Graphing\IPlaneSection.cs" />
+    <Compile Include="Interfaces\Graphing\IPoint.cs" />
+    <Compile Include="Interfaces\Framework\IApplication.cs" />
+    <Compile Include="Interfaces\Browsing\IBrowseElement.cs" />
+    <Compile Include="Interfaces\Browsing\IBrowser.cs" />
+    <Compile Include="Interfaces\Browsing\ICreateBrowseElement.cs" />
+    <Compile Include="Interfaces\Editors\IEditor.cs" />
+    <Compile Include="Interfaces\Framework\IExpression.cs" />
+    <Compile Include="Interfaces\Editors\IFormEditor.cs" />
+    <Compile Include="Interfaces\Input\KeyInputMode.cs" />
+    <Compile Include="Interfaces\Framework\IStackView.cs" />
+    <Compile Include="Interfaces\Framework\IStringExpression.cs" />
+    <Compile Include="Interfaces\Editors\ITextEditor.cs" />
+    <Compile Include="Interfaces\Framework\IView.cs" />
+    <Compile Include="Old\Log.cs" />
+    <Compile Include="Old\Parser.cs" />
+    <Compile Include="Old\WPF\FillableCanvas.cs" />
+    <Compile Include="Old\Services.cs" />
+    <Compile Include="Old\Contracts\IVIMController.cs" />
+    <Compile Include="Old\KeyMapper.cs" />
+    <Compile Include="Old\Serializer.cs" />
+    <Compile Include="Old\Controls_Old\Container\VIMControlContainer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -109,12 +133,12 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="Controls\Misc\VIMDirectoryControl.cs" />
-    <Compile Include="Controls\VIMForms\VIMFormControl.cs" />
-    <Compile Include="Controls\Misc\VIMMediaControl.cs" />
-    <Compile Include="Controls\Misc\VIMRPNController.cs" />
-    <Compile Include="Controls\Misc\VIMCommandText.cs" />
-    <Compile Include="Controls\Misc\VIMTextControl.cs" />
+    <Compile Include="Old\Controls_Old\Misc\VIMDirectoryControl.cs" />
+    <Compile Include="Old\Controls_Old\VIMForms\VIMFormControl.cs" />
+    <Compile Include="Old\Controls_Old\Misc\VIMMediaControl.cs" />
+    <Compile Include="Old\Controls_Old\Misc\VIMRPNController.cs" />
+    <Compile Include="Old\Controls_Old\Misc\VIMCommandText.cs" />
+    <Compile Include="Old\Controls_Old\Misc\VIMTextControl.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

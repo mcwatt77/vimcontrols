@@ -3,16 +3,8 @@ using System.Windows;
 
 namespace VIMControls
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
     public class App : Application
     {
-        public App()
-        {
-//            StartupUri 
-        }
-
         [STAThread]
         static void Main()
         {
