@@ -1,9 +1,11 @@
-using AcceptanceTests.Interfaces;
 using NUnit.Framework;
 using Rhino.Mocks;
+using VIMControls.Interfaces;
+using VIMControls.Interfaces.Framework;
 
 namespace AcceptanceTests.InputEditorTests
 {
+    [TestFixture]
     public class TextEditor
     {
         private MockRepository _repository;
@@ -35,14 +37,14 @@ namespace AcceptanceTests.InputEditorTests
         [Test]
         public void TextEditorStartsInNormalMode()
         {
-            Assert.AreEqual(InputMode.Normal, _app.Mode);
+            Assert.AreEqual(KeyInputMode.Normal, _app.Mode);
         }
 
         [Test]
         public void ApplicationModeGetsSetFromTextEditor()
         {
             _app.ProcessKeyString("a");
-            Assert.AreEqual(InputMode.TextInsert, _app.Mode);
+            Assert.AreEqual(KeyInputMode.TextInsert, _app.Mode);
         }
 
         [Test]
@@ -75,7 +77,7 @@ namespace AcceptanceTests.InputEditorTests
             var testString = "Hello foobar!";
             _app.ProcessKeyString("i" + testString + "<esc>Q");
 
-            Assert.AreEqual(InputMode.Stack, _app.Mode);
+            Assert.AreEqual(KeyInputMode.Stack, _app.Mode);
             Assert.IsInstanceOfType(typeof(IStackView), _app.CurrentView);
 
             CommandStack.VerifyStackString(_app, testString);
