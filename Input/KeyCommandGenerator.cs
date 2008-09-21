@@ -3,65 +3,67 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Windows.Input;
+using VIMControls.Input;
 using VIMControls.Interfaces;
 using VIMControls.Interfaces.Framework;
 using ICommand=VIMControls.Interfaces.ICommand;
 
 namespace VIMControls.Input
 {
-    public class Command : ICommand
+    public class KeyModeMap
     {
-        public Command(Expression expression)
-        {}
+        private Dictionary<KeyInputMode, Dictionary<Key, IEnumerable<ICommand>>> _map = new Dictionary<KeyInputMode, Dictionary<Key, IEnumerable<ICommand>>>();
 
-        public void Invoke(ICommandable commandable)
+        public IEnumerable<ICommand> this[KeyInputMode mode, Key key]
         {
+            get
+            {
+                if (_map.ContainsKey(mode))
+                    if (_map[mode].ContainsKey(key))
+                        return _map[mode][key];
+                return null;
+            }
+            set
+            {
+                Dictionary<Key, IEnumerable<ICommand>> keyLookup;
+                if (!_map.ContainsKey(mode))
+                {
+                    keyLookup = new Dictionary<Key, IEnumerable<ICommand>>();
+                    _map[mode] = keyLookup;
+                }
+                else
+                    keyLookup = _map[mode];
+                keyLookup[key] = value;
+            }
         }
-    }
-
-    public interface ISearchable
-    {
-        void AddSearchCharacter(char c);
-        void FinalizeSearch();
-    }
-
-    public interface IMovable
-    {
-        void MoveRight(int i);
-    }
-
-    public interface INavigable
-    {
-        void Navigate();
     }
 
     public class KeyCommandGenerator : IKeyCommandGenerator
     {
-        private Dictionary<string, IEnumerable<Key>> _stringToKeysMap = new Dictionary<string, IEnumerable<Key>>();
-        private static IDictionary<Key, ICommand> _keyToCommand = InitializeKeysToCommands();
+        private static readonly KeyModeMap _map = InitializeKeysToCommands();
+        private readonly Dictionary<string, IEnumerable<Key>> _stringToKeysMap = new Dictionary<string, IEnumerable<Key>>();
 
-        private static IDictionary<Key, ICommand> InitializeKeysToCommands()
+        private static KeyModeMap InitializeKeysToCommands()
         {
-            var dict = new Dictionary<Key, ICommand>();
-            dict[Key.OemQuestion] = new Command((Expression<Action<IApplication>>)(a => a.SetMode(KeyInputMode.Search)));
-            dict[Key.N] = new Command((Expression<Action<ISearchable>>)(a => a.AddSearchCharacter('n')));
-            dict[Key.O] = new Command((Expression<Action<ISearchable>>)(a => a.AddSearchCharacter('o')));
-            dict[Key.T] = new Command((Expression<Action<ISearchable>>)(a => a.AddSearchCharacter('t')));
-            dict[Key.E] = new Command((Expression<Action<ISearchable>>)(a => a.AddSearchCharacter('e')));
-            dict[Key.S] = new Command((Expression<Action<ISearchable>>)(a => a.AddSearchCharacter('s')));
+            var map = new KeyModeMap();
 
-            dict[Key.Enter] = new Command((Expression<Action<ISearchable>>)(a => a.FinalizeSearch()));
-            dict[Key.OemQuestion] = new Command((Expression<Action<IApplication>>)(a => a.SetMode(KeyInputMode.Normal)));
+            var methods = typeof (KeyCommandGenerator)
+                .Assembly
+                .GetMethodsWithCustomAttribute<KeyMapAttribute>()
+                .ToList();
 
-            dict[Key.OemQuestion] = new Command((Expression<Action<IMovable>>)(a => a.MoveRight(1)));
-            dict[Key.OemQuestion] = new Command((Expression<Action<INavigable>>)(a => a.Navigate()));
+            methods.Do(method => method.AttributesOfType<KeyMapAttribute>().Do(attr => attr.AddToMap(map, method)));
+            map[KeyInputMode.Normal, Key.I] = new List<ICommand>{new Command((Expression<Action<IApplication>>)(a => a.SetMode(KeyInputMode.TextInsert)))};
+            map[KeyInputMode.Normal, Key.OemQuestion] = new List<ICommand>{new Command((Expression<Action<IApplication>>)(a => a.SetMode(KeyInputMode.Search)))};
 
-            return dict;
+            return map;
         }
 
         public IEnumerable<ICommand> ProcessKey(Key key)
         {
-            return new List<ICommand> {_keyToCommand[key]};
+            var cmds = _map[Mode, key];
+            if (cmds == null) throw new Exception("Key " + key + " not found for " + Mode);
+            return cmds;
         }
 
         public IEnumerable<ICommand> ProcessKeyString(string keyString)
@@ -69,6 +71,11 @@ namespace VIMControls.Input
             var keys = new List<Key>();
             for (var i = 0; i < keyString.Length; i++)
             {
+                if (keyString[i] == ' ')
+                {
+                    keys.Add(Key.Space);
+                    continue;
+                }
                 if (keyString[i] == '<')
                 {
                     i++;
@@ -84,12 +91,12 @@ namespace VIMControls.Input
                     }
                     throw new Exception("Unknown!");
                 }
-                var map = "/ OemQuestion";
+                var map = "/ OemQuestion ! LeftShift,Oem1 : LeftShift,OemSemicolon";
                 var pairs = map.Split(' ');
                 Enumerable.Range(0, pairs.Length/2)
-                    .Do(
-                    idx =>
-                    _stringToKeysMap[pairs[idx*2]] = new List<Key> {(Key) Enum.Parse(typeof (Key), pairs[idx*2 + 1])});
+                    .Do(idx => _stringToKeysMap[pairs[idx*2]] = pairs[idx*2 + 1]
+                        .Split(',')
+                        .Select(key => (Key)Enum.Parse(typeof(Key), key)));
 
                 if (_stringToKeysMap.ContainsKey(keyString[i].ToString()))
                     keys.AddRange(_stringToKeysMap[keyString[i].ToString()]);
@@ -98,6 +105,12 @@ namespace VIMControls.Input
             }
 
             return keys.Select(key => ProcessKey(key)).Flatten();
+        }
+
+        public KeyInputMode Mode { get; private set; }
+        public void SetMode(KeyInputMode mode)
+        {
+            Mode = mode;
         }
     }
 }

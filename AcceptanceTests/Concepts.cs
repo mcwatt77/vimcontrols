@@ -18,7 +18,7 @@ namespace AcceptanceTests
             _repository = new MockRepository();
         }
 
-        public static IApplication SetupApplication(MockRepository repository)
+        public static IApplication SetupApplication(MockRepository repository, IFactory<IView> viewFactory)
         {
             var app = new VIMApplication();
             var container = repository.StrictMock<IContainer>();
@@ -32,7 +32,8 @@ namespace AcceptanceTests
             elementFactory.Expect(a => a.Create("Objects")).Return(new CreateBrowseElement{DisplayName = "Objects"});
             elementFactory.Expect(a => a.Create("Notes")).Return(new CreateBrowseElement{DisplayName = "Notes"});
             container.Expect(a => a.Get<ILinkedList<IBrowseElement>>()).Return(list);
-            container.Expect(a => a.Get<IBrowser>(list)).Return(new LinkedListBrowser(list));
+            container.Expect(a => a.Get<IBrowser>(list)).Return(new LinkedListBrowser(app, list));
+            container.Expect(a => a.Get<IFactory<IView>>()).Return(viewFactory);
             repository.ReplayAll();
 
             app.Initialize(container);
@@ -43,7 +44,7 @@ namespace AcceptanceTests
         [Test]
         public void WhenIInitializeTheApplicationIGetAnApplicationList()
         {
-            var app = SetupApplication(_repository);
+            var app = SetupApplication(_repository, null);
 
             Assert.IsInstanceOfType(typeof(IBrowser), app.CurrentView);
             var browser = (IBrowser) app.CurrentView;

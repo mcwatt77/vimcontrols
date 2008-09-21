@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Windows.Input;
 using VIMControls.Input;
 using VIMControls.Interfaces;
@@ -13,21 +12,6 @@ namespace VIMControls
         public string DisplayName { get; set;}
         public IEditor Create { get; set; }
         public IBrowser Browse { get; set; }
-    }
-
-    public class LinkedListBrowser : IBrowser
-    {
-        private readonly LinkedList<IBrowseElement> list;
-
-        public LinkedListBrowser(LinkedList<IBrowseElement> list)
-        {
-            this.list = list;
-        }
-
-        public IEnumerable<IBrowseElement> Elements
-        {
-            get { return list.Select(elem => elem); }
-        }
     }
 
     public interface IContainer
@@ -52,6 +36,7 @@ namespace VIMControls
     public class VIMApplication : IApplication
     {
         private KeyCommandGenerator _keyGen;
+        private IFactory<IView> _viewFactory;
 
         public void Initialize(IContainer container)
         {
@@ -66,6 +51,8 @@ namespace VIMControls
                 .Do(elem => list.AddBefore(stackNode, elem));
 
             CurrentView = container.Get<IBrowser>(list);
+
+            _viewFactory = container.Get<IFactory<IView>>();
         }
 
         public IView CurrentView { get; set;}
@@ -80,12 +67,14 @@ namespace VIMControls
             _keyGen.ProcessKeyString(keyString).Do(command => command.Invoke(this));
         }
 
-
-        public KeyInputMode Mode { get; private set; }
+        public void SetView<TView>(TView item)
+        {
+            CurrentView = _viewFactory.Create(item);
+        }
 
         public void SetMode(KeyInputMode mode)
         {
-            Mode = mode;
+            _keyGen.SetMode(mode);
         }
 
         public TView FindView<TView>()
@@ -99,6 +88,7 @@ namespace VIMControls
 
         public void ProcessMissingCommand(ICommand command)
         {
+            command.Invoke(CurrentView);
         }
     }
 }

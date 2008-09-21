@@ -7,5 +7,7 @@ namespace VIMControls.Interfaces
     {
         IEnumerable<ICommand> ProcessKey(Key key);
         IEnumerable<ICommand> ProcessKeyString(string keyString);
+        KeyInputMode Mode { get; }
+        void SetMode(KeyInputMode mode);
     }
 }

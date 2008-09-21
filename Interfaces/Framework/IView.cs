@@ -1,5 +1,5 @@
 namespace VIMControls.Interfaces
 {
-    public interface IView
+    public interface IView : ICommandable
     {}
 }

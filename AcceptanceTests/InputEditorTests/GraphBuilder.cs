@@ -16,7 +16,7 @@ namespace AcceptanceTests.InputEditorTests
         public void Setup()
         {
             _repository = new MockRepository();
-            _app = Concepts.SetupApplication(_repository);
+            _app = Concepts.SetupApplication(_repository, null);
 
             CommandStack.NavigateToCommandStack(_app);
         }
