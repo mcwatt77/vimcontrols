@@ -1,5 +1,7 @@
+using System;
 using NUnit.Framework;
 using Rhino.Mocks;
+using VIMControls;
 using VIMControls.Interfaces;
 using VIMControls.Interfaces.Framework;
 
@@ -15,7 +17,11 @@ namespace AcceptanceTests.InputEditorTests
         public void Setup()
         {
             _repository = new MockRepository();
-            _app = Concepts.SetupApplication(_repository);
+
+            var viewFactory = _repository.StrictMock<IFactory<IView>>();
+            var textEditor = _repository.StrictMock<ITextEditor>();
+            viewFactory.Expect(a => a.Create(String.Empty)).Return(textEditor);
+            _app = Concepts.SetupApplication(_repository, viewFactory);
 
             NavigateToNotes(_app);
         }
@@ -32,19 +38,6 @@ namespace AcceptanceTests.InputEditorTests
 
             var editor = (ITextEditor) _app.CurrentView;
             Assert.AreEqual(output, editor.Text);
-        }
-
-        [Test]
-        public void TextEditorStartsInNormalMode()
-        {
-            Assert.AreEqual(KeyInputMode.Normal, _app.Mode);
-        }
-
-        [Test]
-        public void ApplicationModeGetsSetFromTextEditor()
-        {
-            _app.ProcessKeyString("a");
-            Assert.AreEqual(KeyInputMode.TextInsert, _app.Mode);
         }
 
         [Test]
@@ -77,7 +70,6 @@ namespace AcceptanceTests.InputEditorTests
             var testString = "Hello foobar!";
             _app.ProcessKeyString("i" + testString + "<esc>Q");
 
-            Assert.AreEqual(KeyInputMode.Stack, _app.Mode);
             Assert.IsInstanceOfType(typeof(IStackView), _app.CurrentView);
 
             CommandStack.VerifyStackString(_app, testString);

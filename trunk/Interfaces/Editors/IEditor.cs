@@ -1,5 +1,5 @@
 namespace VIMControls.Interfaces
 {
-    public interface IEditor
+    public interface IEditor : IView
     {}
 }

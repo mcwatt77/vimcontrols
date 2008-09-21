@@ -60,20 +60,29 @@ namespace VIMControls
                     yield return item;
         }
 
-        public static IEnumerable<MethodInfo> GetMethodsWithCustomAttribute<T>(this Assembly assembly)
+        public static IEnumerable<MethodInfo> GetStaticMethodsWithCustomAttribute<T>(this Assembly assembly)
         {
             return assembly
                 .GetTypes()
                 .Select(type => type.GetMethods(BindingFlags.Public | BindingFlags.Static).AsEnumerable())
                 .Flatten()
-                .Where(method => method.AttributesOfType<T>().Count() == 1);
+                .Where(method => method.AttributesOfType<T>().Count() > 0);
+        }
+
+        public static IEnumerable<MethodInfo> GetMethodsWithCustomAttribute<T>(this Assembly assembly)
+        {
+            return assembly
+                .GetTypes()
+                .Select(type => type.GetMethods().AsEnumerable())
+                .Flatten()
+                .Where(method => method.AttributesOfType<T>().Count() > 0);
         }
 
         public static IEnumerable<TAttributeType> AttributesOfType<TAttributeType>(this ICustomAttributeProvider attr)
         {
             return attr
                 .GetCustomAttributes(false)
-                .Where(o => o.GetType() == typeof (TAttributeType))
+                .Where(o => typeof(TAttributeType).IsAssignableFrom(o.GetType()))
                 .Cast<TAttributeType>();
         }
 

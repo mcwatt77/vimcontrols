@@ -60,12 +60,18 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Input\Command.cs" />
+    <Compile Include="Input\IMovable.cs" />
+    <Compile Include="Input\INavigable.cs" />
+    <Compile Include="Input\ISearchable.cs" />
+    <Compile Include="Input\ITextInput.cs" />
     <Compile Include="Interfaces\Framework\KeyMapAttribute.cs" />
     <Compile Include="Interfaces\Input\ICommand.cs" />
     <Compile Include="Interfaces\Input\ICommandable.cs" />
     <Compile Include="Interfaces\Input\IKeyCommandGenerator.cs" />
     <Compile Include="Input\KeyCommandGenerator.cs" />
     <Compile Include="LinkedList.cs" />
+    <Compile Include="Browsing\LinkedListBrowser.cs" />
     <Compile Include="VIMApplication.cs" />
     <Compile Include="Old\Contracts\IVIMListCursor.cs" />
     <Compile Include="Old\Contracts\UIElementWrapper.cs" />
