@@ -14,7 +14,7 @@ namespace AcceptanceTests.InputEditorTests
         public void Setup()
         {
             _repository = new MockRepository();
-            _app = Concepts.SetupApplication(_repository, null);
+            _app = Concepts.SetupApplication(_repository, null, null);
 
             CommandStack.NavigateToCommandStack(_app);
         }
@@ -31,7 +31,7 @@ namespace AcceptanceTests.InputEditorTests
 
         public static void ValidateFunction(IApplication app, string fn, double dValExpected)
         {
-            app.ProcessKeyString(fn);
+            app.KeyGen.ProcessKeyString(fn);
             CommandStack.VerifyStackNumeric(app, dValExpected);
         }
     }

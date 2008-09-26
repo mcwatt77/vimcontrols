@@ -24,6 +24,19 @@ namespace VIMControls.Interfaces.Framework
             map[KeyInputMode, key] = list;
         }
 
+        public void AddToMap(Action<KeyInputMode, Key, object[]> CommandMapper)
+        {
+            if (CommandString == "/") CommandMapper(KeyInputMode, Key.OemQuestion, Params);
+            else if (CommandString == "<cr>") CommandMapper(KeyInputMode, Key.Return, Params);
+            else if (CommandString == @"\[a-z]")
+            {
+                for (var i = 0; i < 26; i++)
+                    CommandMapper(KeyInputMode, (Key)Enum.Parse(typeof(Key), ((char)('A' + i)).ToString()), new object[]{(char)('a' + i)});
+            }
+            else if (CommandString.Length == 1)
+                CommandMapper(KeyInputMode, (Key) Enum.Parse(typeof (Key), CommandString.ToUpper()), Params);
+        }
+
         public void AddToMap(KeyModeMap map, MethodInfo method)
         {
             if (CommandString == "/") AddCommand(Key.OemQuestion, map, method, Params);

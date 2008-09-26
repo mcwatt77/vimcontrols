@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using VIMControls.Controls;
@@ -90,6 +91,18 @@ namespace VIMControls
         {
             object o = Delegate.CreateDelegate(typeof (TDelegateType), method);
             return (TDelegateType) o;
+        }
+
+        public static LambdaExpression BuildLambda(this MethodInfo method, params object[] @params)
+        {
+            var cExprs = @params.Select(o => Expression.Constant(o));
+            var parameter = Expression.Parameter(method.ReflectedType, "a");
+            var call = cExprs.Count() > 0
+                           ? Expression.Call(parameter, method, cExprs.ToArray())
+                           : Expression.Call(parameter, method);
+            var l = Expression.Lambda(call, parameter);
+
+            return l;
         }
 
         public static bool HasSetter(this PropertyInfo propertyInfo)

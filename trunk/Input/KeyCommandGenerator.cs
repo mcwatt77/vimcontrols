@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Windows.Input;
 using VIMControls.Input;
 using VIMControls.Interfaces;
@@ -12,7 +13,7 @@ namespace VIMControls.Input
 {
     public class KeyModeMap
     {
-        private Dictionary<KeyInputMode, Dictionary<Key, IEnumerable<ICommand>>> _map = new Dictionary<KeyInputMode, Dictionary<Key, IEnumerable<ICommand>>>();
+        private readonly Dictionary<KeyInputMode, Dictionary<Key, IEnumerable<ICommand>>> _map = new Dictionary<KeyInputMode, Dictionary<Key, IEnumerable<ICommand>>>();
 
         public IEnumerable<ICommand> this[KeyInputMode mode, Key key]
         {
@@ -40,23 +41,48 @@ namespace VIMControls.Input
 
     public class KeyCommandGenerator : IKeyCommandGenerator
     {
-        private static readonly KeyModeMap _map = InitializeKeysToCommands();
+        private readonly IFactory<ICommand> _commandFactory;
+        private KeyModeMap _map;
         private readonly Dictionary<string, IEnumerable<Key>> _stringToKeysMap = new Dictionary<string, IEnumerable<Key>>();
 
-        private static KeyModeMap InitializeKeysToCommands()
+
+        public KeyCommandGenerator(IFactory<ICommand> commandFactory)
         {
-            var map = new KeyModeMap();
+            _commandFactory = commandFactory;
+        }
+
+        public KeyModeMap InitializeKeysToCommands()
+        {
+            _map = new KeyModeMap();
 
             var methods = typeof (KeyCommandGenerator)
                 .Assembly
                 .GetMethodsWithCustomAttribute<KeyMapAttribute>()
                 .ToList();
 
-            methods.Do(method => method.AttributesOfType<KeyMapAttribute>().Do(attr => attr.AddToMap(map, method)));
-            map[KeyInputMode.Normal, Key.I] = new List<ICommand>{new Command((Expression<Action<IApplication>>)(a => a.SetMode(KeyInputMode.TextInsert)))};
-            map[KeyInputMode.Normal, Key.OemQuestion] = new List<ICommand>{new Command((Expression<Action<IApplication>>)(a => a.SetMode(KeyInputMode.Search)))};
+//            methods.Do(method => method.AttributesOfType<KeyMapAttribute>().Do(attr => attr.AddToMap(map, method)));
+            methods
+                .Do(method => method.AttributesOfType<KeyMapAttribute>()
+                                  .Do(attr => attr.AddToMap((inputMode, key, @params) =>
+                                                            AddCommand(inputMode, key, method, @params))));
 
-            return map;
+            _map[KeyInputMode.Normal, Key.I] = new List<ICommand> {BuildCommand<IApplication>(a => a.SetMode(KeyInputMode.TextInsert))};
+            _map[KeyInputMode.Normal, Key.OemQuestion] = new List<ICommand> {BuildCommand<IApplication>(a => a.SetMode(KeyInputMode.Search))};
+
+            return _map;
+        }
+
+        private void AddCommand(KeyInputMode inputMode, Key key, MethodInfo method, params object[] @params)
+        {
+            var cmds = _map[inputMode, key];
+            var list = cmds == null ? new List<ICommand>() : cmds.ToList();
+            list.Add(_commandFactory.Create(method.BuildLambda(@params)));
+            _map[inputMode, key] = list;
+        }
+
+        private ICommand BuildCommand<T>(Expression<Action<T>> cmd)
+        {
+            return _commandFactory.Create(cmd);
         }
 
         public IEnumerable<ICommand> ProcessKey(Key key)

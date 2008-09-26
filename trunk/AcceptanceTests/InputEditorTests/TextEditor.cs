@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using NUnit.Framework;
 using Rhino.Mocks;
 using VIMControls;
@@ -12,6 +13,8 @@ namespace AcceptanceTests.InputEditorTests
     {
         private MockRepository _repository;
         private IApplication _app;
+        private ITextEditor _textEditor;
+        private TestCommandFactory _cmdFactory;
 
         [SetUp]
         public void Setup()
@@ -19,22 +22,34 @@ namespace AcceptanceTests.InputEditorTests
             _repository = new MockRepository();
 
             var viewFactory = _repository.StrictMock<IFactory<IView>>();
-            var textEditor = _repository.StrictMock<ITextEditor>();
-            viewFactory.Expect(a => a.Create(String.Empty)).Return(textEditor);
-            _app = Concepts.SetupApplication(_repository, viewFactory);
+            _textEditor = _repository.StrictMock<ITextEditor>();
+            viewFactory.Expect(a => a.Create(String.Empty)).Return(_textEditor);
+            _app = Concepts.SetupApplication(_repository, viewFactory, _cmdFactory = new TestCommandFactory());
 
             NavigateToNotes(_app);
         }
 
-        public static void NavigateToNotes(IApplication app)
+        public void NavigateToNotes(IApplication app)
         {
-            app.ProcessKeyString("/notes<cr>l<cr>");
+            app.KeyGen.ProcessKeyString("/notes<cr>l<cr>").Do(a => a.Invoke(app));
+
+            var execedCmds = _cmdFactory.RequestedExpressions.Select(expression => expression.ToString()).ToList();
+            Assert.AreEqual("a => a.SetMode(Search)", execedCmds[0]);
             Assert.IsInstanceOfType(typeof(ITextEditor), app.CurrentView);
+        }
+
+        [Test]
+        public void TestModeChange()
+        {
+            _textEditor.Expect(a => a.Text).Return("");
+            _repository.ReplayAll();
+
+            TestTextString("i","");
         }
 
         private void TestTextString(string input, string output)
         {
-            _app.ProcessKeyString(input);
+            _app.KeyGen.ProcessKeyString(input).Do(a => a.Invoke(_app));
 
             var editor = (ITextEditor) _app.CurrentView;
             Assert.AreEqual(output, editor.Text);
@@ -44,10 +59,10 @@ namespace AcceptanceTests.InputEditorTests
         public void CanSaveAndReadNotes()
         {
             var testString = "Hello foobar!";
-            _app.ProcessKeyString("i" + testString + ":w notetest<cr>:q");
+            _app.KeyGen.ProcessKeyString("i" + testString + ":w notetest<cr>:q").Do(a => a.Invoke(_app));
 
             NavigateToNotes(_app);
-            _app.ProcessKeyString(":e notetest<cr>");
+            _app.KeyGen.ProcessKeyString(":e notetest<cr>");
 
             var editor = (ITextEditor) _app.CurrentView;
             Assert.AreEqual(testString, editor.Text);
@@ -68,7 +83,7 @@ namespace AcceptanceTests.InputEditorTests
         public void QpushesEditorContentToStack()
         {
             var testString = "Hello foobar!";
-            _app.ProcessKeyString("i" + testString + "<esc>Q");
+            _app.KeyGen.ProcessKeyString("i" + testString + "<esc>Q");
 
             Assert.IsInstanceOfType(typeof(IStackView), _app.CurrentView);
 
