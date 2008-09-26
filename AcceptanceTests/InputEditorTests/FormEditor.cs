@@ -16,27 +16,27 @@ namespace AcceptanceTests.InputEditorTests
         public void Setup()
         {
             _repository = new MockRepository();
-            _app = Concepts.SetupApplication(_repository, null);
+            _app = Concepts.SetupApplication(_repository, null, new TestCommandFactory());
 
             NavigateToFormEditor(_app);
         }
 
         public static void NavigateToFormEditor(IApplication app)
         {
-            app.ProcessKeyString("/objects<cr>l<cr>");
+            app.KeyGen.ProcessKeyString("/objects<cr>l<cr>");
             Assert.IsInstanceOfType(typeof(IFormEditor), app.CurrentView);
         }
 
         [Test]
         public void CanCreateANewForm()
         {
-            _app.ProcessKeyString("title Now is the winter of our discount tent!<cr>");
-            _app.ProcessKeyString("color re<cr>");
-            _app.ProcessKeyString("<esc>:w sa<cr>:q");
+            _app.KeyGen.ProcessKeyString("title Now is the winter of our discount tent!<cr>");
+            _app.KeyGen.ProcessKeyString("color re<cr>");
+            _app.KeyGen.ProcessKeyString("<esc>:w sa<cr>:q");
 
             NavigateToFormEditor(_app);
 
-            _app.ProcessKeyString(":e sa<cr>");
+            _app.KeyGen.ProcessKeyString(":e sa<cr>");
 
             var formEditor = (IFormEditor) _app.CurrentView;
             var keyPair = formEditor.Data.Skip(1).First();

@@ -2,6 +2,7 @@
 using NUnit.Framework;
 using Rhino.Mocks;
 using VIMControls;
+using VIMControls.Input;
 using VIMControls.Interfaces;
 using VIMControls.Interfaces.Framework;
 
@@ -18,12 +19,19 @@ namespace AcceptanceTests
             _repository = new MockRepository();
         }
 
-        public static IApplication SetupApplication(MockRepository repository, IFactory<IView> viewFactory)
+        public static IApplication SetupApplication(MockRepository repository, IFactory<IView> viewFactory, IFactory<ICommand> cmdFactory)
         {
             var app = new VIMApplication();
             var container = repository.StrictMock<IContainer>();
             var elementFactory = repository.StrictMock<IFactory<IBrowseElement>>();
             var list = new LinkedList<IBrowseElement>();
+
+            //TODO: I don't want to give it a real command factory
+            //I want to give it something that will new up Commands, but return the list of expressions
+
+            var keyGen = new KeyCommandGenerator(cmdFactory);
+            keyGen.InitializeKeysToCommands();
+            container.Expect(a => a.Get<IKeyCommandGenerator>()).Return(keyGen);
             container.Expect(a => a.Get<IFactory<IBrowseElement>>()).Return(elementFactory);
             elementFactory.Expect(a => a.Create("Command Stack")).Return(new CreateBrowseElement{DisplayName = "Command Stack"});
             elementFactory.Expect(a => a.Create("Files")).Return(new CreateBrowseElement{DisplayName = "Files"});
@@ -44,7 +52,7 @@ namespace AcceptanceTests
         [Test]
         public void WhenIInitializeTheApplicationIGetAnApplicationList()
         {
-            var app = SetupApplication(_repository, null);
+            var app = SetupApplication(_repository, null, new TestCommandFactory());
 
             Assert.IsInstanceOfType(typeof(IBrowser), app.CurrentView);
             var browser = (IBrowser) app.CurrentView;

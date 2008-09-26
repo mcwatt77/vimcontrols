@@ -15,14 +15,14 @@ namespace AcceptanceTests.InputEditorTests
         public void Setup()
         {
             _repository = new MockRepository();
-            _app = Concepts.SetupApplication(_repository, null);
+            _app = Concepts.SetupApplication(_repository, null, new TestCommandFactory());
 
             NavigateToCommandStack(_app);
         }
 
         public static void NavigateToCommandStack(IApplication app)
         {
-            app.ProcessKeyString("k<cr>");
+            app.KeyGen.ProcessKeyString("k<cr>");
             Assert.IsInstanceOfType(typeof(IStackView), app.CurrentView);
         }
 
@@ -51,7 +51,7 @@ namespace AcceptanceTests.InputEditorTests
         [Test]
         public void CanEditFileFromStackCmd()
         {
-            _app.ProcessKeyString("dir<cr>j<cr>/projects<cr>/accept<cr>concept<cr>");
+            _app.KeyGen.ProcessKeyString("dir<cr>j<cr>/projects<cr>/accept<cr>concept<cr>");
 
             Assert.IsInstanceOfType(typeof(ITextEditor), _app.CurrentView);
             var editor = (ITextEditor)_app.CurrentView;

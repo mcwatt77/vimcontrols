@@ -60,6 +60,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Interfaces\IContainer.cs" />
     <Compile Include="Input\Command.cs" />
     <Compile Include="Input\IMovable.cs" />
     <Compile Include="Input\INavigable.cs" />
