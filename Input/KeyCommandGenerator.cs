@@ -7,44 +7,15 @@ using System.Windows.Input;
 using VIMControls.Input;
 using VIMControls.Interfaces;
 using VIMControls.Interfaces.Framework;
+using VIMControls.Interfaces.Input;
 using ICommand=VIMControls.Interfaces.ICommand;
 
 namespace VIMControls.Input
 {
-    public class KeyModeMap
-    {
-        private readonly Dictionary<KeyInputMode, Dictionary<Key, IEnumerable<ICommand>>> _map = new Dictionary<KeyInputMode, Dictionary<Key, IEnumerable<ICommand>>>();
-
-        public IEnumerable<ICommand> this[KeyInputMode mode, Key key]
-        {
-            get
-            {
-                if (_map.ContainsKey(mode))
-                    if (_map[mode].ContainsKey(key))
-                        return _map[mode][key];
-                return null;
-            }
-            set
-            {
-                Dictionary<Key, IEnumerable<ICommand>> keyLookup;
-                if (!_map.ContainsKey(mode))
-                {
-                    keyLookup = new Dictionary<Key, IEnumerable<ICommand>>();
-                    _map[mode] = keyLookup;
-                }
-                else
-                    keyLookup = _map[mode];
-                keyLookup[key] = value;
-            }
-        }
-    }
-
     public class KeyCommandGenerator : IKeyCommandGenerator
     {
         private readonly IFactory<ICommand> _commandFactory;
         private KeyModeMap _map;
-        private readonly Dictionary<string, IEnumerable<Key>> _stringToKeysMap = new Dictionary<string, IEnumerable<Key>>();
-
 
         public KeyCommandGenerator(IFactory<ICommand> commandFactory)
         {
@@ -60,24 +31,30 @@ namespace VIMControls.Input
                 .GetMethodsWithCustomAttribute<KeyMapAttribute>()
                 .ToList();
 
-//            methods.Do(method => method.AttributesOfType<KeyMapAttribute>().Do(attr => attr.AddToMap(map, method)));
             methods
                 .Do(method => method.AttributesOfType<KeyMapAttribute>()
-                                  .Do(attr => attr.AddToMap((inputMode, key, @params) =>
-                                                            AddCommand(inputMode, key, method, @params))));
+                                  .Do(attr => attr.AddToMap((inputMode, toggle, key, @params) =>
+                                                            AddCommand(inputMode, toggle, key, method, @params))));
 
-            _map[KeyInputMode.Normal, Key.I] = new List<ICommand> {BuildCommand<IApplication>(a => a.SetMode(KeyInputMode.TextInsert))};
-            _map[KeyInputMode.Normal, Key.OemQuestion] = new List<ICommand> {BuildCommand<IApplication>(a => a.SetMode(KeyInputMode.Search))};
+            ((List<ICommand>)_map[KeyInputMode.Search, KeyToggle.None, Key.Enter])
+                .Add(BuildCommand<IKeyModeSwitcher>(a => a.SetMode(KeyInputMode.Normal)));
+            _map[KeyInputMode.TextInsert, KeyToggle.None, Key.Escape] = new List<ICommand> {BuildCommand<IKeyModeSwitcher>(a => a.SetMode(KeyInputMode.Normal))};
+            _map[KeyInputMode.Normal, KeyToggle.None, Key.I] = new List<ICommand> {BuildCommand<IKeyModeSwitcher>(a => a.SetMode(KeyInputMode.TextInsert))};
+            _map[KeyInputMode.Normal, KeyToggle.None, Key.OemQuestion] = new List<ICommand> {BuildCommand<IKeyModeSwitcher>(a => a.SetMode(KeyInputMode.Search))};
+            _map[KeyInputMode.Normal, KeyToggle.None, Key.OemSemicolon] = 
+                new List<ICommand> {BuildCommand<IKeyModeSwitcher>(a => a.SetMode(KeyInputMode.Command))};
+            _map[KeyInputMode.TextInsert, KeyToggle.None, Key.LeftShift] =
+                new List<ICommand> {BuildCommand<IKeyModeSwitcher>(a => a.SetToggle(KeyToggle.Shift))};
 
             return _map;
         }
 
-        private void AddCommand(KeyInputMode inputMode, Key key, MethodInfo method, params object[] @params)
+        private void AddCommand(KeyInputMode inputMode, KeyToggle toggle, Key key, MethodInfo method, params object[] @params)
         {
-            var cmds = _map[inputMode, key];
+            var cmds = _map[inputMode, toggle, key];
             var list = cmds == null ? new List<ICommand>() : cmds.ToList();
             list.Add(_commandFactory.Create(method.BuildLambda(@params)));
-            _map[inputMode, key] = list;
+            _map[inputMode, toggle, key] = list;
         }
 
         private ICommand BuildCommand<T>(Expression<Action<T>> cmd)
@@ -87,50 +64,68 @@ namespace VIMControls.Input
 
         public IEnumerable<ICommand> ProcessKey(Key key)
         {
-            var cmds = _map[Mode, key];
+            var cmds = _map[Mode, KeyToggle.None, key];
             if (cmds == null) throw new Exception("Key " + key + " not found for " + Mode);
-            return cmds;
+
+            var modeSwitcher = new KeyModeSwitcher(this);
+            //todo: this won't work if the list of commands contains a mode switch
+            cmds.Do(cmd => cmd.Invoke(modeSwitcher));
+            return modeSwitcher.Commands;
+        }
+
+        public interface IKeyModeSwitcher : ICommandable
+        {
+            void SetMode(KeyInputMode mode);
+            void SetToggle(KeyToggle toggle);
+        }
+
+        public class KeyModeSwitcher : IKeyModeSwitcher
+        {
+            private readonly KeyCommandGenerator _gen;
+            private readonly List<ICommand> _commands = new List<ICommand>();
+
+            public KeyModeSwitcher(KeyCommandGenerator gen)
+            {
+                _gen = gen;
+            }
+
+            public IEnumerable<ICommand> Commands
+            {
+                get
+                {
+                    return _commands;
+                }
+            }
+
+            public void ProcessMissingCommand(ICommand command)
+            {
+                _commands.Add(command);
+            }
+
+            public void SetMode(KeyInputMode mode)
+            {
+                //todo: want to move IApplication out of this class, can probably do it through events
+                _commands.Add(_gen.BuildCommand<IApplication>(a => a.SetMode(mode)));
+                _gen.SetMode(mode);
+            }
+
+            public void SetToggle(KeyToggle toggle)
+            {
+                _gen.SetToggle(toggle);
+            }
         }
 
         public IEnumerable<ICommand> ProcessKeyString(string keyString)
         {
-            var keys = new List<Key>();
-            for (var i = 0; i < keyString.Length; i++)
-            {
-                if (keyString[i] == ' ')
-                {
-                    keys.Add(Key.Space);
-                    continue;
-                }
-                if (keyString[i] == '<')
-                {
-                    i++;
-                    var lookupString = String.Empty;
-                    while (keyString[i] != '>')
-                        lookupString += keyString[i++];
-                    //lookup string
+            return OldKeyStringParser.ProcessKeyString(keyString)
+                .Select(key => ProcessKey(key))
+                .Flatten();
+        }
 
-                    if (lookupString == "cr")
-                    {
-                        keys.Add(Key.Return);
-                        continue;
-                    }
-                    throw new Exception("Unknown!");
-                }
-                var map = "/ OemQuestion ! LeftShift,Oem1 : LeftShift,OemSemicolon";
-                var pairs = map.Split(' ');
-                Enumerable.Range(0, pairs.Length/2)
-                    .Do(idx => _stringToKeysMap[pairs[idx*2]] = pairs[idx*2 + 1]
-                        .Split(',')
-                        .Select(key => (Key)Enum.Parse(typeof(Key), key)));
-
-                if (_stringToKeysMap.ContainsKey(keyString[i].ToString()))
-                    keys.AddRange(_stringToKeysMap[keyString[i].ToString()]);
-                else
-                    keys.Add((Key) Enum.Parse(typeof (Key), keyString[i].ToString().ToUpper()));
-            }
-
-            return keys.Select(key => ProcessKey(key)).Flatten();
+        public KeyToggle Toggle { get; private set; }
+        public void SetToggle(KeyToggle toggle)
+        {
+            Toggle = toggle;
         }
 
         public KeyInputMode Mode { get; private set; }

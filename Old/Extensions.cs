@@ -23,15 +23,28 @@ namespace VIMControls
 
         public static void Do<TSource>(this IEnumerable<TSource> src, Action<TSource> fn)
         {
-            foreach (TSource item in src)
+            foreach (var item in src)
                 fn(item);
         }
         
         public static void Do<TSource>(this IEnumerable<TSource> src, Action<int, TSource> fn)
         {
             var i = 0;
-            foreach (TSource item in src)
+            foreach (var item in src)
                 fn(i++, item);
+        }
+
+        public static TValue GetOrNew<TKey, TValue>(this Dictionary<TKey, TValue> src, TKey key) where TValue : new()
+        {
+            TValue ret;
+            if (!src.ContainsKey(key))
+            {
+                ret = new TValue();
+                src[key] = ret;
+            }
+            else
+                ret = src[key];
+            return ret;
         }
 
         public static Type SystemType(this MemberInfo src)

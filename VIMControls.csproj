@@ -60,6 +60,8 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Input\KeyModeMap.cs" />
+    <Compile Include="Input\OldKeyStringParser.cs" />
     <Compile Include="Interfaces\IContainer.cs" />
     <Compile Include="Input\Command.cs" />
     <Compile Include="Input\IMovable.cs" />
@@ -71,6 +73,7 @@
     <Compile Include="Interfaces\Input\ICommandable.cs" />
     <Compile Include="Interfaces\Input\IKeyCommandGenerator.cs" />
     <Compile Include="Input\KeyCommandGenerator.cs" />
+    <Compile Include="Interfaces\Input\KeyToggle.cs" />
     <Compile Include="LinkedList.cs" />
     <Compile Include="Browsing\LinkedListBrowser.cs" />
     <Compile Include="VIMApplication.cs" />

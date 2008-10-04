@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using VIMControls;
 using VIMControls.Input;
@@ -41,8 +42,15 @@ namespace AcceptanceTests
 
         public void Invoke(ICommandable commandable)
         {
-            _factory.AddCall(_expression);
-            _cmd.Invoke(commandable);
+            try
+            {
+                _factory.AddCall(_expression);
+                _cmd.Invoke(commandable);
+            }
+            catch(Exception e)
+            {
+                throw new Exception("Failed executing " + _expression + " on: " + e.Message);
+            }
         }
     }
 }

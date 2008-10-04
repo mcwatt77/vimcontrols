@@ -1,6 +1,6 @@
 ﻿namespace VIMControls
 {
-    public class Parser
+    public class FutureParser
     {
     }
     /*

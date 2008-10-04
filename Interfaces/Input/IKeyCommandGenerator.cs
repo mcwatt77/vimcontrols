@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Windows.Input;
+using VIMControls.Interfaces.Input;
 
-namespace VIMControls.Interfaces
+namespace VIMControls.Interfaces.Input
 {
     public interface IKeyCommandGenerator
     {
