@@ -1,3 +1,5 @@
+using VIMControls.Interfaces.Input;
+
 namespace VIMControls.Interfaces.Framework
 {
     public interface IApplication : ICommandable
@@ -8,7 +10,6 @@ namespace VIMControls.Interfaces.Framework
         void ProcessCommand(ICommand command);
         void SetView<TView>(TView item);
         IKeyCommandGenerator KeyGen { get; }
-        [KeyMapSearch("<cr>", KeyInputMode.Normal)]
         void SetMode(KeyInputMode mode);
     }
 }

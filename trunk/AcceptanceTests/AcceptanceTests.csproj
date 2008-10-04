@@ -55,11 +55,16 @@
     <Compile Include="InputEditorTests\FormEditor.cs" />
     <Compile Include="InputEditorTests\FunctionBuilder.cs" />
     <Compile Include="InputEditorTests\GraphBuilder.cs" />
+    <Compile Include="Parser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="InputEditorTests\TextEditor.cs" />
     <Compile Include="TestCommandFactory.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\KeyStringParser\KeyCommandMapper.csproj">
+      <Project>{C4CBE469-7AFB-44CD-91F6-EACB0A603CCF}</Project>
+      <Name>KeyCommandMapper</Name>
+    </ProjectReference>
     <ProjectReference Include="..\VIMControls.csproj">
       <Project>{0025697C-CD6E-4FEF-8F7C-43F8801E39BE}</Project>
       <Name>VIMControls</Name>

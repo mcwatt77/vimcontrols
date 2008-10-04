@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using VIMControls.Interfaces;
 using VIMControls.Interfaces.Framework;
+using VIMControls.Interfaces.Input;
 using ICommand=VIMControls.Interfaces.ICommand;
 
 namespace VIMControls
@@ -41,7 +42,16 @@ namespace VIMControls
 
         public void SetMode(KeyInputMode mode)
         {
+            //todo: there are two different KeyMode concepts going on...
+            //one for the keymode as it changes to generate the interface calls...
+            //and another that is important to provide UI queues.
+            //but I still need to be able to generate interface calls ahead of time without
+            //changing *the* mode
             _keyGen.SetMode(mode);
+        }
+
+        public void SetToggle(KeyToggle toggle)
+        {
         }
 
         public TView FindView<TView>()

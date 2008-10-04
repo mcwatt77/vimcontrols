@@ -5,6 +5,7 @@ using VIMControls;
 using VIMControls.Input;
 using VIMControls.Interfaces;
 using VIMControls.Interfaces.Framework;
+using VIMControls.Interfaces.Input;
 
 namespace AcceptanceTests
 {
@@ -25,9 +26,6 @@ namespace AcceptanceTests
             var container = repository.StrictMock<IContainer>();
             var elementFactory = repository.StrictMock<IFactory<IBrowseElement>>();
             var list = new LinkedList<IBrowseElement>();
-
-            //TODO: I don't want to give it a real command factory
-            //I want to give it something that will new up Commands, but return the list of expressions
 
             var keyGen = new KeyCommandGenerator(cmdFactory);
             keyGen.InitializeKeysToCommands();

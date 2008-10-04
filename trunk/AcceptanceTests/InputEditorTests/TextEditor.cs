@@ -1,10 +1,13 @@
 using System;
 using System.Linq;
+using KeyStringParser;
 using NUnit.Framework;
 using Rhino.Mocks;
 using VIMControls;
+using VIMControls.Input;
 using VIMControls.Interfaces;
 using VIMControls.Interfaces.Framework;
+using VIMControls.Interfaces.Input;
 
 namespace AcceptanceTests.InputEditorTests
 {
@@ -22,16 +25,27 @@ namespace AcceptanceTests.InputEditorTests
             _repository = new MockRepository();
 
             var viewFactory = _repository.StrictMock<IFactory<IView>>();
-            _textEditor = _repository.StrictMock<ITextEditor>();
+            _textEditor = _repository.DynamicMock<ITextEditor>();
             viewFactory.Expect(a => a.Create(String.Empty)).Return(_textEditor);
             _app = Concepts.SetupApplication(_repository, viewFactory, _cmdFactory = new TestCommandFactory());
+            _textEditor.Expect(a => a.ProcessMissingCommand(null)).IgnoreArguments();
 
             NavigateToNotes(_app);
         }
 
         public void NavigateToNotes(IApplication app)
         {
-            app.KeyGen.ProcessKeyString("/notes<cr>l<cr>").Do(a => a.Invoke(app));
+            var parser = new Parser();
+            var keys = parser.Parse("/notes<cr>l<cr>");
+            var cmds = keys.Select(key => app.KeyGen.ProcessKey(key)).Flatten().ToList();
+            //todo: It seems there's a problem.  KeyGen must handle state of shift, normal mode, etc.
+            //otherwise, I can't just get a list of commands from ProcessKey
+            //But then the app needs to be able to set the mode
+            //And I need a command that targets KeyGen
+
+            cmds.Do(a => a.Invoke(app));
+
+//            app.KeyGen.ProcessKeyString("/notes<cr>l<cr>").Do(a => a.Invoke(app));
 
             var execedCmds = _cmdFactory.RequestedExpressions.Select(expression => expression.ToString()).ToList();
             Assert.AreEqual("a => a.SetMode(Search)", execedCmds[0]);
@@ -42,9 +56,14 @@ namespace AcceptanceTests.InputEditorTests
         public void TestModeChange()
         {
             _textEditor.Expect(a => a.Text).Return("");
+            _textEditor.Expect(a => a.Text).Return("");
             _repository.ReplayAll();
 
-            TestTextString("i","");
+            TestTextString("i", "");
+            Assert.AreEqual(KeyInputMode.TextInsert, _app.KeyGen.Mode);
+
+            TestTextString("<esc>", "");
+            Assert.AreEqual(KeyInputMode.Normal, _app.KeyGen.Mode);
         }
 
         private void TestTextString(string input, string output)
@@ -59,7 +78,9 @@ namespace AcceptanceTests.InputEditorTests
         public void CanSaveAndReadNotes()
         {
             var testString = "Hello foobar!";
-            _app.KeyGen.ProcessKeyString("i" + testString + ":w notetest<cr>:q").Do(a => a.Invoke(_app));
+            var toProcess = "i" + testString + "<esc>:w notetest<cr>:q";
+            var temp = OldKeyStringParser.ProcessKeyString(toProcess);
+            _app.KeyGen.ProcessKeyString(toProcess).Do(a => a.Invoke(_app));
 
             NavigateToNotes(_app);
             _app.KeyGen.ProcessKeyString(":e notetest<cr>");
