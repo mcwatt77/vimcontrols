@@ -1,0 +1,13 @@
+﻿<Window x:Class="KeyboardProcessor.Window1"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:KeyboardProcessor="clr-namespace:KeyboardProcessor"
+    Title="Window1" Height="362" Width="300">
+    <StackPanel Name="stackPanel1" >
+        <TextBlock Height="100" Name="EDIT_TYPING" TextWrapping="Wrap"></TextBlock>
+        <TextBox Height="100" Name="EDIT_STRINGS" AcceptsReturn="True">EDIT_STRINGS</TextBox>
+        <Button Height="28" Name="BTN_EVAL">Eval</Button>
+        <Button Height="28" Name="BTN_CLEAR">Clear</Button>
+        <TextBlock Height="100" Name="EDIT_OUTPUT" TextWrapping="Wrap"></TextBlock>
+    </StackPanel>
+</Window>

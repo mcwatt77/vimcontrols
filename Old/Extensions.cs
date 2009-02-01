@@ -54,19 +54,6 @@ namespace VIMControls
             return null;
         }
 
-        public static int IndexOf<TItem>(this IEnumerable<TItem> src, TItem item)
-        {
-            var e = src.GetEnumerator();
-            var i = 0;
-            while (e.MoveNext())
-            {
-                if (e.Current.Equals(item))
-                    return i;
-                i++;
-            }
-            return -1;
-        }
-
         public static IEnumerable<TItem> Flatten<TItem>(this IEnumerable<IEnumerable<TItem>> src)
         {
             foreach (var list in src)

@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Input;
-using VIMControls;
+using Utility.Core;
 
 namespace KeyStringParser
 {
