@@ -76,6 +76,7 @@
     <Compile Include="Interfaces\Input\KeyToggle.cs" />
     <Compile Include="LinkedList.cs" />
     <Compile Include="Browsing\LinkedListBrowser.cs" />
+    <Compile Include="Old\VIMAction.cs" />
     <Compile Include="VIMApplication.cs" />
     <Compile Include="Old\Contracts\IVIMListCursor.cs" />
     <Compile Include="Old\Contracts\UIElementWrapper.cs" />
