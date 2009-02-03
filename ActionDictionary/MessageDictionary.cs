@@ -35,7 +35,8 @@ namespace ActionDictionary
                 .GetTypes()
                 .Select(type => type.GetMethods().AsEnumerable())
                 .Flatten()
-                .Select(type => type.AttributesOfType<MapAttribute>().SingleOrDefault())
+                .Select(type => type.AttributesOfType<MapAttribute>().AsEnumerable())
+                .Flatten()
                 .Where(map => map != null)
                 .Do(map => map.AddToDictionary(this));
         }
@@ -46,6 +47,12 @@ namespace ActionDictionary
         {
             ChangeMode(mode);
             _currentDict.Add(_parser.Parse(keys), msg);
+        }
+
+        public void AddKeys(InputMode mode, IEnumerable<Key> keys, Message msg)
+        {
+            ChangeMode(mode);
+            _currentDict.Add(keys, msg);
         }
 
         public void AddKey(InputMode mode, Key key, Message msg)
