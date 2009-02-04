@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Input;
@@ -15,6 +16,7 @@ namespace ActionDictionary
 #pragma warning disable 169
         private readonly SequencedDictionary<Key, Message> _normalDict = new SequencedDictionary<Key, Message>();
         private readonly SequencedDictionary<Key, Message> _insertDict = new SequencedDictionary<Key, Message>();
+        private readonly SequencedDictionary<Key, Message> _commandDict = new SequencedDictionary<Key, Message>();
 #pragma warning restore 169
         private SequencedDictionary<Key, Message> _currentDict;
         private static readonly Parser _parser = new Parser();
@@ -66,14 +68,27 @@ namespace ActionDictionary
             var ret = new List<Message>();
             _currentDict.Push(key);
             while (_currentDict.Count() > 0)
-                ret.Add(_currentDict.Pop().Value);
-            ret.Do(msg => msg.Invoke(this));
+            {
+                //don't do this if Value == null
+                var value = _currentDict.Pop().Value;
+                if (value == null) continue;
+                ret.Add(value);
+            }
+            try
+            {
+                ret.Do(msg => msg.Invoke(this));
+            }
+            catch(TargetInvocationException e)
+            {
+                throw e.InnerException;
+            }
             return ret;
         }
 
         public void ChangeMode(InputMode mode)
         {
             var member = GetType().GetField(string.Format("_{0}Dict", mode.ToString().ToLower()), BindingFlags.NonPublic | BindingFlags.Instance);
+            if (member == null) throw new Exception(mode + " does not have a dictionary set up");
             _currentDict = (SequencedDictionary<Key, Message>)member.GetValue(this);
             InputMode = mode;
         }

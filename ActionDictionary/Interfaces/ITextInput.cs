@@ -38,7 +38,13 @@ namespace ActionDictionary.Interfaces
             Enumerable.Range(0, _charList.Length).Do(
                 i =>
                 dictionary.AddKeys(_mode, _keys.Skip(i*2).Take(2),
-                                   Message.Create<ITextInput>(f => f.InputCharacter(_charList[i]))));
+                                   BuildMessage(_charList[i])));
+        }
+
+        private static Message BuildMessage(char i)
+        {
+            var lambda = typeof (ITextInput).GetMethod("InputCharacter").BuildLambda(i);
+            return Message.Create(lambda, typeof(ITextInput));
         }
     }
 
@@ -65,7 +71,13 @@ namespace ActionDictionary.Interfaces
             Enumerable.Range(0, _charList.Length).Do(
                 i =>
                 dictionary.AddKeys(_mode, keyList.Skip(i*2).Take(2),
-                                   Message.Create<ITextInput>(f => f.InputCharacter(_charList[i]))));
+                                   BuildMessage(_charList[i])));
+        }
+
+        private static Message BuildMessage(char i)
+        {
+            var lambda = typeof (ITextInput).GetMethod("InputCharacter").BuildLambda(i);
+            return Message.Create(lambda, typeof(ITextInput));
         }
     }
     internal class CharacterMapAttribute : MapAttribute
@@ -90,7 +102,13 @@ namespace ActionDictionary.Interfaces
 
             keyList.Do(
                 (i, key) =>
-                dictionary.AddKey(_mode, key, Message.Create<ITextInput>(f => f.InputCharacter(_charList[i]))));
+                dictionary.AddKey(_mode, key, BuildMessage(_charList[i])));
+        }
+
+        private static Message BuildMessage(char i)
+        {
+            var lambda = typeof (ITextInput).GetMethod("InputCharacter").BuildLambda(i);
+            return Message.Create(lambda, typeof(ITextInput));
         }
     }
 }

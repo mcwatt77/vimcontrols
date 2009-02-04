@@ -92,6 +92,10 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\ActionDictionary\ActionDictionary.csproj">
+      <Project>{648E5886-432C-4075-A0AB-0C8623B66E77}</Project>
+      <Name>ActionDictionary</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\KeyStringParser\KeyCommandMapper.csproj">
       <Project>{C4CBE469-7AFB-44CD-91F6-EACB0A603CCF}</Project>
       <Name>KeyCommandMapper</Name>
