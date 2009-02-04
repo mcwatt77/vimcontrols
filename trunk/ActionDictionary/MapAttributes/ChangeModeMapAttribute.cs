@@ -32,9 +32,12 @@ namespace ActionDictionary.MapAttributes
                                                  });
         }
 
+        //This is preferred because it allows pretty display
         private static Message GetModeChangeMessage(string eVal)
         {
-            return Message.Create<IModeChange>(f => f.ChangeMode(GetMode(eVal)));
+            var mode = GetMode(eVal);
+            var lambda = typeof (IModeChange).GetMethod("ChangeMode").BuildLambda(mode);
+            return Message.Create(lambda, typeof(IModeChange));
         }
 
         private static InputMode GetMode(string eVal)
