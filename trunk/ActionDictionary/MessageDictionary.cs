@@ -24,13 +24,13 @@ namespace ActionDictionary
         public MessageDictionary()
         {
             ReadCommandsFromAttributes();
-            AddString(InputMode.Insert, "a", Message.Create<ITextInput>(f => f.InputCharacter('a')));
+//            AddString(InputMode.Insert, "a", Message.Create<ITextInput>(f => f.InputCharacter('a')));
 
             _currentDict = _normalDict;
             InputMode = InputMode.Normal;
         }
 
-        private void ReadCommandsFromAttributes()
+/*        private void ReadCommandsFromAttributes()
         {
             typeof (MessageDictionary)
                 .Assembly
@@ -40,7 +40,18 @@ namespace ActionDictionary
                 .Select(type => type.AttributesOfType<MapAttribute>().AsEnumerable())
                 .Flatten()
                 .Where(map => map != null)
-                .Do(map => map.AddToDictionary(this));
+                .Do(map => map.AddToDictionary(this, null));
+        }*/
+        private void ReadCommandsFromAttributes()
+        {
+            typeof (MessageDictionary)
+                .Assembly
+                .GetTypes()
+                .Select(type => type.GetMethods().AsEnumerable())
+                .Flatten()
+                .Where(method => method.AttributesOfType<MapAttribute>().Count() > 0)
+                .Select(type => new {Attribute = type.AttributesOfType<MapAttribute>(), Method = type})
+                .Do(map => map.Attribute.Do(attr => attr.AddToDictionary(this, map.Method)));
         }
 
         public InputMode InputMode { get; private set; }

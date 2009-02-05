@@ -36,6 +36,9 @@ namespace ActionDictionary.Tests
         [Test]
         public void TestSomeStuff()
         {
+            //Need to make sure the mappers are using the passed in MethodInfo, cause they're not currently...
+            Assert.Fail("Use passed in MethodInfo inside MapAttribute implementations!");
+
             var msgDict = new MessageDictionary();
             var msgs = msgDict.ProcessKey(Key.A);
             Assert.AreEqual(2, msgs.Count(), "Failed to enter insert mode");
