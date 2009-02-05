@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Reflection;
 using ActionDictionary.Interfaces;
 using Utility.Core;
 
@@ -14,7 +15,7 @@ namespace ActionDictionary.MapAttributes
             _mappings = mappings;
         }
 
-        public override void AddToDictionary(MessageDictionary dictionary)
+        public override void AddToDictionary(MessageDictionary dictionary, MethodInfo info)
         {
             _mappings.Do(mapping => AddMapping(dictionary, mapping));
         }

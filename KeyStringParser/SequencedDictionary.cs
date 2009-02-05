@@ -31,6 +31,21 @@ namespace KeyStringParser
 
         public void Add(IEnumerable<TKey> key, IEnumerable<TValue> value)
         {
+            Set(key, value, false);
+        }
+
+        public void Set(IEnumerable<TKey> key, TValue value)
+        {
+            Set(key, new[] {value});
+        }
+
+        public void Set(IEnumerable<TKey> key, IEnumerable<TValue> value)
+        {
+            Set(key, value, true);
+        }
+
+        private void Set(IEnumerable<TKey> key, IEnumerable<TValue> value, bool replace)
+        {
             var dict = _backingStore;
             var e = key.GetEnumerator();
 
@@ -60,7 +75,7 @@ namespace KeyStringParser
             else
                 dVal = dict[prev];
 
-            dVal.Value = value;
+            dVal.Value = (replace || dVal.Value == null) ? value : dVal.Value.Concat(value);
             dVal.UseValueForNoMatch = true;
         }
 

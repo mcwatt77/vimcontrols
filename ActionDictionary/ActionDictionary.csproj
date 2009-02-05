@@ -49,11 +49,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MapAttributes\CharacterMapAttribute.cs" />
+    <Compile Include="MapAttributes\CharacterMapKeysAttribute.cs" />
+    <Compile Include="MapAttributes\CharacterMapShiftAttribute.cs" />
     <Compile Include="MapAttributes\ChangeModeMapAttribute.cs" />
     <Compile Include="Interfaces\ICommandInput.cs" />
     <Compile Include="Interfaces\IModeChange.cs" />
     <Compile Include="InputMode.cs" />
     <Compile Include="Interfaces\ITextInput.cs" />
+    <Compile Include="MapAttributes\KeyMapAttribute.cs" />
     <Compile Include="MapAttributes\MapAttribute.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="MessageDictionary.cs" />
