@@ -1,6 +1,4 @@
 using System.Reflection;
-using ActionDictionary.Interfaces;
-using Utility.Core;
 
 namespace ActionDictionary.MapAttributes
 {
@@ -17,8 +15,7 @@ namespace ActionDictionary.MapAttributes
 
         public override void AddToDictionary(MessageDictionary dictionary, MethodInfo info)
         {
-//            dictionary.AddString(_mode, _keyList, Message.Create<ITextInput>(f => f.InsertAfterCursor()));
-            dictionary.AddString(_mode, _keyList, Message.Create(info.BuildLambda(), info.GetType()));
+            dictionary.AddString(_mode, _keyList, BuildMessage(info));
         }
     }
 }

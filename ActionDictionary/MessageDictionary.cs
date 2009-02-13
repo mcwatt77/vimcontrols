@@ -10,7 +10,7 @@ using Utility.Core;
 
 namespace ActionDictionary
 {
-    public class MessageDictionary : IModeChange
+    public class MessageDictionary : IModeChange, IAliasMap
     {
         // Suppress warning.  These are only accessed through reflection
 #pragma warning disable 169
@@ -80,18 +80,21 @@ namespace ActionDictionary
             _currentDict.Push(key);
             while (_currentDict.Count() > 0)
             {
-                //don't do this if Value == null
-                var value = _currentDict.Pop().Value;
-                if (value == null) continue;
-                ret.Add(value);
-            }
-            try
-            {
-                ret.Do(msg => msg.Invoke(this));
-            }
-            catch(TargetInvocationException e)
-            {
-                throw e.InnerException;
+                while (_currentDict.Count() > 0)
+                {
+                    //don't do this if Value == null
+                    var value = _currentDict.Pop().Value;
+                    if (value == null) continue;
+                    ret.Add(value);
+                }
+                try
+                {
+                    ret.Do(msg => msg.Invoke(this));
+                }
+                catch (TargetInvocationException e)
+                {
+                    throw e.InnerException;
+                }
             }
             return ret;
         }
@@ -102,6 +105,11 @@ namespace ActionDictionary
             if (member == null) throw new Exception(mode + " does not have a dictionary set up");
             _currentDict = (SequencedDictionary<Key, Message>)member.GetValue(this);
             InputMode = mode;
+        }
+
+        public void SetAlias(Key keyAlias)
+        {
+            _currentDict.Push(keyAlias);
         }
     }
 }

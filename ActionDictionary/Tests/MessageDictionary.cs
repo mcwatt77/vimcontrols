@@ -34,11 +34,16 @@ namespace ActionDictionary.Tests
         }
 
         [Test]
-        public void TestSomeStuff()
+        public void TestIAliasMap()
         {
-            //Need to make sure the mappers are using the passed in MethodInfo, cause they're not currently...
-            Assert.Fail("Use passed in MethodInfo inside MapAttribute implementations!");
+            var msgDict = new MessageDictionary();
+            var msgs = msgDict.ProcessKey(Key.RightShift);
+            Assert.AreEqual("a => a.SetAlias(LeftShift)", msgs.Single().ToString());
+        }
 
+        [Test]
+        public void TestRightShiftAliasing()
+        {
             var msgDict = new MessageDictionary();
             var msgs = msgDict.ProcessKey(Key.A);
             Assert.AreEqual(2, msgs.Count(), "Failed to enter insert mode");
@@ -46,6 +51,25 @@ namespace ActionDictionary.Tests
             msgDict.ProcessKey(Key.RightShift);
             msgs = msgDict.ProcessKey(Key.A);
             Assert.AreEqual("a => a.InputCharacter(A)", msgs.Single().ToString(), "Did not process RightShift");
+        }
+
+        [Test]
+        public void TestCharacterMap()
+        {
+            var msgDict = new MessageDictionary();
+            msgDict.ProcessKey(Key.A);
+            var msgs = msgDict.ProcessKey(Key.A);
+            Assert.AreEqual("a => a.InputCharacter(a)", msgs.Single().ToString());
+        }
+
+        [Test]
+        public void SpaceStillWorksAfterHittingShift()
+        {
+            var msgDict = new MessageDictionary();
+            msgDict.ProcessKey(Key.A);
+            msgDict.ProcessKey(Key.LeftShift);
+            var msgs = msgDict.ProcessKey(Key.Space);
+            Assert.AreEqual("a => a.InputCharacter( )", msgs.Single().ToString());
         }
     }
 }

@@ -35,7 +35,6 @@ namespace KeyboardProcessor
         {
             try
             {
-
                 var messages = _mDict.ProcessKey(e.Key);
                 messages.Do(msg => EDIT_OUTPUT.Text += "<<" + msg + ">>");
                 //Do something with the messages!
