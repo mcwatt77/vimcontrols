@@ -1,0 +1,81 @@
+﻿using System;
+using System.Globalization;
+using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
+using ActionDictionary;
+using ActionDictionary.Interfaces;
+using AppControlInterfaces.ListView;
+using Utility.Core;
+
+namespace AppViewer.Controls
+{
+    public class GridControl<TDataProcessor> : IAppControl, IMissing, IListViewUpdate
+        where TDataProcessor : IListViewData, new()
+    {
+        private TDataProcessor _processor = new TDataProcessor();
+
+        public UIElement GetControl()
+        {
+            return new ListViewCanvas(_processor.GetData, _processor.RowCount, _processor.ColCount);
+        }
+
+        public void ProcessMissingCmd(Message msg)
+        {
+        }
+
+        public void Update(int row, int col)
+        {
+            _processor.GetData(row, col);
+        }
+
+        public void Update(int row)
+        {
+        }
+    }
+
+    public class ListViewCanvas : Canvas
+    {
+        private readonly Func<int, int, string> _fnData;
+        private readonly int _rows;
+        private readonly int _cols;
+
+        public ListViewCanvas(Func<int, int, string> fnData, int rows, int cols)
+        {
+            _fnData = fnData;
+            _rows = rows;
+            _cols = cols;
+        }
+
+        protected override void OnRender(DrawingContext dc)
+        {
+            base.OnRender(dc);
+
+            var top = 0.0;
+            Enumerable.Range(0, _rows).Do(row => top = RenderRow(dc, top, row));
+        }
+
+        private double RenderRow(DrawingContext dc, double top, int row)
+        {
+            var tf = new Typeface(new FontFamily("Courier New"), FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
+            var colWidth = ActualWidth/_cols;
+            Enumerable.Range(0, _cols).Do(col =>
+                                              {
+                                                  var metrics = new FormattedText(_fnData(row, col), CultureInfo.CurrentCulture,
+                                                                                  FlowDirection.LeftToRight, tf, 15, Brushes.Black);
+                                                  metrics.MaxTextWidth = colWidth;
+                                                  if (col == 0) top += metrics.Height;
+                                                  dc.DrawText(metrics, new Point(col * colWidth, top));
+                                              });
+            return top;
+        }
+
+        private static double RenderLine(string text, DrawingContext dc, Typeface tf, double top, bool hilight)
+        {
+            var metrics = new FormattedText(text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, tf, 15, hilight ? Brushes.Blue : Brushes.Black);
+            dc.DrawText(metrics, new Point(0, top));
+            return top + metrics.Height;
+        }
+    }
+}

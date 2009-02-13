@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq.Expressions;
 using System.Reflection;
+using ActionDictionary.Interfaces;
 
 namespace ActionDictionary
 {
@@ -40,7 +41,9 @@ namespace ActionDictionary
         public void Invoke<TInterface>(TInterface obj)
         {
             if (_type.IsAssignableFrom(obj.GetType()))
-                _method.Invoke(_fn, new object[] {obj});
+                _method.Invoke(_fn, new object[] { obj });
+            else if (typeof(IMissing).IsAssignableFrom(obj.GetType()))
+                ((IMissing) obj).ProcessMissingCmd(this);
         }
 
         public override string ToString()

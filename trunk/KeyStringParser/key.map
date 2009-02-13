@@ -2,6 +2,7 @@
 ;;A map may be a single character, or a string enclosed in <> with an option {0} variable
 ;;maps are case sensitive
 
+<RightShift> RightShift
 <space> Space
 <c-{0}> LeftCtrl
 <s-{0}> LeftShift

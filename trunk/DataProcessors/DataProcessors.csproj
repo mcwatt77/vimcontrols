@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{648E5886-432C-4075-A0AB-0C8623B66E77}</ProjectGuid>
+    <ProjectGuid>{782DA14A-C998-4922-B02E-0B135327AFBC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ActionDictionary</RootNamespace>
-    <AssemblyName>ActionDictionary</AssemblyName>
+    <RootNamespace>DataProcessors</RootNamespace>
+    <AssemblyName>DataProcessors</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -32,9 +32,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="nunit.framework, Version=2.4.7.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL" />
-    <Reference Include="PresentationCore">
-      <RequiredTargetFramework>3.0</RequiredTargetFramework>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -47,38 +44,25 @@
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="WindowsBase">
-      <RequiredTargetFramework>3.0</RequiredTargetFramework>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Interfaces\IAliasMap.cs" />
-    <Compile Include="Interfaces\IAppControl.cs" />
-    <Compile Include="Interfaces\IEnterProcessor.cs" />
-    <Compile Include="Interfaces\IMissing.cs" />
-    <Compile Include="Interfaces\INavigation.cs" />
-    <Compile Include="Interfaces\INewElement.cs" />
-    <Compile Include="Interfaces\IWindow.cs" />
-    <Compile Include="MapAttributes\CharacterMapAttribute.cs" />
-    <Compile Include="MapAttributes\CharacterMapKeysAttribute.cs" />
-    <Compile Include="MapAttributes\CharacterMapShiftAttribute.cs" />
-    <Compile Include="Interfaces\ICommandInput.cs" />
-    <Compile Include="Interfaces\IModeChange.cs" />
-    <Compile Include="InputMode.cs" />
-    <Compile Include="Interfaces\ITextInput.cs" />
-    <Compile Include="MapAttributes\EnumMapAttribute.cs" />
-    <Compile Include="MapAttributes\KeyMapAttribute.cs" />
-    <Compile Include="MapAttributes\MapAttribute.cs" />
-    <Compile Include="Message.cs" />
-    <Compile Include="MessageDictionary.cs" />
-    <Compile Include="Tests\Message.cs" />
+    <Compile Include="AppLauncher.cs" />
+    <Compile Include="IText.cs" />
+    <Compile Include="MessagePipe.cs" />
+    <Compile Include="ProjectTracker\Controller.cs" />
+    <Compile Include="ProjectTracker\ItemList.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Tests\MessageDictionary.cs" />
+    <Compile Include="SgNavigator.cs" />
+    <Compile Include="Tests\AppLauncher.cs" />
+    <Compile Include="Tests\ProjectTracker.cs" />
+    <Compile Include="Tests\TestBase.cs" />
+    <Compile Include="Tests\Text.cs" />
+    <Compile Include="Text.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\KeyStringParser\KeyCommandMapper.csproj">
-      <Project>{C4CBE469-7AFB-44CD-91F6-EACB0A603CCF}</Project>
-      <Name>KeyCommandMapper</Name>
+    <ProjectReference Include="..\ActionDictionary\ActionDictionary.csproj">
+      <Project>{648E5886-432C-4075-A0AB-0C8623B66E77}</Project>
+      <Name>ActionDictionary</Name>
     </ProjectReference>
     <ProjectReference Include="..\UtilityCore\UtilityCore.csproj">
       <Project>{AEB6E54A-DCCC-4C77-A4B3-81580A945B0E}</Project>

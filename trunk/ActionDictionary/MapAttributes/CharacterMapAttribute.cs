@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using System.Reflection;
-using ActionDictionary.Interfaces;
 using ActionDictionary.MapAttributes;
 using KeyStringParser;
 using Utility.Core;
@@ -30,13 +29,7 @@ namespace ActionDictionary.MapAttributes
 
             keyList.Do(
                 (i, key) =>
-                dictionary.AddKey(_mode, key, BuildMessage(_charList[i])));
-        }
-
-        private static Message BuildMessage(char i)
-        {
-            var lambda = typeof (ITextInput).GetMethod("InputCharacter").BuildLambda(i);
-            return Message.Create(lambda, typeof(ITextInput));
+                dictionary.AddKey(_mode, key, BuildMessage(info, _charList[i])));
         }
     }
 }

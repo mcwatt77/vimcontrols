@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Input;
-using ActionDictionary.Interfaces;
 using ActionDictionary.MapAttributes;
 using Utility.Core;
 
@@ -31,13 +30,7 @@ namespace ActionDictionary.MapAttributes
             Enumerable.Range(0, _charList.Length).Do(
                 i =>
                 dictionary.AddKeys(_mode, _keys.Skip(i*2).Take(2),
-                                   BuildMessage(_charList[i])));
-        }
-
-        private static Message BuildMessage(char i)
-        {
-            var lambda = typeof (ITextInput).GetMethod("InputCharacter").BuildLambda(i);
-            return Message.Create(lambda, typeof(ITextInput));
+                                   BuildMessage(info, _charList[i])));
         }
     }
 }
