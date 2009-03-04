@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using ActionDictionary;
 using ActionDictionary.Interfaces;
+using AppControlInterfaces.ListView;
 using Utility.Core;
 
 namespace DataProcessors
@@ -33,34 +34,67 @@ namespace DataProcessors
     {
         private readonly MessagePipe _messagePipe;
         private readonly UpdatePipe _updatePipe;
+        private readonly List<KeyValuePair<Type, string>> _apps = new List<KeyValuePair<Type, string>>();
+
+        private IEnumerable<KeyValuePair<Type, string>> LaunchableTypes(IEnumerable<Assembly> appControlAssemblies)
+        {
+            var launchableTypes = GetType().Assembly.GetTypesWithCustomAttribute<LaunchableAttribute>();
+            var types = launchableTypes
+                .Select(type => new KeyValuePair<Type, string>(GetAppControlType(type, appControlAssemblies),GetLaunchableName(type)))
+                .ToList();
+
+            var dict = types.ToDictionary(pair => pair.Value.ToLower());
+            var preferredSort = new List<string> {"notes viewer", "sg viewer", "civilization"};
+            return preferredSort
+                .Where(dict.ContainsKey)
+                .Select(s => dict[s]).Concat(types.Where(pair => !preferredSort.Contains(pair.Value))).ToList();
+
+//            return types;
+        }
+
+        private static string GetLaunchableName(ICustomAttributeProvider type)
+        {
+            return type.GetCustomAttributes(false).OfType<LaunchableAttribute>().Single().DisplayName;
+        }
+
+        private static bool filter(Type m, object filterCriteria)
+        {
+            return true;
+        }
+
+        private static Type GetAppControlType(Type launchableType, IEnumerable<Assembly> assemblies)
+        {
+            var types = launchableType.FindInterfaces(filter, null).Where(type => type.Assembly == typeof(IListViewData).Assembly);
+            if (types.Count() != 1) throw new Exception("Currently only supporting a DataProcessor to implement a single AppControlInterface");
+            var appControlInterfaceType = types.Single();
+
+            //from there, look in assemblies for appControlInterfaceType
+
+            return assemblies
+                .Select(assembly => GetAppControlType(assembly, appControlInterfaceType, launchableType))
+                .SingleOrDefault();
+        }
+
+        private static Type GetAppControlType(Assembly assembly, Type appControlInterfaceType, Type launchableType)
+        {
+            var controlType = assembly
+                .GetTypes()
+                .Where(type => typeof (IAppControl).IsAssignableFrom(type)
+                               && type.GetGenericArguments().Count() == 1)
+                .Where(type => type.GetGenericArguments().Single().GetGenericParameterConstraints().SingleOrDefault() == appControlInterfaceType)
+                .SingleOrDefault();
+
+            return controlType.MakeGenericType(launchableType);
+        }
 
         public AppLauncher(MessagePipe messagePipe, UpdatePipe updatePipe, params Assembly[] appControlAssemblies)
         {
-            var types = appControlAssemblies
-                .Select(ass => ass.GetTypes().AsEnumerable())
-                .Flatten()
-                .Where(type => typeof(IAppControl).IsAssignableFrom(type));
-            //now look at the generic type parameter constraints...
-            //then look for classes that implement those constraints
-
-
+            var types = LaunchableTypes(appControlAssemblies);
+            types.Do(type => _apps.Add(new KeyValuePair<Type, string>(type.Key, type.Value)));
 
             _messagePipe = messagePipe;
             _updatePipe = updatePipe;
-            AppLines = new List<AppLine>
-                           {
-                               new SingleAppLine("Project Tracker"),
-                               new SingleAppLine("Text Editor"),
-                               new SingleAppLine("SG Viewer"),
-                               new SingleAppLine("Command Stack"),
-                               new SingleAppLine("Files"),
-                               new SingleAppLine("Audio"),
-                               new SingleAppLine("Movies"),
-                               new SingleAppLine("Objects"),
-                               new SingleAppLine("Notes"),
-                               new SingleAppLine("Grapher"),
-                               new SingleAppLine("3d Sketcher")
-                           };
+            AppLines = _apps.Select(pair => (AppLine)new SingleAppLine(pair.Value)).ToList();
             //get all of the class that implement IAppControl
         }
 
@@ -91,8 +125,7 @@ namespace DataProcessors
 
         public void Enter()
         {
-            _messagePipe.SendMessage(Message.Create<IWindow>(window => window.Navigate(Type.GetType("AppViewer.SgViewerControl, AppViewer"))));
-//            _messagePipe.SendMessage(Message.Create<IWindow>(window => window.Navigate(Type.GetType("AppViewer.CommandStackControl, AppViewer"))));
+            _messagePipe.SendMessage(Message.Create<IWindow>(window => window.Navigate(_apps[HilightIndex].Key)));
         }
     }
 

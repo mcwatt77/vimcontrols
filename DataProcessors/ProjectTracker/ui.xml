@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<list>
+  <columns select="//workItem">
+    <column select="@dueBy">Due By</column>
+    <column select="@priority">Priority</column>
+    <column select="@summary">Summary</column>
+  </columns>
+</list>

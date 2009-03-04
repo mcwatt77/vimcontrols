@@ -8,5 +8,7 @@ namespace ActionDictionary.Interfaces
         [KeyMap(InputMode.Normal, "<f11>")]
         void Maximize();
         void Navigate(Type type);
+        [KeyMap(InputMode.Normal, ";q")]
+        void Quit();
     }
 }
