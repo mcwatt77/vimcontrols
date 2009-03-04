@@ -11,7 +11,7 @@ namespace Utility.Core
         {
             var newType = src.FindType<TBase>(typeName, namespacePart);
 
-            if (parms.Where(o => o == null).Count() > 0)
+            if (parms.Where(o => o == null).Any())
                 throw new ArgumentException("Can't initialize an object with null constructor values.");
 
             var constructor = newType.GetConstructor(parms.Select(o => o.GetType()).ToArray());
@@ -36,7 +36,14 @@ namespace Utility.Core
                 .GetTypes()
                 .Select(type => type.GetMethods(BindingFlags.Public | BindingFlags.Static).AsEnumerable())
                 .Flatten()
-                .Where(method => method.AttributesOfType<T>().Count() > 0);
+                .Where(method => method.AttributesOfType<T>().Any());
+        }
+
+        public static IEnumerable<Type> GetTypesWithCustomAttribute<T>(this Assembly assembly)
+        {
+            return assembly
+                .GetTypes()
+                .Where(type => type.AttributesOfType<T>().Any());
         }
 
         public static IEnumerable<MethodInfo> GetMethodsWithCustomAttribute<T>(this Assembly assembly)
@@ -45,7 +52,7 @@ namespace Utility.Core
                 .GetTypes()
                 .Select(type => type.GetMethods().AsEnumerable())
                 .Flatten()
-                .Where(method => method.AttributesOfType<T>().Count() > 0);
+                .Where(method => method.AttributesOfType<T>().Any());
         }
     }
 }

@@ -41,9 +41,18 @@ namespace ActionDictionary
         public void Invoke<TInterface>(TInterface obj)
         {
             if (_type.IsAssignableFrom(obj.GetType()))
-                _method.Invoke(_fn, new object[] { obj });
+            {
+                try
+                {
+                    _method.Invoke(_fn, new object[] {obj});
+                }
+                catch(TargetInvocationException e)
+                {
+                    throw e.InnerException;
+                }
+            }
             else if (typeof(IMissing).IsAssignableFrom(obj.GetType()))
-                ((IMissing) obj).ProcessMissingCmd(this);
+                ((IMissing)obj).ProcessMissingCmd(this);
         }
 
         public override string ToString()

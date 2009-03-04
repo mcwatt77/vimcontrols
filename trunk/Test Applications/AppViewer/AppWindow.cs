@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using ActionDictionary;
@@ -43,14 +45,23 @@ namespace AppViewer
             var grid = (Grid) Content;
             grid.Children.Clear();
 
-            //TODO: this assumes empty constructor.  This will need to be some sort of container implementation
-            var con = type.GetConstructor(new Type[] {});
-            _ctrl = (IAppControl)con.Invoke(new object[] {});
-            grid.Children.Add(_ctrl.GetControl());
+            var typeDict = new Dictionary<Type, object>();
+            typeDict[typeof (MessagePipe)] = new MessagePipe(this);
+            var constructor = type.GetConstructors().Single();
+            constructor
+                .GetParameters()
+                .Where(parameter => !typeDict.ContainsKey(parameter.ParameterType))
+                .Do(parameter => { typeDict[parameter.ParameterType] = parameter.ParameterType.NewInstance<object>(); });
 
-            //do something like...
-/*            var view = new GridControl<ListTest>();
-            grid.Children.Add(view.GetControl());*/
+            var parameters = constructor.GetParameters().Select(parameter => typeDict[parameter.ParameterType]).ToArray();
+
+            _ctrl = (IAppControl)constructor.Invoke(parameters);
+            grid.Children.Add(_ctrl.GetControl());
+        }
+
+        public void Quit()
+        {
+            Navigate(typeof(AppLauncherControl));
         }
     }
 
@@ -76,6 +87,16 @@ namespace AppViewer
         public int ColCount
         {
             get { return 3; }
+        }
+
+        public int HilightIndex
+        {
+            get { return 0; }
+        }
+
+        public IListViewUpdate Updater
+        {
+            set { }
         }
     }
 }

@@ -45,5 +45,10 @@ namespace Utility.Core
             var textReader = new XmlTextReader(stream);
             return XDocument.Load(textReader);
         }
+
+        public static TItem NewInstance<TItem>(this Type type)
+        {
+            return (TItem)type.GetConstructors().Single().Invoke(new object[] {});
+        }
     }
 }

@@ -54,6 +54,9 @@
     <Compile Include="AppViewer.cs" />
     <Compile Include="AppWindow.cs" />
     <Compile Include="Controls\GridControl.cs" />
+    <Compile Include="Controls\MediaViewerControl.cs" />
+    <Compile Include="Controls\NoteViewerControl.cs" />
+    <Compile Include="Controls\TextBlockControl.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -67,8 +70,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="SgViewerControl.cs" />
-    <Compile Include="ToBeImplemented.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

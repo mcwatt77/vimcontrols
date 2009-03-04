@@ -12,26 +12,38 @@ using Utility.Core;
 namespace AppViewer.Controls
 {
     public class GridControl<TDataProcessor> : IAppControl, IMissing, IListViewUpdate
-        where TDataProcessor : IListViewData, new()
+        where TDataProcessor : IListViewData
     {
-        private TDataProcessor _processor = new TDataProcessor();
+        private readonly TDataProcessor _processor;
+        private UIElement _control;
+
+        public GridControl(TDataProcessor processor)
+        {
+            _processor = processor;
+            _processor.Updater = this;
+        }
 
         public UIElement GetControl()
         {
-            return new ListViewCanvas(_processor.GetData, _processor.RowCount, _processor.ColCount);
+            if (_control == null) _control = new ListViewCanvas(_processor.GetData, () => _processor.HilightIndex, _processor.RowCount, _processor.ColCount);
+            return _control;
         }
 
         public void ProcessMissingCmd(Message msg)
         {
+            msg.Invoke(_processor);
         }
 
         public void Update(int row, int col)
         {
-            _processor.GetData(row, col);
+//            _processor.GetData(row, col);
+            GetControl().InvalidateVisual();
         }
 
         public void Update(int row)
         {
+//            Enumerable.Range(0, _processor.ColCount).Do(i => _processor.GetData(row, i));
+            GetControl().InvalidateVisual();
         }
     }
 
@@ -40,10 +52,12 @@ namespace AppViewer.Controls
         private readonly Func<int, int, string> _fnData;
         private readonly int _rows;
         private readonly int _cols;
+        private readonly Func<int> _fnHilight;
 
-        public ListViewCanvas(Func<int, int, string> fnData, int rows, int cols)
+        public ListViewCanvas(Func<int, int, string> fnData, Func<int> fnHilight, int rows, int cols)
         {
             _fnData = fnData;
+            _fnHilight = fnHilight;
             _rows = rows;
             _cols = cols;
         }
@@ -62,18 +76,19 @@ namespace AppViewer.Controls
             var colWidth = ActualWidth/_cols;
             Enumerable.Range(0, _cols).Do(col =>
                                               {
-                                                  var metrics = new FormattedText(_fnData(row, col), CultureInfo.CurrentCulture,
-                                                                                  FlowDirection.LeftToRight, tf, 15, Brushes.Black);
-                                                  metrics.MaxTextWidth = colWidth;
+                                                  top += RenderLine(_fnData(row, col), dc, tf, top, colWidth, _fnHilight() == row);
+/*                                                  var metrics = new FormattedText(_fnData(row, col), CultureInfo.CurrentCulture,
+                                                                                  FlowDirection.LeftToRight, tf, 15, Brushes.Black)
+                                                                    {MaxTextWidth = colWidth};
                                                   if (col == 0) top += metrics.Height;
-                                                  dc.DrawText(metrics, new Point(col * colWidth, top));
+                                                  dc.DrawText(metrics, new Point(col * colWidth, top));*/
                                               });
             return top;
         }
 
-        private static double RenderLine(string text, DrawingContext dc, Typeface tf, double top, bool hilight)
+        private static double RenderLine(string text, DrawingContext dc, Typeface tf, double top, double maxWidth, bool hilight)
         {
-            var metrics = new FormattedText(text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, tf, 15, hilight ? Brushes.Blue : Brushes.Black);
+            var metrics = new FormattedText(text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, tf, 15, hilight ? Brushes.Blue : Brushes.Black){MaxTextWidth = maxWidth};
             dc.DrawText(metrics, new Point(0, top));
             return top + metrics.Height;
         }
