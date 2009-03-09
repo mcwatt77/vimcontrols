@@ -76,12 +76,7 @@ namespace AppViewer.Controls
             var colWidth = ActualWidth/_cols;
             Enumerable.Range(0, _cols).Do(col =>
                                               {
-                                                  top += RenderLine(_fnData(row, col), dc, tf, top, colWidth, _fnHilight() == row);
-/*                                                  var metrics = new FormattedText(_fnData(row, col), CultureInfo.CurrentCulture,
-                                                                                  FlowDirection.LeftToRight, tf, 15, Brushes.Black)
-                                                                    {MaxTextWidth = colWidth};
-                                                  if (col == 0) top += metrics.Height;
-                                                  dc.DrawText(metrics, new Point(col * colWidth, top));*/
+                                                  top = RenderLine(_fnData(row, col), dc, tf, top, colWidth, _fnHilight() == row);
                                               });
             return top;
         }

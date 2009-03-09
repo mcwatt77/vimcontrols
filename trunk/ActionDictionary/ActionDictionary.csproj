@@ -54,10 +54,12 @@
   <ItemGroup>
     <Compile Include="Interfaces\IAliasMap.cs" />
     <Compile Include="Interfaces\IAppControl.cs" />
-    <Compile Include="Interfaces\IEnterProcessor.cs" />
+    <Compile Include="Interfaces\IControlKeyProcessor.cs" />
+    <Compile Include="Interfaces\IError.cs" />
     <Compile Include="Interfaces\IMissing.cs" />
     <Compile Include="Interfaces\INavigation.cs" />
     <Compile Include="Interfaces\INewElement.cs" />
+    <Compile Include="Interfaces\IPaging.cs" />
     <Compile Include="Interfaces\IWindow.cs" />
     <Compile Include="MapAttributes\CharacterMapAttribute.cs" />
     <Compile Include="MapAttributes\CharacterMapKeysAttribute.cs" />

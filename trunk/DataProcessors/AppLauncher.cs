@@ -30,7 +30,7 @@ namespace DataProcessors
         }
     }
 
-    public class AppLauncher : INavigation, IEnterProcessor
+    public class AppLauncher : INavigation, IControlKeyProcessor
     {
         private readonly MessagePipe _messagePipe;
         private readonly UpdatePipe _updatePipe;
@@ -47,7 +47,7 @@ namespace DataProcessors
             var preferredSort = new List<string> {"notes viewer", "sg viewer", "civilization"};
             return preferredSort
                 .Where(dict.ContainsKey)
-                .Select(s => dict[s]).Concat(types.Where(pair => !preferredSort.Contains(pair.Value))).ToList();
+                .Select(s => dict[s]).Concat(types.Where(pair => !preferredSort.Contains(pair.Value.ToLower()))).ToList();
 
 //            return types;
         }
@@ -65,8 +65,9 @@ namespace DataProcessors
         private static Type GetAppControlType(Type launchableType, IEnumerable<Assembly> assemblies)
         {
             var types = launchableType.FindInterfaces(filter, null).Where(type => type.Assembly == typeof(IListViewData).Assembly);
-            if (types.Count() != 1) throw new Exception("Currently only supporting a DataProcessor to implement a single AppControlInterface");
-            var appControlInterfaceType = types.Single();
+            //TODO: instead of assuming the first... look for a hierarchy
+//            if (types.Count() != 1) throw new Exception("Currently only supporting a DataProcessor to implement a single AppControlInterface");
+            var appControlInterfaceType = types.First();
 
             //from there, look in assemblies for appControlInterfaceType
 
@@ -123,9 +124,33 @@ namespace DataProcessors
         {
         }
 
+        public void Beginning()
+        {
+            var oldHilight = HilightIndex;
+            HilightIndex = 0;
+            _updatePipe.Send(new []{oldHilight, HilightIndex});
+        }
+
+        public void End()
+        {
+            var oldHilight = HilightIndex;
+            HilightIndex = AppLines.Count() - 1;
+            _updatePipe.Send(new []{oldHilight, HilightIndex});
+        }
+
         public void Enter()
         {
             _messagePipe.SendMessage(Message.Create<IWindow>(window => window.Navigate(_apps[HilightIndex].Key)));
+        }
+
+        public void WindowScroll()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void LocalScroll()
+        {
+            throw new System.NotImplementedException();
         }
     }
 
