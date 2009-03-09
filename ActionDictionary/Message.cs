@@ -10,7 +10,7 @@ namespace ActionDictionary
     {
         private object _fn;
         private Expression _expr;
-        private Type _type;
+        public Type MethodType { get; private set; }
         private MethodInfo _method;
 
         public static Message Create(LambdaExpression fn, Type type)
@@ -19,7 +19,7 @@ namespace ActionDictionary
             var msg = new Message
                           {
                               _fn = compiled,
-                              _type = type,
+                              MethodType = type,
                               _method = compiled.GetType().GetMethod("Invoke"),
                               _expr = fn
                           };
@@ -32,7 +32,7 @@ namespace ActionDictionary
             var msg = new Message
                           {
                               _fn = compiled,
-                              _type = typeof (TInterface),
+                              MethodType = typeof (TInterface),
                               _method = compiled.GetType().GetMethod("Invoke"),
                               _expr = fn
                           };
@@ -49,7 +49,7 @@ namespace ActionDictionary
             var errorMsgs = new List<Message>();
             try
             {
-                if (_type.IsAssignableFrom(obj.GetType()))
+                if (MethodType.IsAssignableFrom(obj.GetType()))
                 {
                     try
                     {

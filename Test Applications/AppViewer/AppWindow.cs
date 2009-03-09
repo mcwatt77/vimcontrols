@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -70,7 +71,14 @@ namespace AppViewer
 
             var parameters = constructor.GetParameters().Select(parameter => typeDict[parameter.ParameterType]).ToArray();
 
-            _ctrl = (IAppControl)constructor.Invoke(parameters);
+            try
+            {
+                _ctrl = (IAppControl) constructor.Invoke(parameters);
+            }
+            catch(TargetInvocationException e)
+            {
+                throw e.InnerException;
+            }
             grid.Children.Add(_ctrl.GetControl());
         }
 
