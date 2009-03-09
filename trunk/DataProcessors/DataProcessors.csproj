@@ -60,6 +60,7 @@
     <Compile Include="NoteViewer\LeftNavController.cs" />
     <Compile Include="NoteViewer\TextController.cs" />
     <Compile Include="NoteViewer\TextCursor.cs" />
+    <Compile Include="NoteViewer\TextMetricAdapter.cs" />
     <Compile Include="ProjectTracker\Controller.cs" />
     <Compile Include="ProjectTracker\ItemList.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -67,6 +68,7 @@
     <Compile Include="SgNavigator\SgNavigator.cs" />
     <Compile Include="TemplateParser\Controller.cs" />
     <Compile Include="Tests\AppLauncher.cs" />
+    <Compile Include="Tests\NoteViewer\Controller.cs" />
     <Compile Include="Tests\ProjectTracker.cs" />
     <Compile Include="Tests\TemplateParser\Controller.cs" />
     <Compile Include="Tests\TestBase.cs" />

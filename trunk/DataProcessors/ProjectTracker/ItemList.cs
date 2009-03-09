@@ -2,7 +2,7 @@
 
 namespace DataProcessors.ProjectTracker
 {
-    public class ItemList : INavigation, IControlKeyProcessor, INewElement
+    public class ItemList : IPaging, IControlKeyProcessor, INewElement
     {
         public void MoveUp()
         {
@@ -12,19 +12,19 @@ namespace DataProcessors.ProjectTracker
         {
         }
 
-        public void MoveRight()
-        {
-        }
-
-        public void MoveLeft()
-        {
-        }
-
         public void Beginning()
         {
         }
 
         public void End()
+        {
+        }
+
+        public void PageUp()
+        {
+        }
+
+        public void PageDown()
         {
         }
 
