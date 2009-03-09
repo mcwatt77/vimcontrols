@@ -47,8 +47,8 @@ namespace ActionDictionary
         public IEnumerable<Message> Invoke<TInterface>(TInterface obj, bool throwOnException)
         {
             var errorMsgs = new List<Message>();
-/*            try
-            {*/
+            try
+            {
                 if (_type.IsAssignableFrom(obj.GetType()))
                 {
                     try
@@ -62,12 +62,12 @@ namespace ActionDictionary
                 }
                 else if (typeof (IMissing).IsAssignableFrom(obj.GetType()))
                     ((IMissing) obj).ProcessMissingCmd(this);
-/*            }
+            }
             catch(Exception ex)
             {
                 if (throwOnException) throw ex;
                 errorMsgs.Add(Create<IError>(e => e.Report(ex.Message)));
-            }*/
+            }
 
             return errorMsgs;
         }

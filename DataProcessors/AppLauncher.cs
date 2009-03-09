@@ -30,7 +30,7 @@ namespace DataProcessors
         }
     }
 
-    public class AppLauncher : INavigation, IControlKeyProcessor
+    public class AppLauncher : IControlKeyProcessor, IPaging
     {
         private readonly MessagePipe _messagePipe;
         private readonly UpdatePipe _updatePipe;
@@ -116,14 +116,6 @@ namespace DataProcessors
             else _updatePipe.Send(new[] {HilightIndex - 1, HilightIndex});
         }
 
-        public void MoveRight()
-        {
-        }
-
-        public void MoveLeft()
-        {
-        }
-
         public void Beginning()
         {
             var oldHilight = HilightIndex;
@@ -136,6 +128,14 @@ namespace DataProcessors
             var oldHilight = HilightIndex;
             HilightIndex = AppLines.Count() - 1;
             _updatePipe.Send(new []{oldHilight, HilightIndex});
+        }
+
+        public void PageUp()
+        {
+        }
+
+        public void PageDown()
+        {
         }
 
         public void Enter()

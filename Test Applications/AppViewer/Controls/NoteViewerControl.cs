@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Shapes;
 using ActionDictionary;
 using ActionDictionary.Interfaces;
 using AppControlInterfaces.NoteViewer;
@@ -36,6 +33,7 @@ namespace AppViewer.Controls
             if (_control == null)
             {
                 var grid = new Grid {ShowGridLines = true};
+                grid.SizeChanged += grid_SizeChanged;
                 grid.ColumnDefinitions.Add(new ColumnDefinition{Width = new GridLength(0.16, GridUnitType.Star)});
                 grid.ColumnDefinitions.Add(new ColumnDefinition{Width = new GridLength(0.84, GridUnitType.Star)});
 
@@ -64,6 +62,11 @@ namespace AppViewer.Controls
                 _control = grid;
             }
             return _control;
+        }
+
+        private void grid_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            _processor.Height = ((Grid)GetControl()).ActualHeight;
         }
 
         public void ProcessMissingCmd(Message msg)
@@ -98,23 +101,22 @@ namespace AppViewer.Controls
 
     public class TextEditViewCanvas : Canvas
     {
-        private readonly Func<int, string> _fnRows;
+        private readonly Func<int, FormattedText> _fnRows;
         private readonly Func<int> _fnRowCount;
         private readonly Func<int> _fnTopRow;
         private readonly Func<int> _fnCursorRow;
         private readonly Func<int> _fnCursorCol;
         private readonly TextBlock _cursor;
-        private Typeface _tf;
 
-        public TextEditViewCanvas(Func<int, string> fnRows, Func<int> fnRowCount, Func<int> fnTopRow, Func<int> fnCursorRow, Func<int> fnCursorCol)
+        public TextEditViewCanvas(Func<int, FormattedText> fnRows, Func<int> fnRowCount, Func<int> fnTopRow, Func<int> fnCursorRow, Func<int> fnCursorCol)
         {
-            _tf = new Typeface(new FontFamily("Courier New"), FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
-
             var color = Brushes.DarkCyan.Clone();
             color.Opacity = 0.5;
-            var metrics = GetMetrics("A", _tf, null);
 
-            _cursor = new TextBlock {Height = metrics.Height, Width = metrics.Width, Background = color, Margin = new Thickness(0)};
+            var metrics = fnRows(0);
+            var geom = metrics.BuildHighlightGeometry(new Point(0, 0), 0, 1);
+
+            _cursor = new TextBlock {Height = geom.Bounds.Height, Width = geom.Bounds.Width, Background = color, Margin = new Thickness(0)};
             Children.Add(_cursor);
 
             _fnRows = fnRows;
@@ -128,23 +130,15 @@ namespace AppViewer.Controls
         {
             base.OnRender(dc);
 
-            _cursor.Margin = new Thickness(_cursor.Width * _fnCursorCol(), _cursor.Height * _fnCursorRow(), 0, 0);
+            _cursor.Margin = new Thickness(_cursor.Width * _fnCursorCol(), _cursor.Height * (_fnCursorRow() - _fnTopRow()), 0, 0);
             var top = 0.0;
-            Enumerable.Range(_fnTopRow(), _fnRowCount()).Do(row => top = RenderLine(_fnRows(row), dc, _tf, top, ActualWidth, false));
+            Enumerable.Range(_fnTopRow(), _fnRowCount()).Do(row => top = RenderLine(_fnRows(row), dc, top));
         }
 
-        private static double RenderLine(string text, DrawingContext dc, Typeface tf, double top, double maxWidth, bool hilight)
+        private static double RenderLine(FormattedText text, DrawingContext dc, double top)
         {
-            var metrics = GetMetrics(text, tf, maxWidth);
-            dc.DrawText(metrics, new Point(0, top));
-            return top + metrics.Height;
-        }
-
-        private static FormattedText GetMetrics(string text, Typeface tf, double? maxWidth)
-        {
-            var metrics = new FormattedText(text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, tf, 15, Brushes.Black);
-            if (maxWidth != null) metrics.MaxTextWidth = (double)maxWidth;
-            return metrics;
+            dc.DrawText(text, new Point(0, top));
+            return top + text.Height;
         }
     }
 }
