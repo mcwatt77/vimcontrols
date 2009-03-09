@@ -1,8 +1,15 @@
-﻿using System.Windows;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Shapes;
 using ActionDictionary;
 using ActionDictionary.Interfaces;
 using AppControlInterfaces.NoteViewer;
+using Utility.Core;
 
 namespace AppViewer.Controls
 {
@@ -14,7 +21,9 @@ namespace AppViewer.Controls
         private readonly TDataProcessor _processor;
         private UIElement _control;
         private UIElement _updateControl;
-        private TextBlock _textControl;
+//        private TextBlock _textControl;
+//        private TextBlock _cursor;
+        private Canvas _textCanvas;
 
         public NoteViewerControl(TDataProcessor processor)
         {
@@ -27,16 +36,30 @@ namespace AppViewer.Controls
             if (_control == null)
             {
                 var grid = new Grid {ShowGridLines = true};
-                grid.ColumnDefinitions.Add(new ColumnDefinition{Width = new GridLength(0.3, GridUnitType.Star)});
-                grid.ColumnDefinitions.Add(new ColumnDefinition{Width = new GridLength(0.7, GridUnitType.Star)});
+                grid.ColumnDefinitions.Add(new ColumnDefinition{Width = new GridLength(0.16, GridUnitType.Star)});
+                grid.ColumnDefinitions.Add(new ColumnDefinition{Width = new GridLength(0.84, GridUnitType.Star)});
 
                 _updateControl = new ListViewCanvas(_processor.GetData, () => _processor.HilightIndex, _processor.RowCount, _processor.ColCount);
                 grid.Children.Add(_updateControl);
                 Grid.SetColumn(_updateControl, 0);
 
-                _textControl = new TextBlock {Text = _processor.GetData(_processor.HilightIndex, 1)};
-                grid.Children.Add(_textControl);
-                Grid.SetColumn(_textControl, 1);
+                _textCanvas = new TextEditViewCanvas(i => _processor.GetTextRow(i),
+                                                     () => _processor.TextRowCount,
+                                                     () => _processor.TopTextRow,
+                                                     () => _processor.Cursor.Row,
+                                                     () => _processor.Cursor.Column);
+/*                _textCanvas = new Canvas();
+                _textControl = new TextBlock();
+                _textCanvas.Children.Add(_textControl);*/
+                grid.Children.Add(_textCanvas);
+                Grid.SetColumn(_textCanvas, 1);
+
+                var color = Brushes.DarkCyan.Clone();
+                color.Opacity = 0.5;
+//                _cursor = new TextBlock {Height = 23, Width = 30, Background = color, Margin = new Thickness(0)};
+//                _textCanvas.Children.Add(_cursor);
+
+                UpdateTextRows();
 
                 _control = grid;
             }
@@ -58,9 +81,70 @@ namespace AppViewer.Controls
             _updateControl.InvalidateVisual();
         }
 
-        public void UpdateTextBody(string body)
+        public void UpdateTextRows()
         {
-            _textControl.Text = body;
+            _textCanvas.InvalidateVisual();
+        }
+
+        public void UpdateCursor()
+        {
+            _textCanvas.InvalidateVisual();
+/*            if (_processor.Cursor != null)
+            {
+//                _cursor.Margin = new Thickness(_processor.Cursor.Column * 13, _processor.Cursor.Row * 23, 0, 0);
+            }*/
+        }
+    }
+
+    public class TextEditViewCanvas : Canvas
+    {
+        private readonly Func<int, string> _fnRows;
+        private readonly Func<int> _fnRowCount;
+        private readonly Func<int> _fnTopRow;
+        private readonly Func<int> _fnCursorRow;
+        private readonly Func<int> _fnCursorCol;
+        private readonly TextBlock _cursor;
+        private Typeface _tf;
+
+        public TextEditViewCanvas(Func<int, string> fnRows, Func<int> fnRowCount, Func<int> fnTopRow, Func<int> fnCursorRow, Func<int> fnCursorCol)
+        {
+            _tf = new Typeface(new FontFamily("Courier New"), FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
+
+            var color = Brushes.DarkCyan.Clone();
+            color.Opacity = 0.5;
+            var metrics = GetMetrics("A", _tf, null);
+
+            _cursor = new TextBlock {Height = metrics.Height, Width = metrics.Width, Background = color, Margin = new Thickness(0)};
+            Children.Add(_cursor);
+
+            _fnRows = fnRows;
+            _fnRowCount = fnRowCount;
+            _fnTopRow = fnTopRow;
+            _fnCursorRow = fnCursorRow;
+            _fnCursorCol = fnCursorCol;
+        }
+
+        protected override void OnRender(DrawingContext dc)
+        {
+            base.OnRender(dc);
+
+            _cursor.Margin = new Thickness(_cursor.Width * _fnCursorCol(), _cursor.Height * _fnCursorRow(), 0, 0);
+            var top = 0.0;
+            Enumerable.Range(_fnTopRow(), _fnRowCount()).Do(row => top = RenderLine(_fnRows(row), dc, _tf, top, ActualWidth, false));
+        }
+
+        private static double RenderLine(string text, DrawingContext dc, Typeface tf, double top, double maxWidth, bool hilight)
+        {
+            var metrics = GetMetrics(text, tf, maxWidth);
+            dc.DrawText(metrics, new Point(0, top));
+            return top + metrics.Height;
+        }
+
+        private static FormattedText GetMetrics(string text, Typeface tf, double? maxWidth)
+        {
+            var metrics = new FormattedText(text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, tf, 15, Brushes.Black);
+            if (maxWidth != null) metrics.MaxTextWidth = (double)maxWidth;
+            return metrics;
         }
     }
 }

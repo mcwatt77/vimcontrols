@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using ActionDictionary;
 using ActionDictionary.Interfaces;
 using AppControlInterfaces.ListView;
@@ -11,7 +12,7 @@ using Utility.Core;
 
 namespace AppViewer
 {
-    public class AppWindow : Window, IMissing, IWindow
+    public class AppWindow : Window, IMissing, IWindow, IError
     {
         private static readonly MessageDictionary _mDict = new MessageDictionary();
         private static IAppControl _ctrl;
@@ -24,10 +25,24 @@ namespace AppViewer
             Content = grid;
         }
 
-        protected override void OnKeyDown(System.Windows.Input.KeyEventArgs e)
+        private bool ProcessKeyState(KeyboardDevice device, Key curKey, Key retKey, params Key[] addlKeys)
         {
+            if (curKey == Key.LeftCtrl || curKey == Key.RightCtrl) return false;
+
+            if (!(addlKeys.Any(aKey => device.IsKeyDown(aKey)) || device.IsKeyDown(retKey)))
+                return true;
+
+            var msgs = _mDict.ProcessKey(retKey);
+            msgs.Do(msg => msg.Invoke(this));
+            return true;
+        }
+
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            if (!ProcessKeyState(e.KeyboardDevice, e.Key, Key.LeftCtrl, Key.RightCtrl)) return;
+
             var messages = _mDict.ProcessKey(e.Key);
-            messages.Do(msg => msg.Invoke(this));
+            messages.Do(msg => msg.Invoke(this, false).Do(m => m.Invoke(this)));
         }
 
         public void ProcessMissingCmd(Message msg)
@@ -62,6 +77,11 @@ namespace AppViewer
         public void Quit()
         {
             Navigate(typeof(AppLauncherControl));
+        }
+
+        public void Report(string msg)
+        {
+            MessageBox.Show(msg);
         }
     }
 

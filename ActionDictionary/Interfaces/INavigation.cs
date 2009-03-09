@@ -12,5 +12,9 @@ namespace ActionDictionary.Interfaces
         void MoveRight();
         [KeyMap(InputMode.Normal, "h")]
         void MoveLeft();
+        [KeyMap(InputMode.Normal, "gg")]
+        void Beginning();
+        [KeyMap(InputMode.Normal, "G")]
+        void End();
     }
 }

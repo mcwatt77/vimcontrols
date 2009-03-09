@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 using ActionDictionary.Interfaces;
@@ -38,21 +39,37 @@ namespace ActionDictionary
             return msg;
         }
 
-        public void Invoke<TInterface>(TInterface obj)
+        public IEnumerable<Message> Invoke<TInterface>(TInterface obj)
         {
-            if (_type.IsAssignableFrom(obj.GetType()))
+            return Invoke(obj, true);
+        }
+
+        public IEnumerable<Message> Invoke<TInterface>(TInterface obj, bool throwOnException)
+        {
+            var errorMsgs = new List<Message>();
+/*            try
+            {*/
+                if (_type.IsAssignableFrom(obj.GetType()))
+                {
+                    try
+                    {
+                        _method.Invoke(_fn, new object[] {obj});
+                    }
+                    catch (TargetInvocationException e)
+                    {
+                        throw e.InnerException;
+                    }
+                }
+                else if (typeof (IMissing).IsAssignableFrom(obj.GetType()))
+                    ((IMissing) obj).ProcessMissingCmd(this);
+/*            }
+            catch(Exception ex)
             {
-                try
-                {
-                    _method.Invoke(_fn, new object[] {obj});
-                }
-                catch(TargetInvocationException e)
-                {
-                    throw e.InnerException;
-                }
-            }
-            else if (typeof(IMissing).IsAssignableFrom(obj.GetType()))
-                ((IMissing)obj).ProcessMissingCmd(this);
+                if (throwOnException) throw ex;
+                errorMsgs.Add(Create<IError>(e => e.Report(ex.Message)));
+            }*/
+
+            return errorMsgs;
         }
 
         public override string ToString()
