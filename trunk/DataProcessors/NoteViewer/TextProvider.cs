@@ -1,15 +1,16 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace DataProcessors.NoteViewer
 {
     public class TextProvider
     {
-        private readonly IEnumerable<string> _lines;
+        private readonly IList<string> _lines;
 
         public TextProvider(string text)
         {
-            _lines = ToRows(text);
+            _lines = ToRows(text).ToList();
         }
 
         public IEnumerable<string> Lines
@@ -23,6 +24,11 @@ namespace DataProcessors.NoteViewer
         private static IEnumerable<string> ToRows(string input)
         {
             return Regex.Split(input, "\r\n");
+        }
+
+        public void UpdateLine(int row, string data)
+        {
+            _lines[row] = data;
         }
     }
 }

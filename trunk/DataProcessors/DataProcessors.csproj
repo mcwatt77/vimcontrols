@@ -57,6 +57,7 @@
     <Compile Include="IText.cs" />
     <Compile Include="MessagePipe.cs" />
     <Compile Include="NoteViewer\Controller.cs" />
+    <Compile Include="NoteViewer\IFormattedTextController.cs" />
     <Compile Include="NoteViewer\LeftNavController.cs" />
     <Compile Include="NoteViewer\TextController.cs" />
     <Compile Include="NoteViewer\TextCursor.cs" />
