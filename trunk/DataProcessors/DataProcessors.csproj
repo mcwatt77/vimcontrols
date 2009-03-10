@@ -61,6 +61,7 @@
     <Compile Include="NoteViewer\TextController.cs" />
     <Compile Include="NoteViewer\TextCursor.cs" />
     <Compile Include="NoteViewer\TextMetricAdapter.cs" />
+    <Compile Include="NoteViewer\TextProvider.cs" />
     <Compile Include="ProjectTracker\Controller.cs" />
     <Compile Include="ProjectTracker\ItemList.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

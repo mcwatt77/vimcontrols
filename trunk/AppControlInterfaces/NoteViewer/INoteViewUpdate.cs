@@ -2,7 +2,11 @@
 
 namespace AppControlInterfaces.NoteViewer
 {
-    public interface INoteViewUpdate : IListViewUpdate
+    public interface INoteViewUpdate : ITextViewUpdate, IListViewUpdate
+    {
+    }
+
+    public interface ITextViewUpdate
     {
         void UpdateTextRows();
         void UpdateCursor();

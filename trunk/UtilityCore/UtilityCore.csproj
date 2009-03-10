@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="AssemblyExtensions.cs" />
     <Compile Include="CustomAttributeProviderExtensions.cs" />
+    <Compile Include="ExceptionExtensions.cs" />
     <Compile Include="GenericDictionaryExtensions.cs" />
     <Compile Include="GenericEnumerableExtensions.cs" />
     <Compile Include="GenericListExtensions.cs" />

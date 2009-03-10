@@ -7,7 +7,24 @@ namespace DataProcessors.NoteViewer
     public class TextController : IFullNavigation
     {
         private readonly TextCursor _cursor;
-        public INoteViewUpdate Updater { get; set; }
+
+        private TextProvider _textProvider;
+        public TextProvider TextProvider
+        {
+            get
+            {
+                return _textProvider;
+            }
+            set
+            {
+                _textProvider = value;
+                _cursor.Row = 0;
+                _cursor.Column = 0;
+                Updater.UpdateTextRows();
+            }
+        }
+
+        public ITextViewUpdate Updater { get; set; }
 
         public TextController(TextCursor cursor)
         {
@@ -43,6 +60,7 @@ namespace DataProcessors.NoteViewer
         public void Beginning()
         {
             _cursor.Row = 0;
+            Updater.UpdateCursor();
         }
 
         public void End()

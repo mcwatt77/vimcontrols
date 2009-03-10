@@ -17,6 +17,17 @@ namespace Utility.Core
             }
         }
 
+        public static IEnumerable<T> ChainWithSelf<T>(this T e, Func<T, T> fn) where T : class
+        {
+            yield return e;
+            var newE = fn(e);
+            while (newE != null)
+            {
+                yield return newE;
+                newE = fn(newE);
+            }
+        }
+
 		public static PropertyInfo Property(this object instance, string propertyName)
 		{
 			if (instance == null)

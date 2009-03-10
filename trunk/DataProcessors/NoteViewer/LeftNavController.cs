@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using ActionDictionary.Interfaces;
+using AppControlInterfaces.ListView;
 using AppControlInterfaces.NoteViewer;
 
 namespace DataProcessors.NoteViewer
@@ -7,7 +8,7 @@ namespace DataProcessors.NoteViewer
     public class LeftNavController : ILeftNavData, IFullNavigation
     {
         //TODO: This should be able to initialize with an empty updater...
-        public INoteViewUpdate Updater { get; set; }
+        public IListViewUpdate Updater { get; set; }
         private readonly List<Controller.NoteData> _data;
 
         public LeftNavController(List<Controller.NoteData> data)
@@ -40,7 +41,6 @@ namespace DataProcessors.NoteViewer
             {
                 Updater.Update(HilightIndex + 1);
                 Updater.Update(HilightIndex);
-                Updater.UpdateTextRows();
             }
         }
 
@@ -52,7 +52,6 @@ namespace DataProcessors.NoteViewer
             {
                 Updater.Update(HilightIndex - 1);
                 Updater.Update(HilightIndex);
-                Updater.UpdateTextRows();
             }
         }
 
