@@ -15,7 +15,7 @@ namespace DataProcessors.Tests
         [Test]
         public void TestSomething()
         {
-            Test(new TextController(new TextCursor()) {Updater = this, TextProvider = new TextProvider("")},
+            Test(() => new TextController(new TextCursor()) {Updater = this, TextProvider = new TextProvider("")},
                  controller => controller.TextProvider.Lines.SeparateBy("\r\n"));
         }
 
@@ -24,7 +24,7 @@ namespace DataProcessors.Tests
             AddKeyString("aa", "a",
                          _ti(a => a.InsertAfterCursor()),
                          _ti(a => a.InputCharacter('a')));
-            AddKeyString("a<cr><cr><cr><bk><bk><bk>", "",
+            AddKeyString("a<cr><cr><cr><bksp><bksp><bksp>", "a",
                          _ti(a => a.InsertAfterCursor()),
                          _ti(a => a.InputCharacter('\n')),
                          _ti(a => a.InputCharacter('\n')),
