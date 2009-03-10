@@ -2,6 +2,7 @@
 
 namespace AppControlInterfaces.NoteViewer
 {
+    //TODO: I should be able to implement a version of INoteViewData without filler methods for ILeftNavData and ITextData
     public interface INoteViewData : ILeftNavData, ITextData
     {
         INoteViewUpdate Updater { set; }

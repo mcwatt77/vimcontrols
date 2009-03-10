@@ -1,7 +1,9 @@
-﻿namespace ActionDictionary.Interfaces
+﻿using System;
+
+namespace ActionDictionary.Interfaces
 {
     public interface IError
     {
-        void Report(string msg);
+        void Report(Exception e);
     }
 }

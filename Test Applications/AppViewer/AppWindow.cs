@@ -71,14 +71,8 @@ namespace AppViewer
 
             var parameters = constructor.GetParameters().Select(parameter => typeDict[parameter.ParameterType]).ToArray();
 
-            try
-            {
-                _ctrl = (IAppControl) constructor.Invoke(parameters);
-            }
-            catch(TargetInvocationException e)
-            {
-                throw e.InnerException;
-            }
+            _ctrl = (IAppControl) constructor.Invoke(parameters);
+
             grid.Children.Add(_ctrl.GetControl());
         }
 
@@ -87,9 +81,10 @@ namespace AppViewer
             Navigate(typeof(AppLauncherControl));
         }
 
-        public void Report(string msg)
+        public void Report(Exception ex)
         {
-            MessageBox.Show(msg);
+            var inner = ex.ChainWithSelf(e => e.InnerException).Last();
+            MessageBox.Show(inner.Message + "\r\n\r\n\r\n" + inner.StackTrace);
         }
     }
 

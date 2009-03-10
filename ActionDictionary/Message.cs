@@ -50,23 +50,14 @@ namespace ActionDictionary
             try
             {
                 if (MethodType.IsAssignableFrom(obj.GetType()))
-                {
-                    try
-                    {
-                        _method.Invoke(_fn, new object[] {obj});
-                    }
-                    catch (TargetInvocationException e)
-                    {
-                        throw e.InnerException;
-                    }
-                }
+                    _method.Invoke(_fn, new object[] {obj});
                 else if (typeof (IMissing).IsAssignableFrom(obj.GetType()))
                     ((IMissing) obj).ProcessMissingCmd(this);
             }
             catch(Exception ex)
             {
-                if (throwOnException) throw ex;
-                errorMsgs.Add(Create<IError>(e => e.Report(ex.Message)));
+                if (throwOnException) throw;
+                errorMsgs.Add(Create<IError>(e => e.Report(ex)));
             }
 
             return errorMsgs;

@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Windows.Media;
 using ActionDictionary;
 using ActionDictionary.Interfaces;
+using AppControlInterfaces.ListView;
 using AppControlInterfaces.NoteViewer;
 
 namespace DataProcessors.NoteViewer
@@ -16,7 +16,7 @@ namespace DataProcessors.NoteViewer
 
     //TODO: IPaging gets directed to TextMetricAdapter
     [Launchable("Notes Viewer")]
-    public class Controller : INoteViewData, IControlKeyProcessor, IMissing
+    public class Controller : INoteViewData, IControlKeyProcessor, IMissing, IListViewUpdate
     {
         //TODO: This should be able to initialize with an empty updater...
         private INoteViewUpdate _updater;
@@ -34,36 +34,36 @@ namespace DataProcessors.NoteViewer
             var sql = "select descr, body from note";
             var cmd = new SqlCommand(sql, conn);
             var rdr = cmd.ExecuteReader();
+            if (rdr == null) throw new Exception(".NET stopped working!");
+
             while (rdr.Read()) _data.Add(NoteData.FromReader(rdr));
 
-            _leftNavController = new LeftNavController(_data);
+            _leftNavController = new LeftNavController(_data) {Updater = this};
             var cursor = new TextCursor();
             _textController = new TextController(cursor);
             Cursor = cursor;
 
             _currentNav = _leftNavController;
 
-            _textMetricAdapter = new TextMetricAdapter(row => _data[HilightIndex].Body.ElementAtOrDefault(row) ?? String.Empty, _textController);
+            _textMetricAdapter = new TextMetricAdapter(row => _data[HilightIndex].Body.Lines.ElementAtOrDefault(row) ?? String.Empty,
+                () => _data[HilightIndex].Body.Lines.Count(),
+                _textController);
+            _textMetricAdapter.TextProvider = _data[HilightIndex].Body;
         }
 
         public class NoteData
         {
             public string Desc { get; set; }
-            public IEnumerable<string> Body { get; set; }
+            public TextProvider Body { get; set; }
 
             public static NoteData FromReader(IDataRecord rdr)
             {
                 return new NoteData
                                {
                                    Desc = rdr["descr"].ToString(),
-                                   Body = ToRows(rdr["body"].ToString())
+                                   Body = new TextProvider(rdr["body"].ToString())
                                };
             }
-        }
-
-        private static IEnumerable<string> ToRows(string input)
-        {
-            return Regex.Split(input, "\r\n");
         }
 
         public string GetData(int row, int col)
@@ -98,7 +98,7 @@ namespace DataProcessors.NoteViewer
         {
             get
             {
-                return _textMetricAdapter.RowsByHeight(Height).Count();
+                return _textMetricAdapter.RowsByHeight().Count();
             }
         }
 
@@ -107,10 +107,6 @@ namespace DataProcessors.NoteViewer
             get
             {
                 return _textMetricAdapter.TopTextRow;
-            }
-            private set
-            {
-                _textMetricAdapter.TopTextRow = value;
             }
         }
 
@@ -121,8 +117,7 @@ namespace DataProcessors.NoteViewer
             set
             {
                 _updater = value;
-                _leftNavController.Updater = value;
-                _textController.Updater = value;
+                _textMetricAdapter.Updater = value;
             }
         }
 
@@ -133,6 +128,7 @@ namespace DataProcessors.NoteViewer
             set
             {
                 _height = value;
+                _textMetricAdapter.Height = value;
                 _updater.UpdateTextRows();
             }
         }
@@ -156,9 +152,19 @@ namespace DataProcessors.NoteViewer
 
         public void ProcessMissingCmd(Message msg)
         {
-            if (msg.MethodType == typeof(IPaging))
-                TopTextRow = 0;
             msg.Invoke(_currentNav);
+        }
+
+        public void Update(int row, int col)
+        {
+            _textMetricAdapter.TextProvider = _data[HilightIndex].Body;
+            _updater.Update(row, col);
+        }
+
+        public void Update(int row)
+        {
+            _textMetricAdapter.TextProvider = _data[HilightIndex].Body;
+            _updater.Update(row);
         }
     }
 }

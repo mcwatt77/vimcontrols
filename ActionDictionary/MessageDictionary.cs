@@ -87,14 +87,7 @@ namespace ActionDictionary
                     if (value == null) continue;
                     ret.Add(value);
                 }
-                try
-                {
-                    ret.Do(msg => msg.Invoke(this));
-                }
-                catch (TargetInvocationException e)
-                {
-                    throw e.InnerException;
-                }
+                ret.Do(msg => msg.Invoke(this));
             }
             return ret;
         }
