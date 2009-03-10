@@ -88,6 +88,10 @@
       <Project>{9EEEB720-2EFC-4D7B-880E-E3891305F076}</Project>
       <Name>AppControlInterfaces</Name>
     </ProjectReference>
+    <ProjectReference Include="..\KeyStringParser\KeyCommandMapper.csproj">
+      <Project>{C4CBE469-7AFB-44CD-91F6-EACB0A603CCF}</Project>
+      <Name>KeyCommandMapper</Name>
+    </ProjectReference>
     <ProjectReference Include="..\UtilityCore\UtilityCore.csproj">
       <Project>{AEB6E54A-DCCC-4C77-A4B3-81580A945B0E}</Project>
       <Name>UtilityCore</Name>
