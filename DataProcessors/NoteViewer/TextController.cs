@@ -87,22 +87,41 @@ namespace DataProcessors.NoteViewer
 
         public void InputCharacter(char c)
         {
-            _textProvider.UpdateLine(0, c + _textProvider.Lines.First());
+            var newLine = CurrentLine.Insert(_cursor.Column, c.ToString());
+            _textProvider.UpdateLine(_cursor.Row, newLine);
+            _cursor.Column++;
             Updater.UpdateTextRows();
+        }
+
+        private string CurrentLine
+        {
+            get
+            {
+                return _textProvider.Lines.ElementAtOrDefault(_cursor.Row) ?? "";
+            }
         }
 
         public void InsertAfterCursor()
         {
             _cursor.InsertMode = true;
+            if (CurrentLine.Length > 0) _cursor.Column++;
             Updater.UpdateCursor();
         }
 
         public void InsertBeforeCursor()
         {
+            _cursor.InsertMode = true;
+            Updater.UpdateCursor();
         }
 
         public void DeleteBeforeCursor()
         {
+            if (_cursor.Column <= 0) return;
+
+            var newLine = CurrentLine.Remove(_cursor.Column - 1);
+            _textProvider.UpdateLine(_cursor.Row, newLine);
+            _cursor.Column--;
+            Updater.UpdateTextRows();
         }
 
         public void ChangeMode(InputMode mode)

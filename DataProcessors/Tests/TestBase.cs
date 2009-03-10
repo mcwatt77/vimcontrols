@@ -13,10 +13,10 @@ namespace DataProcessors.Tests
     {
         private readonly List<KeyStringData> _keyStrings = new List<KeyStringData>();
 
-        protected void Test<TAction>(TAction msgRecipient, Func<TAction, string> fn)
+        protected void Test<TAction>(Func<TAction> fnMsgRecipient, Func<TAction, string> fn)
         {
             SetKeyStrings();
-            _keyStrings.Do(keyString => keyString.Test(msgRecipient, fn));
+            _keyStrings.Do(keyString => keyString.Test(fnMsgRecipient(), fn));
         }
 
         protected abstract void SetKeyStrings();
@@ -42,7 +42,8 @@ namespace DataProcessors.Tests
             public void Test<TAction>(TAction msgRecipient, Func<TAction, string> fn)
             {
                 var parser = new Parser();
-                var msgs = parser.Parse(Input).Select(key => _mDict.ProcessKey(key)).Flatten();
+                var parse = parser.Parse(Input).ToList();
+                var msgs = parse.Select(key => _mDict.ProcessKey(key)).Flatten();
                 msgs.Do(msg => msg.Invoke(msgRecipient));
                 Assert.AreEqual(Output, fn(msgRecipient));
             }

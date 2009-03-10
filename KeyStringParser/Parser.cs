@@ -44,9 +44,11 @@ namespace KeyStringParser
             var key = input.Substring(1, last - 1);
             if (_stringLookup.ContainsKey(key)) return _stringLookup[key];
 
-            var keyValuePair = _variableKeyLookup
+            var keyValuePairs = _variableKeyLookup
                 .Where(keyPair => Regex.IsMatch(key, string.Format(keyPair.Key, ".*")))
-                .Single();
+                .ToList();
+            if (keyValuePairs.Count == 0) throw new Exception("'" + input + "' not found in dictionary");
+            var keyValuePair = keyValuePairs.Single();
 
             var resultKey = Regex.Replace(input, "<" + string.Format(keyValuePair.Key, "(.*)") + ">", "$1");
 
