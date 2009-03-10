@@ -22,7 +22,6 @@ namespace DataProcessors.NoteViewer
         private INoteViewUpdate _updater;
         private readonly List<NoteData> _data = new List<NoteData>();
         private readonly LeftNavController _leftNavController;
-        private readonly TextController _textController;
         private IFullNavigation _currentNav;
         private readonly TextMetricAdapter _textMetricAdapter;
 
@@ -40,15 +39,11 @@ namespace DataProcessors.NoteViewer
 
             _leftNavController = new LeftNavController(_data) {Updater = this};
             var cursor = new TextCursor();
-            _textController = new TextController(cursor);
             Cursor = cursor;
 
             _currentNav = _leftNavController;
 
-            _textMetricAdapter = new TextMetricAdapter(row => _data[HilightIndex].Body.Lines.ElementAtOrDefault(row) ?? String.Empty,
-                () => _data[HilightIndex].Body.Lines.Count(),
-                _textController);
-            _textMetricAdapter.TextProvider = _data[HilightIndex].Body;
+            _textMetricAdapter = new TextMetricAdapter(cursor) {TextProvider = _data[HilightIndex].Body};
         }
 
         public class NoteData

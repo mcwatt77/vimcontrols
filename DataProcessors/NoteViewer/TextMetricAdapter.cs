@@ -11,13 +11,6 @@ using Utility.Core;
 
 namespace DataProcessors.NoteViewer
 {
-    public interface IFormattedTextController
-    {
-        int FirstRow { get; set; }
-        double Height { get; set; }
-        IEnumerable<FormattedText> RowsByHeight();
-    }
-
     public class TextMetricAdapter : IFormattedTextController, IMissing, IPaging, IFullNavigation, ITextViewUpdate
     {
         public int TopTextRow { get; set; }
@@ -41,12 +34,11 @@ namespace DataProcessors.NoteViewer
         private readonly Func<int> _fnRowCount;
         private readonly TextController _controller;
 
-        public TextMetricAdapter(Func<int, string> fnGetRow, Func<int> fnRowCount, TextController controller)
+        public TextMetricAdapter(TextCursor cursor)
         {
-            _fnGetRow = fnGetRow;
-            _fnRowCount = fnRowCount;
-            _controller = controller;
-            _controller.Updater = this;
+            _fnGetRow = i => _controller.TextProvider.Lines.ElementAt(i);
+            _fnRowCount = () => _controller.TextProvider.Lines.Count();
+            _controller = new TextController(cursor) {Updater = this};
         }
 
         public int FirstRow { get; set; }
@@ -65,11 +57,14 @@ namespace DataProcessors.NoteViewer
 
         public void End()
         {
+            _controller.End();
             var row = _fnRowCount() - 1;
             var totalHeight = 0.0;
-            while (totalHeight < Height && row >= 0)
+            while (row >= 0)
             {
-                var text = GetRow(row--);
+                var text = GetRow(row);
+                if (totalHeight + text.Height > Height) break;
+                row--;
                 totalHeight += text.Height;
             }
 

@@ -1,10 +1,12 @@
+using System.Linq;
+using ActionDictionary;
 using ActionDictionary.Interfaces;
 using AppControlInterfaces.NoteViewer;
 
 namespace DataProcessors.NoteViewer
 {
     //TODO: This should really be the one that owns the data
-    public class TextController : IFullNavigation
+    public class TextController : IFullNavigation, ITextInput, IModeChange
     {
         private readonly TextCursor _cursor;
 
@@ -41,7 +43,9 @@ namespace DataProcessors.NoteViewer
         public void MoveDown()
         {
             _cursor.Row++;
-            Updater.UpdateCursor();
+            if (_cursor.Row >= _textProvider.Lines.Count())
+                _cursor.Row = _textProvider.Lines.Count() - 1;
+            else Updater.UpdateCursor();
         }
 
         public void MoveRight()
@@ -65,6 +69,8 @@ namespace DataProcessors.NoteViewer
 
         public void End()
         {
+            _cursor.Row = _textProvider.Lines.Count() - 1;
+            Updater.UpdateCursor();
         }
 
         public void PageUp()
@@ -77,6 +83,32 @@ namespace DataProcessors.NoteViewer
         {
             _cursor.Row += 10;
             MoveDown();
+        }
+
+        public void InputCharacter(char c)
+        {
+            _textProvider.UpdateLine(0, c + _textProvider.Lines.First());
+            Updater.UpdateTextRows();
+        }
+
+        public void InsertAfterCursor()
+        {
+            _cursor.InsertMode = true;
+            Updater.UpdateCursor();
+        }
+
+        public void InsertBeforeCursor()
+        {
+        }
+
+        public void DeleteBeforeCursor()
+        {
+        }
+
+        public void ChangeMode(InputMode mode)
+        {
+            _cursor.InsertMode = mode == InputMode.Insert;
+            Updater.UpdateCursor();
         }
     }
 }

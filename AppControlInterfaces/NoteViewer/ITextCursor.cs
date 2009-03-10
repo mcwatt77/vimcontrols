@@ -4,5 +4,6 @@ namespace AppControlInterfaces.NoteViewer
     {
         int Row { get; }
         int Column { get; }
+        bool InsertMode { get; }
     }
 }

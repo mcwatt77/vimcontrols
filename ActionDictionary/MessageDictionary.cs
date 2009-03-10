@@ -24,24 +24,11 @@ namespace ActionDictionary
         public MessageDictionary()
         {
             ReadCommandsFromAttributes();
-//            AddString(InputMode.Insert, "a", Message.Create<ITextInput>(f => f.InputCharacter('a')));
 
             _currentDict = _normalDict;
             InputMode = InputMode.Normal;
         }
 
-/*        private void ReadCommandsFromAttributes()
-        {
-            typeof (MessageDictionary)
-                .Assembly
-                .GetTypes()
-                .Select(type => type.GetMethods().AsEnumerable())
-                .Flatten()
-                .Select(type => type.AttributesOfType<MapAttribute>().AsEnumerable())
-                .Flatten()
-                .Where(map => map != null)
-                .Do(map => map.AddToDictionary(this, null));
-        }*/
         private void ReadCommandsFromAttributes()
         {
             typeof (MessageDictionary)
