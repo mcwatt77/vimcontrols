@@ -22,7 +22,7 @@ namespace DataProcessors.NoteViewer
                 _textProvider = value;
                 _cursor.Row = 0;
                 _cursor.Column = 0;
-                Updater.UpdateTextRows();
+                Update(true);
             }
         }
 
@@ -37,7 +37,7 @@ namespace DataProcessors.NoteViewer
         {
             _cursor.Row--;
             if (_cursor.Row < 0) _cursor.Row = 0;
-            Updater.UpdateCursor();
+            Update(false);
         }
 
         public void MoveDown()
@@ -45,32 +45,32 @@ namespace DataProcessors.NoteViewer
             _cursor.Row++;
             if (_cursor.Row >= _textProvider.Lines.Count())
                 _cursor.Row = _textProvider.Lines.Count() - 1;
-            else Updater.UpdateCursor();
+            else Update(false);
         }
 
         public void MoveRight()
         {
             _cursor.Column++;
-            Updater.UpdateCursor();
+            Update(false);
         }
 
         public void MoveLeft()
         {
             _cursor.Column--;
             if (_cursor.Column < 0) _cursor.Column = 0;
-            Updater.UpdateCursor();
+            Update(false);
         }
 
         public void Beginning()
         {
             _cursor.Row = 0;
-            Updater.UpdateCursor();
+            Update(false);
         }
 
         public void End()
         {
             _cursor.Row = _textProvider.Lines.Count() - 1;
-            Updater.UpdateCursor();
+            Update(false);
         }
 
         public void PageUp()
@@ -90,7 +90,7 @@ namespace DataProcessors.NoteViewer
             var newLine = CurrentLine.Insert(_cursor.Column, c.ToString());
             _textProvider.UpdateLine(_cursor.Row, newLine);
             _cursor.Column++;
-            Updater.UpdateTextRows();
+            Update(true);
         }
 
         private string CurrentLine
@@ -105,29 +105,37 @@ namespace DataProcessors.NoteViewer
         {
             _cursor.InsertMode = true;
             if (CurrentLine.Length > 0) _cursor.Column++;
-            Updater.UpdateCursor();
+            Update(false);
         }
 
         public void InsertBeforeCursor()
         {
             _cursor.InsertMode = true;
-            Updater.UpdateCursor();
+            Update(false);
         }
 
         public void DeleteBeforeCursor()
         {
             if (_cursor.Column <= 0) return;
 
-            var newLine = CurrentLine.Remove(_cursor.Column - 1);
+            var newLine = CurrentLine.Remove(_cursor.Column - 1, 1);
             _textProvider.UpdateLine(_cursor.Row, newLine);
             _cursor.Column--;
-            Updater.UpdateTextRows();
+            Update(true);
         }
 
         public void ChangeMode(InputMode mode)
         {
             _cursor.InsertMode = mode == InputMode.Insert;
-            Updater.UpdateCursor();
+            Update(false);
+        }
+
+        private void Update(bool rows)
+        {
+            if (_cursor.Column > CurrentLine.Length) _cursor.Column = CurrentLine.Length;
+
+            if (rows) Updater.UpdateTextRows();
+            else Updater.UpdateCursor();
         }
     }
 }

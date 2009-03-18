@@ -22,6 +22,8 @@ namespace DataProcessors
         }
     }
 
+    [Launchable("Query Analyzer")]
+    public class SQLQueryControl : ToBeImplemented{public SQLQueryControl():base("This will work like the note viewer\r\n where the left nav is named queries\r\n and you can have multiple queries\r\n on the right."){}}
     [Launchable("Project Tracker")]
     public class ProjectTrackerControl : ToBeImplemented{public ProjectTrackerControl():base("This will track projects"){}}
     [Launchable("Keyboard Processor Test")]
