@@ -67,13 +67,19 @@
     <Compile Include="ProjectTracker\ItemList.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="LaunchableAttribute.cs" />
+    <Compile Include="ProxyGenerator.cs" />
     <Compile Include="SgNavigator\SgNavigator.cs" />
     <Compile Include="TemplateParser\Controller.cs" />
     <Compile Include="Tests\AppLauncher.cs" />
+    <Compile Include="Tests\IParentNode.cs" />
     <Compile Include="Tests\NoteViewer\Controller.cs" />
     <Compile Include="Tests\ProjectTracker.cs" />
+    <Compile Include="Tests\ProxyGenerator.cs" />
+    <Compile Include="Tests\RootNode.cs" />
+    <Compile Include="Tests\SpecialMessageTest.cs" />
     <Compile Include="Tests\TemplateParser\Controller.cs" />
     <Compile Include="Tests\TestBase.cs" />
+    <Compile Include="Tests\TestDynamicImplementation.cs" />
     <Compile Include="Tests\Text.cs" />
     <Compile Include="Text.cs" />
     <Compile Include="ToBeImplemented.cs" />
@@ -99,6 +105,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ProjectTracker\ui.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="NoteViewer\ui.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ui id="noteViewer">
+  <entityList displayName="Note Viewer" path="//note">
+    <navigation display="@descr" updateElement="../../navigationContext[id = 'noteRecord']" updateData="."/>
+  </entityList>
+  <navigationContext id="noteRecord">
+    <text path="@body"/>
+  </navigationContext>
+</ui>

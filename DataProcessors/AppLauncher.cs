@@ -44,7 +44,7 @@ namespace DataProcessors
                 .ToList();
 
             var dict = types.ToDictionary(pair => pair.Value.ToLower());
-            var preferredSort = new List<string> {"notes viewer", "command stack", "sg viewer", "civilization"};
+            var preferredSort = new List<string> {"notes viewer", "query analyzer", "command stack", "sg viewer", "civilization"};
             return preferredSort
                 .Where(dict.ContainsKey)
                 .Select(s => dict[s]).Concat(types.Where(pair => !preferredSort.Contains(pair.Value.ToLower()))).ToList();

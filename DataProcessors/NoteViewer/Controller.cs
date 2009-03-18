@@ -147,6 +147,9 @@ namespace DataProcessors.NoteViewer
 
         public void ProcessMissingCmd(Message msg)
         {
+            if (msg.MethodType == typeof(ILeftNavData)) msg.Invoke(_leftNavController);
+            if (msg.MethodType == typeof(ITextData)) msg.Invoke(_textMetricAdapter);
+
             msg.Invoke(_currentNav);
         }
 
