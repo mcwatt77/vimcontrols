@@ -27,6 +27,23 @@ namespace DataProcessors.Tests
         }
     }
 
+    public class Pgtest : TestInterface
+    {
+        private IMissing _missing;
+        private readonly Action<int> _doSomething;
+
+        public Pgtest(IMissing missing, object[] methods)
+        {
+            _missing = missing;
+            _doSomething = (Action<int>)methods[0];
+        }
+
+        public void DoSomething(int i)
+        {
+            _doSomething(i);
+        }
+    }
+
     public interface TestInterface
     {
         void DoSomething(int i);
