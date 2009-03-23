@@ -15,6 +15,11 @@ namespace NodeMessaging
 
         public void Intercept(IInvocation invocation)
         {
+            if (invocation.TargetType != typeof(INode) && invocation.Method.DeclaringType == typeof(INode))
+            {
+                invocation.ReturnValue = invocation.Method.Invoke(_node, invocation.Arguments);
+                return;
+            }
             invocation.Proceed();
             _rootNode.Intercept(_node, invocation);
         }

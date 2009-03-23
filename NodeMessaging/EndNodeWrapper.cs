@@ -51,7 +51,7 @@ namespace NodeMessaging
             var ret = _node.Get<T>();
 
             var generator = new ProxyGenerator();
-            var proxy = generator.CreateInterfaceProxyWithTarget(ret, new FinalInterceptor(_rootNode, _node));
+            var proxy = (T) generator.CreateInterfaceProxyWithTarget(typeof (T), new[] {typeof (IEndNode)}, ret, new FinalInterceptor(_rootNode, _node));
             return proxy;
         }
     }
