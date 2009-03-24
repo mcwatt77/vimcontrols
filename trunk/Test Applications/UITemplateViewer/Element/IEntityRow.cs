@@ -5,7 +5,7 @@ namespace UITemplateViewer.Element
 {
     public interface IEntityRow
     {
-        IEnumerable<IStringProvider> Columns { get; set; }
-        bool Selected { get; set; }
+        IParentNode Context { get; set; }
+        IEnumerable<IFieldAccessor<string>> Columns { get; set; }
     }
 }

@@ -12,6 +12,9 @@ namespace ActionDictionary
         private Expression _expr;
         public Type MethodType { get; private set; }
         private MethodInfo _method;
+        private readonly List<Message> _errors = new List<Message>();
+
+        public IEnumerable<Message> Errors { get { return _errors; } }
 
         public static Message Create(LambdaExpression fn, Type type)
         {
@@ -39,28 +42,26 @@ namespace ActionDictionary
             return msg;
         }
 
-        public IEnumerable<Message> Invoke<TInterface>(TInterface obj)
+        public object Invoke<TInterface>(TInterface obj)
         {
             return Invoke(obj, true);
         }
 
-        public IEnumerable<Message> Invoke<TInterface>(TInterface obj, bool throwOnException)
+        public object Invoke<TInterface>(TInterface obj, bool throwOnException)
         {
-            var errorMsgs = new List<Message>();
             try
             {
                 if (MethodType.IsAssignableFrom(obj.GetType()))
-                    _method.Invoke(_fn, new object[] {obj});
-                else if (typeof (IMissing).IsAssignableFrom(obj.GetType()))
-                    ((IMissing) obj).ProcessMissingCmd(this);
+                    return _method.Invoke(_fn, new object[] {obj});
+                if (typeof (IMissing).IsAssignableFrom(obj.GetType()))
+                    return ((IMissing) obj).ProcessMissingCmd(this);
             }
             catch(Exception ex)
             {
                 if (throwOnException) throw;
-                errorMsgs.Add(Create<IError>(e => e.Report(ex)));
+                _errors.Add(Create<IError>(e => e.Report(ex)));
             }
-
-            return errorMsgs;
+            return null;
         }
 
         public override string ToString()

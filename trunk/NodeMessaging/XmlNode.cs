@@ -34,9 +34,14 @@ namespace NodeMessaging
             var attr = _elem.Attribute(name);
 
             var endNode = new EndNode {Name = name, Parent = this};
-            var stringProvider = new StringProvider {Text = attr.Value};
-            endNode.Register<IStringProvider>(stringProvider);
+            var stringProvider = (IFieldAccessor<string>)new FieldAccessor<string> {Value = attr.Value};
+            endNode.Register(stringProvider);
             return endNode;
+        }
+
+        public void Register<T>(T t)
+        {
+            throw new System.NotImplementedException();
         }
 
         public IParentNode Parent

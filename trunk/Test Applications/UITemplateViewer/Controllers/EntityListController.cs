@@ -8,7 +8,7 @@ namespace UITemplateViewer.Controllers
     {
         private int _selectedIndex;
 
-        public IEntityList EntityList { get; set; }
+        public IEntitySelector EntityList { get; set; }
 
         public void MoveUp()
         {

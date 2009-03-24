@@ -145,12 +145,12 @@ namespace DataProcessors.NoteViewer
         {
         }
 
-        public void ProcessMissingCmd(Message msg)
+        public object ProcessMissingCmd(Message msg)
         {
             if (msg.MethodType == typeof(ILeftNavData)) msg.Invoke(_leftNavController);
             if (msg.MethodType == typeof(ITextData)) msg.Invoke(_textMetricAdapter);
 
-            msg.Invoke(_currentNav);
+            return msg.Invoke(_currentNav);
         }
 
         public void Update(int row, int col)

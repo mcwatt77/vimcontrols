@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace NodeMessaging
@@ -6,6 +7,7 @@ namespace NodeMessaging
     {
         private readonly RootNode _rootNode;
         private readonly IParentNode _node;
+        private readonly Dictionary<Type, object> _registeredTypes = new Dictionary<Type, object>();
 
         public ParentNodeWrapper(RootNode rootNode, IParentNode node)
         {
@@ -31,6 +33,11 @@ namespace NodeMessaging
         public IEndNode Attribute(string name)
         {
             return new EndNodeWrapper(_rootNode, _node.Attribute(name));
+        }
+
+        public void Register<T>(T t)
+        {
+            _registeredTypes[typeof (T)] = t;
         }
 
         public IParentNode Parent

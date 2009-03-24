@@ -130,9 +130,9 @@ namespace DataProcessors.NoteViewer
                 .Do(i => _controller.MoveDown());
         }
 
-        public void ProcessMissingCmd(Message msg)
+        public object ProcessMissingCmd(Message msg)
         {
-            msg.Invoke(_controller);
+            return msg.Invoke(_controller);
         }
 
         public void MoveRight()

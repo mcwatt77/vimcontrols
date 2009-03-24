@@ -10,10 +10,12 @@ namespace UITemplateViewer.WPF
     public class EntityRow : IEntityRow, IUIInitialize
     {
         private Label _label;
-        private IEnumerable<IStringProvider> _columns;
+        private IEnumerable<IFieldAccessor<string>> _columns;
         private bool _selected;
 
         public IContainer Parent { get; set; }
+        public IParentNode Context { get; set; }
+        public string ID { get; set; }
 
         public bool Selected
         {
@@ -33,19 +35,19 @@ namespace UITemplateViewer.WPF
                 {
                     _label = new Label();
                     if (Columns != null)
-                        _label.Content = Columns.First().Text;
+                        _label.Content = Columns.First().Value;
                 }
                 return _label;
             }
         }
 
-        public IEnumerable<IStringProvider> Columns
+        public IEnumerable<IFieldAccessor<string>> Columns
         {
             get { return _columns; }
             set
             {
                 _columns = value;
-                Label.Content = _columns.First().Text;
+                Label.Content = _columns.First().Value;
             }
         }
 

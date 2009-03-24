@@ -29,9 +29,9 @@ namespace AppViewer.Controls
             return _image;
         }
 
-        public void ProcessMissingCmd(Message msg)
+        public object ProcessMissingCmd(Message msg)
         {
-            msg.Invoke(_processor);
+            return msg.Invoke(_processor);
         }
 
         //TODO:  I don't like this... the Update has to beware of _processor not being set yet
