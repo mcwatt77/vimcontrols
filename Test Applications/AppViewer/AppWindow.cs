@@ -42,12 +42,18 @@ namespace AppViewer
             if (!ProcessKeyState(e.KeyboardDevice, e.Key, Key.LeftCtrl, Key.RightCtrl)) return;
 
             var messages = _mDict.ProcessKey(e.Key);
-            messages.Do(msg => msg.Invoke(this, false).Do(m => m.Invoke(this)));
+            messages.Do(InvokeMessage);
         }
 
-        public void ProcessMissingCmd(Message msg)
+        private void InvokeMessage(Message message)
         {
-            msg.Invoke(_ctrl);
+            message.Invoke(this, false);
+            message.Errors.Do(m => m.Invoke(this));
+        }
+
+        public object ProcessMissingCmd(Message msg)
+        {
+            return msg.Invoke(_ctrl);
         }
 
         public void Maximize()

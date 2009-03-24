@@ -4,6 +4,7 @@ namespace UITemplateViewer.Element
 {
     public interface IContainer
     {
-        void AddChild(UIElement element);
+        void AddChild(FrameworkElement element);
+        FrameworkElement ControlById(string id);
     }
 }

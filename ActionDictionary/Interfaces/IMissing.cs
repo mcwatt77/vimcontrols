@@ -2,6 +2,6 @@
 {
     public interface IMissing
     {
-        void ProcessMissingCmd(Message msg);
+        object ProcessMissingCmd(Message msg);
     }
 }

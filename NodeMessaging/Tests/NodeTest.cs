@@ -16,7 +16,7 @@ namespace NodeMessaging.Tests
             rootNode.Register<IParentNode>(xmlNode);
 
             Predicate<INode> nodePredicate = node => node.Name == "desc" && node.Parent.Name == "note";
-            Predicate<IInvocation> messagePredicate = invocation => invocation.Method.DeclaringType == typeof (IStringProvider);
+            Predicate<IInvocation> messagePredicate = invocation => invocation.Method.DeclaringType == typeof (IFieldAccessor<string>);
             var testRecipient = new TestRecipient();
             var nodeMessage = new NodeMessage
                                   {
@@ -26,17 +26,17 @@ namespace NodeMessaging.Tests
                                   };
             rootNode.InstallHook(nodeMessage);
 
-            var stringProvider = rootNode.Nodes("note").First().Attribute("desc").Get<IStringProvider>();
-            stringProvider.Text = "New Text";
+            var stringProvider = rootNode.Nodes("note").First().Attribute("desc").Get<IFieldAccessor<string>>();
+            stringProvider.Value = "New Text";
 
-            Assert.AreEqual("New Text", testRecipient.Text);
+            Assert.AreEqual("New Text", testRecipient.Value);
         }
 
-        public class TestRecipient : IStringProvider
+        public class TestRecipient : IFieldAccessor<string>
         {
             private string _text = "Not yet called";
 
-            public string Text
+            public string Value
             {
                 get { return _text; }
                 set { _text = value; }

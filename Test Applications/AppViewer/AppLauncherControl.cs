@@ -40,9 +40,9 @@ namespace AppViewer
             _canvas.InvalidateVisual();
         }
 
-        public void ProcessMissingCmd(Message msg)
+        public object ProcessMissingCmd(Message msg)
         {
-            msg.Invoke(_launcher);
+            return msg.Invoke(_launcher);
         }
     }
 

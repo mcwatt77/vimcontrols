@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using ActionDictionary;
+using Castle.Core.Interceptor;
 using Castle.DynamicProxy;
 
 namespace NodeMessaging
@@ -50,9 +52,41 @@ namespace NodeMessaging
         {
             var ret = _node.Get<T>();
 
-            var generator = new ProxyGenerator();
+/*            var generator = new ProxyGenerator();
             var proxy = (T) generator.CreateInterfaceProxyWithTarget(typeof (T), new[] {typeof (IEndNode)}, ret, new FinalInterceptor(_rootNode, _node));
+            return proxy;*/
+            return InjectNode(ret, Intercept);
+        }
+
+        private static T InjectNode<T>(T t, Action<IInvocation> fnIntercept) where T : class
+        {
+            var generator = new ProxyGenerator();
+            var proxy = (T) generator.CreateInterfaceProxyWithTarget(typeof (T), new[] {typeof (IEndNode)}, t, new DelegateInterceptor(fnIntercept));
             return proxy;
+        }
+
+        private Message Intercept(Message message)
+        {
+            if (message.MethodType == typeof(INode))
+            {
+                message.Invoke(_node);
+                return null;
+            }
+            return message;
+        }
+
+        private void Intercept(IInvocation invocation)
+        {
+            //invocation
+            //.TargetType, .Method, .ReturnValue, .Arguments, .Proceed()
+
+            if (invocation.TargetType != typeof(INode) && invocation.Method.DeclaringType == typeof(INode))
+            {
+                invocation.ReturnValue = invocation.Method.Invoke(_node, invocation.Arguments);
+                return;
+            }
+            invocation.Proceed();
+            _rootNode.Intercept(_node, invocation);
         }
     }
 }

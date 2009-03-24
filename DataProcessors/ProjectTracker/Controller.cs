@@ -7,9 +7,9 @@ namespace DataProcessors.ProjectTracker
     {
         private readonly ItemList _itemList = new ItemList();
 
-        public void ProcessMissingCmd(Message msg)
+        public object ProcessMissingCmd(Message msg)
         {
-            msg.Invoke(_itemList);
+            return msg.Invoke(_itemList);
         }
     }
 }

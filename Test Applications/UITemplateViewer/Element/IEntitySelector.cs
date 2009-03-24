@@ -1,10 +1,11 @@
 using System.Collections.Generic;
+using UITemplateViewer.Element;
 
 namespace UITemplateViewer.Element
 {
-    public interface IEntityList
+    public interface IEntitySelector
     {
-        string DisplayName { get; set; }
         IEnumerable<IEntityRow> Rows { get; set; }
+        IEntityRow SelectedRow { get; set; }
     }
 }

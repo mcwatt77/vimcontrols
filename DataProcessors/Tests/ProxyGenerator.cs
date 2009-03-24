@@ -21,9 +21,9 @@ namespace DataProcessors.Tests
             Assert.AreEqual(5, i);
         }
 
-        public void ProcessMissingCmd(Message msg)
+        public object ProcessMissingCmd(Message msg)
         {
-            msg.Invoke(_test);
+            return msg.Invoke(_test);
         }
     }
 

@@ -4,11 +4,11 @@ using UITemplateViewer.Element;
 
 namespace UITemplateViewer.WPF
 {
-    public class TextDisplay : IStringProvider, IUIInitialize
+    public class TextDisplay : IFieldAccessor<string>, IUIInitialize
     {
         private TextBlock _text;
 
-        public string Text
+        public string Value
         {
             get { return TextBlock.Text; }
             set { TextBlock.Text = value; }
@@ -30,5 +30,6 @@ namespace UITemplateViewer.WPF
         }
 
         public IContainer Parent { get; set; }
+        public string ID { get; set; }
     }
 }

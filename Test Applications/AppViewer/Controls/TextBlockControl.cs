@@ -23,9 +23,9 @@ namespace AppViewer.Controls
             _control.Text = _processor.GetData();
         }
 
-        public void ProcessMissingCmd(Message msg)
+        public object ProcessMissingCmd(Message msg)
         {
-            msg.Invoke(_processor);
+            return msg.Invoke(_processor);
         }
     }
 }
