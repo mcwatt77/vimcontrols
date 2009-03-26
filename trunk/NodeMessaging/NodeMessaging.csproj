@@ -63,6 +63,7 @@
     <Compile Include="FinalInterceptor.cs" />
     <Compile Include="IEndNode.cs" />
     <Compile Include="INode.cs" />
+    <Compile Include="MessageAdaptor.cs" />
     <Compile Include="NodeMessage.cs" />
     <Compile Include="IParentNode.cs" />
     <Compile Include="IFieldAccessor.cs" />

@@ -72,15 +72,17 @@ namespace NodeMessaging
             _nodeMessages.Add(nodeMessage);
         }
 
-        public void Intercept(IEndNode node, IInvocation invocation)
+        public void Intercept(INode node, IInvocation invocation)
         {
             _nodeMessages.Do(message => ProcessMessage(message, node, invocation));
         }
 
-        private void ProcessMessage(NodeMessage message, IEndNode node, IInvocation invocation)
+        private void ProcessMessage(NodeMessage message, INode node, IInvocation invocation)
         {
-            if (!message.NodePredicate(node)) return;
-            if (!message.MessagePredicate(invocation)) return;
+            if (message.NodePredicate != null)
+                if (!message.NodePredicate(node)) return;
+            if (message.MessagePredicate != null)
+                if (!message.MessagePredicate(invocation)) return;
 
             var lambda = invocation.Method.BuildLambda(invocation.Arguments);
             var msgOut = Message.Create(lambda, invocation.Method.DeclaringType);

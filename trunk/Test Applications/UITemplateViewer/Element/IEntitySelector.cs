@@ -3,9 +3,13 @@ using UITemplateViewer.Element;
 
 namespace UITemplateViewer.Element
 {
-    public interface IEntitySelector
+    public interface IEntitySelector : IEntitySelector<IEntityRow>
+    {}
+
+    public interface IEntitySelector<TRow>
+        where TRow : IEntityRow
     {
-        IEnumerable<IEntityRow> Rows { get; set; }
-        IEntityRow SelectedRow { get; set; }
+        IEnumerable<TRow> Rows { get; set; }
+        TRow SelectedRow { get; set; }
     }
 }

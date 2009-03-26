@@ -7,7 +7,7 @@ using UITemplateViewer.Element;
 
 namespace UITemplateViewer.WPF
 {
-    public class EntityRow : IEntityRow, IUIInitialize
+    public class EntityRow : IUIEntityRow, IUIInitialize
     {
         private Label _label;
         private IEnumerable<IFieldAccessor<string>> _columns;

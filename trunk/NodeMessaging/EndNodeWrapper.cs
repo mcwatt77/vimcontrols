@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using ActionDictionary;
 using Castle.Core.Interceptor;
 using Castle.DynamicProxy;
@@ -58,6 +57,7 @@ namespace NodeMessaging
             return InjectNode(ret, Intercept);
         }
 
+        //TODO: Remove duplication
         private static T InjectNode<T>(T t, Action<IInvocation> fnIntercept) where T : class
         {
             var generator = new ProxyGenerator();
@@ -75,6 +75,7 @@ namespace NodeMessaging
             return message;
         }
 
+        //TODO: Remove duplication
         private void Intercept(IInvocation invocation)
         {
             //invocation

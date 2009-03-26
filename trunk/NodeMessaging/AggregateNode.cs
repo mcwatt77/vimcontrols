@@ -38,6 +38,11 @@ namespace NodeMessaging
             throw new System.NotImplementedException();
         }
 
+        public T Get<T>() where T : class
+        {
+            throw new System.NotImplementedException();
+        }
+
         public void Register<T>(T t)
         {
             throw new System.NotImplementedException();
