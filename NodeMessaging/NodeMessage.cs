@@ -8,5 +8,6 @@ namespace NodeMessaging
         public Predicate<INode> NodePredicate { get; set; }
         public Predicate<IInvocation> MessagePredicate { get; set; }
         public object Target { get; set; }
+        public object TargetDelegate { get; set; }
     }
 }

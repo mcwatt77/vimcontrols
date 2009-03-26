@@ -1,25 +1,57 @@
 using System.Collections.Generic;
+using System.Linq;
 using UITemplateViewer.Element;
 using UITemplateViewer.WPF;
 
 namespace UITemplateViewer
 {
-    public class EntitySelector : IEntitySelector
+    public class EntitySelectorWrapper : IEntitySelector
     {
-        private IEntityRow _selectedRow;
+        private readonly EntitySelector _selector;
 
-        public IEnumerable<IEntityRow> Rows { get; set; }
+        public EntitySelectorWrapper(EntitySelector selector)
+        {
+            _selector = selector;
+        }
+
+        public IEnumerable<IEntityRow> Rows
+        {
+            get
+            {
+                return _selector.Rows.Cast<IEntityRow>();
+            }
+            set
+            {
+                _selector.Rows = value.Cast<IUIEntityRow>();
+            }
+        }
+
         public IEntityRow SelectedRow
+        {
+            get
+            {
+                return _selector.SelectedRow;
+            }
+            set
+            {
+                _selector.SelectedRow = (IUIEntityRow)value;
+            }
+        }
+    }
+
+    public class EntitySelector : IEntitySelector<IUIEntityRow>
+    {
+        private IUIEntityRow _selectedRow;
+
+        public IEnumerable<IUIEntityRow> Rows { get; set; }
+        public IUIEntityRow SelectedRow
         {
             get { return _selectedRow; }
             set
             {
-                var selectedRow = (EntityRow) _selectedRow;
-                if (_selectedRow != null) selectedRow.Selected = false;
-
+                if (_selectedRow != null) _selectedRow.Selected = false;
                 _selectedRow = value;
-                selectedRow = (EntityRow) _selectedRow;
-                selectedRow.Selected = true;
+                _selectedRow.Selected = true;
             }
         }
     }

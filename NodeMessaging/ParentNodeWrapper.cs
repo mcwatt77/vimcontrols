@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Castle.Core.Interceptor;
+using Castle.DynamicProxy;
 
 namespace NodeMessaging
 {
@@ -33,6 +36,34 @@ namespace NodeMessaging
         public IEndNode Attribute(string name)
         {
             return new EndNodeWrapper(_rootNode, _node.Attribute(name));
+        }
+
+        public T Get<T>() where T : class
+        {
+            var ret = (T) _registeredTypes[typeof (T)];
+            return InjectNode(ret, Intercept);
+        }
+
+        //TODO: Remove duplication
+        private void Intercept(IInvocation invocation)
+        {
+            if (invocation.TargetType != typeof(INode) && invocation.Method.DeclaringType == typeof(INode))
+            {
+                invocation.ReturnValue = invocation.Method.Invoke(_node, invocation.Arguments);
+                return;
+            }
+            invocation.Proceed();
+            _rootNode.Intercept(_node, invocation);
+        }
+
+        //TODO: Remove duplication
+        private static T InjectNode<T>(T t, Action<IInvocation> fnIntercept) where T : class
+        {
+            var generator = new ProxyGenerator();
+            var interfaces = t.GetType().GetInterfaces().Concat(new[] {typeof (IEndNode)}).ToArray();
+            var proxy = (T) generator.CreateInterfaceProxyWithTarget(typeof(T), interfaces, t, new DelegateInterceptor(fnIntercept));
+            //TODO: Include all child interfaces in Proxy
+            return proxy;
         }
 
         public void Register<T>(T t)
