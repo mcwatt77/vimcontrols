@@ -35,6 +35,7 @@ namespace NodeMessaging
 
         public IEndNode Attribute(string name)
         {
+            //bug:  This should not be newing up every time... Memoize that stuff!
             return new EndNodeWrapper(_rootNode, _node.Attribute(name));
         }
 

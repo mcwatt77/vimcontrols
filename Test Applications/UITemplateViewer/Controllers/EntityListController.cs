@@ -26,7 +26,7 @@ namespace UITemplateViewer.Controllers
 
         public void Beginning()
         {
-            throw new System.NotImplementedException();
+            EntityList.SelectedRow = EntityList.Rows.First();
         }
 
         public void End()

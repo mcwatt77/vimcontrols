@@ -6,6 +6,7 @@ namespace NodeMessaging
     public class MessageAdaptor<TSource, TValue>
     {
         public MessageAdaptor(Func<TSource, TValue> f)
-        {}
+        {
+        }
     }
 }

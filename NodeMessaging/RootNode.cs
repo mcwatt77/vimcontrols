@@ -11,13 +11,19 @@ namespace NodeMessaging
     {
         private readonly List<NodeMessage> _nodeMessages = new List<NodeMessage>();
         private readonly Dictionary<Type, object> _registeredTypes = new Dictionary<Type, object>();
+        private List<ParentNodeWrapper> _parentNodeWrappers;
 
         public IEnumerable<IParentNode> Nodes(string nameFilter)
         {
             if (_registeredTypes.ContainsKey(typeof(IParentNode)))
             {
-                var nodeHandler = (IParentNode)_registeredTypes[typeof (IParentNode)];
-                return nodeHandler.Nodes(nameFilter).Select(node => (IParentNode)new ParentNodeWrapper(this, node));
+                if (_parentNodeWrappers == null)
+                {
+                    var nodeHandler = (IParentNode) _registeredTypes[typeof (IParentNode)];
+                    _parentNodeWrappers =
+                        nodeHandler.Nodes(nameFilter).Select(node => new ParentNodeWrapper(this, node)).ToList();
+                }
+                return _parentNodeWrappers.Cast<IParentNode>();
             }
             throw new Exception("You did not register an IParentNode handler");
         }
@@ -44,7 +50,7 @@ namespace NodeMessaging
 
         public T Get<T>() where T : class
         {
-            throw new System.NotImplementedException();
+            return (T) _registeredTypes[typeof (T)];
         }
 
         public void Register<T>(T t)
@@ -85,8 +91,12 @@ namespace NodeMessaging
                 if (!message.MessagePredicate(invocation)) return;
 
             var lambda = invocation.Method.BuildLambda(invocation.Arguments);
-            var msgOut = Message.Create(lambda, invocation.Method.DeclaringType);
-            msgOut.Invoke(message.Target);
+/*            var msgOut = Message.Create(lambda, invocation.Method.DeclaringType);
+            msgOut.Invoke(message.Target);*/
+
+            var del = message.TargetDelegate;
+            var action = del.GetType().GetMethod("Invoke").Invoke(del, new object[] {invocation});
+            action.GetType().GetMethod("Invoke").Invoke(action, new [] {message.Target});
         }
     }
 }
