@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Castle.Core.Interceptor;
 using NodeMessaging;
 using UITemplateViewer.Controllers;
 using UITemplateViewer.Element;
@@ -23,15 +24,12 @@ namespace UITemplateViewer
 
             Func<IParentNode, IFieldAccessor<string>> fnGetDesc = node => node.Attribute("desc").Get<IFieldAccessor<string>>();
             Func<IParentNode, IFieldAccessor<string>> fnGetText = node => node.Attribute("body").Get<IFieldAccessor<string>>();
-            Func<IEndNode, IFieldAccessor<string>> fnGetNewText = endNode => endNode.Parent.Attribute("body").Get<IFieldAccessor<string>>();
             Func<IParentNode, IEnumerable<IParentNode>> fnGetNotes = node => node.Nodes("note");
 
-            var contextDictionary = new Dictionary<string, object>();
-
             EntityList entityList;
-            var rows = BuildNoteList(rootNode, fnGetNotes, fnGetDesc, container, contextDictionary, out entityList);
+            var rows = BuildNoteList(rootNode, fnGetNotes, fnGetDesc, container, out entityList);
             var textDisplay = BuildTextDisplay(rootNode, container);
-            var _entityListController = BuildEntitySelector(rootNode, contextDictionary, textDisplay, fnGetNewText, fnGetText);
+            var _entityListController = BuildEntitySelector(rootNode, fnGetText);
             Initialize((IUIInitialize)textDisplay, entityList, rows);
 
 
@@ -55,21 +53,16 @@ namespace UITemplateViewer
             textDisplay.Initialize();
         }
 
-        private static EntityListController BuildEntitySelector(RootNode rootNode, IDictionary<string, object> contextDictionary, IFieldAccessor<string> textDisplay, Func<IEndNode, IFieldAccessor<string>> fnGetNewText, Func<IParentNode, IFieldAccessor<string>> fnGetText)
+        private static EntityListController BuildEntitySelector(RootNode rootNode, Func<IParentNode, IFieldAccessor<string>> fnGetText)
         {
-            //TODO:  I shouldn't have to pass in textDisplay, I can get it from the provider
-
-
             //TODO: entitySelector element spawns the EntitySelector class, and passes it to the EntityListController
             //It also creates an adaptor of type IFieldAccessor<IEntityRow> that lives *BETWEEN* EntitySelector and EntityListController,
                 //which fires off events to each of the children underneath the entitySelector element
             //It would be nice if something in the framework would conver the [noteList] to EntityList (not the interface)
             //for the EntitySelector to do it's work.
-            //Also note: there seems to be a difference between my EntitySelector class, and some class that would do the work just described
 
 
-            //TODO:  Can I replace this dictionary and casting step with calls to Register<> and Get<>?  I think so.
-            var entityListCast = (IEntityList)contextDictionary["noteList"];
+            var entityListCast = rootNode.Get<IEntityList>();
             //TODO: This should  happen automatically through a register call... (see the rowSelector.Register below)
             var entitySelector = new EntitySelectorWrapper(new EntitySelector())
                                      {
@@ -77,29 +70,24 @@ namespace UITemplateViewer
                                          SelectedRow = entityListCast.Rows.First()
                                      };
 
-      //bug: It's right here yo!
             var textOutput = rootNode.Nodes("textOutput").First().Get<IFieldAccessor<string>>();
             var rowSelector = rootNode.Nodes("rowSelector").First();
             rowSelector.Register<IEntitySelector>(entitySelector);
-            var wrappedSelector = rowSelector.Get<IEntitySelector>();
             var nodeMessage = new NodeMessage
                                   {
                                       NodePredicate = node => node.GetType() == typeof (XmlNode),
                                       Target = textOutput,
                                       MessagePredicate = (message => message.Method.Name == "set_SelectedRow"),
-                                      TargetDelegate = (Func<IEntityRow, Action<IFieldAccessor<string>>>)
-                                                       (row => accessor => accessor.Value = fnGetText(row.Context).Value)
-                                                       //typically this delegate will be of the form...
-                                                       //Execute xpath from delegate on context, and what should be set at that node is the Provider
-                                                       //TODO: 1. I'm registering the selector and the rows, but not the text target?
-                                                       //This problem might have been avoided if I were thinking in terms of using the factory...
+                                      TargetDelegate = (Func<IInvocation, Action<IFieldAccessor<string>>>)
+                                                       (row => accessor => accessor.Value = fnGetText(((IEntityRow)row.Arguments.First()).Context).Value)
+                                                       //TODO: 1. This seems a little complicated...
+                                                       //Somebody, or something in the xml needs to clue the framework in to how to do this wiring.
                                   };
             rootNode.InstallHook(nodeMessage);
 
-            //TODO:  2. Get the TargetDelegate above to work and then remove this EntityListInterceptor.  Pass the wrappedSelector in directly
-            var interceptor = new EntityListInterceptor(wrappedSelector, textDisplay, fnGetNewText);
-            var _entityListController = new EntityListController {EntityList = interceptor};
-            interceptor.SelectedRow = interceptor.Rows.First();
+            var _entityListController = new EntityListController {EntityList = rowSelector.Get<IEntitySelector>()};
+            _entityListController.Beginning();
+
             return _entityListController;
         }
 
@@ -117,12 +105,12 @@ namespace UITemplateViewer
             return node.Get<IEntityRow>();
         }
 
-        private static List<IEntityRow> BuildNoteList(IParentNode rootNode, Func<IParentNode, IEnumerable<IParentNode>> fnGetNotes, Func<IParentNode, IFieldAccessor<string>> fnGetDesc, IContainer container, IDictionary<string, object> contextDictionary, out EntityList entityList)
+        private static List<IEntityRow> BuildNoteList(IParentNode rootNode, Func<IParentNode, IEnumerable<IParentNode>> fnGetNotes, Func<IParentNode, IFieldAccessor<string>> fnGetDesc, IContainer container, out EntityList entityList)
         {
             var notesContext = fnGetNotes(rootNode);
             var rows = notesContext.Select(node => BuildEntityRow(node, fnGetDesc)).ToList();
             entityList = new EntityList {ID = "noteList", Parent = container, Rows = rows};
-            contextDictionary["noteList"] = entityList;
+            rootNode.Register<IEntityList>(entityList);
             return rows;
         }
     }
