@@ -1,13 +1,12 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using ActionDictionary;
 using Castle.Core.Interceptor;
 using NodeMessaging;
 using UITemplateViewer.Controllers;
 using UITemplateViewer.Element;
 using UITemplateViewer.WPF;
-using Utility.Core;
 
 namespace UITemplateViewer
 {
@@ -27,10 +26,10 @@ namespace UITemplateViewer
             Func<IParentNode, IEnumerable<IParentNode>> fnGetNotes = node => node.Nodes("note");
 
             EntityList entityList;
-            var rows = BuildNoteList(rootNode, fnGetNotes, fnGetDesc, container, out entityList);
+            BuildNoteList(rootNode, fnGetNotes, fnGetDesc, container, out entityList);
             var textDisplay = BuildTextDisplay(rootNode, container);
             var _entityListController = BuildEntitySelector(rootNode, fnGetText);
-            Initialize((IUIInitialize)textDisplay, entityList, rows);
+            Initialize(rootNode, (IUIInitialize)textDisplay, entityList);
 
 
             //TODO:  3. Enforce the constraint that new objects go through a factory where the INode is known at creation time, and a proxy is returned
@@ -40,16 +39,18 @@ namespace UITemplateViewer
             return _entityListController;
         }
 
-        private static void Initialize(IUIInitialize textDisplay, EntityList entityList, IEnumerable rows)
+        private static void Initialize(IEndNode rootNode, IUIInitialize textDisplay, EntityList entityList)
         {
 //TODO:  I think maybe this should be a message that gets sent to the RootNode
             //And when that happens I won't need to cast text display and pass it in from above.  Or pass in any other stuff either.
 
+            var msg = Message.Create<IUIInitialize>(ui => ui.Initialize());
+            rootNode.Send(msg);
+
+            //should send the message to all top level controls
 
             //Definitely a single line call
             entityList.Initialize();
-            rows.OfType<IUIInitialize>().Do(ctrl => ctrl.Parent = entityList);
-            rows.OfType<IUIInitialize>().Do(ctrl => ctrl.Initialize());
             textDisplay.Initialize();
         }
 
@@ -98,20 +99,19 @@ namespace UITemplateViewer
             return textOutput.Get<IFieldAccessor<string>>();
         }
 
-        private static IEntityRow BuildEntityRow(IParentNode node, Func<IParentNode, IFieldAccessor<string>> fnGetDesc)
+        private static IUIEntityRow BuildEntityRow(IParentNode node, Func<IParentNode, IFieldAccessor<string>> fnGetDesc)
         {
             IEntityRow row = new EntityRow {Columns = new[] {fnGetDesc(node)}, Context = node};
             node.Register(row);
-            return node.Get<IEntityRow>();
+            return node.Get<IUIEntityRow>();
         }
 
-        private static List<IEntityRow> BuildNoteList(IParentNode rootNode, Func<IParentNode, IEnumerable<IParentNode>> fnGetNotes, Func<IParentNode, IFieldAccessor<string>> fnGetDesc, IContainer container, out EntityList entityList)
+        private static void BuildNoteList(IParentNode rootNode, Func<IParentNode, IEnumerable<IParentNode>> fnGetNotes, Func<IParentNode, IFieldAccessor<string>> fnGetDesc, IContainer container, out EntityList entityList)
         {
             var notesContext = fnGetNotes(rootNode);
             var rows = notesContext.Select(node => BuildEntityRow(node, fnGetDesc)).ToList();
             entityList = new EntityList {ID = "noteList", Parent = container, Rows = rows};
-            rootNode.Register<IEntityList>(entityList);
-            return rows;
+            rootNode.Register(entityList);
         }
     }
 }

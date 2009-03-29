@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ActionDictionary;
 using Castle.Core.Interceptor;
+using Castle.DynamicProxy;
 using Utility.Core;
 
 namespace NodeMessaging
@@ -55,12 +56,57 @@ namespace NodeMessaging
 
         public void Register<T>(T t)
         {
-            _registeredTypes[typeof (T)] = t;
+            var interfaces = t.GetType().GetInterfaces().Select(i => AdditionalInterfaces(i, t)).Flatten();
+            interfaces.Do(i => _registeredTypes[i] = t);
+        }
+
+        private void RegisterWithWrapper(Type typeToSupport, object obj)
+        {
+            var proxy = new ProxyGenerator();
+            _registeredTypes[typeToSupport] = proxy.CreateInterfaceProxyWithoutTarget(typeToSupport, new SuperCast(obj));
+        }
+
+        private IEnumerable<Type> AdditionalInterfaces(Type type, object obj)
+        {
+            yield return type;
+            if (type.IsGenericType)
+            {
+                if (type.GetGenericArguments().Count() == 1)
+                {
+                    var subtype = type.GetGenericArguments().First();
+                    var interfaces = subtype.GetInterfaces();
+                    if (interfaces.Count() > 0)
+                    {
+                        var genericType = type.GetGenericTypeDefinition();
+                        var arg = genericType.GetGenericArguments().First();
+                        var constraint = arg.GetGenericParameterConstraints().First();
+                        var typeToLookFor = interfaces
+                            .Where(i => constraint == i)
+                            .Select(i => genericType.MakeGenericType(i))
+                            .SingleOrDefault();
+
+                        if (typeToLookFor != null)
+                        {
+                            var specialType = type.Assembly.GetTypes().SingleOrDefault(typeToLookFor.IsAssignableFrom);
+                            RegisterWithWrapper(specialType, obj);
+                        }
+
+                    }
+                }
+            }
+            yield break;
+        }
+
+        private IEnumerable<INode> DescendantNodes()
+        {
+//            Nodes();
+            return null;
         }
 
         public Message Send(Message message)
         {
-            throw new System.NotImplementedException();
+            //how do I know who to send to?
+            return null;
         }
 
         public IEnumerable<Type> RegisteredTypes

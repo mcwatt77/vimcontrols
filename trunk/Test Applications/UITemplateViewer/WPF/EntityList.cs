@@ -2,15 +2,16 @@
 using System.Windows;
 using System.Windows.Controls;
 using UITemplateViewer.Element;
+using Utility.Core;
 
 namespace UITemplateViewer.WPF
 {
-    public class EntityList : IEntityList, IContainer, IUIInitialize
+    public class EntityList : IEntityList<IUIEntityRow>, IContainer, IUIInitialize
     {
         private StackPanel _stackPanel;
 
         public string DisplayName { get; set; }
-        public IEnumerable<IEntityRow> Rows { get; set; }
+        public IEnumerable<IUIEntityRow> Rows { get; set; }
 
         public void AddChild(FrameworkElement element)
         {
@@ -27,6 +28,9 @@ namespace UITemplateViewer.WPF
             _stackPanel = new StackPanel();
             if (ID != null) _stackPanel.Name = ID;
             Parent.AddChild(_stackPanel);
+
+            Rows.Do(row => row.Parent = this);
+            Rows.Do(row => row.Initialize());
         }
 
         public IContainer Parent { get; set; }
