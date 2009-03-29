@@ -61,7 +61,6 @@
     <Compile Include="AppWindow.cs" />
     <Compile Include="Controllers\EntityListController.cs" />
     <Compile Include="DynamicTemplate.cs" />
-    <Compile Include="DynamicTemplateElement.cs" />
     <Compile Include="Element\IEntitySelector.cs" />
     <Compile Include="EntitySelector.cs" />
     <Compile Include="EntitySelectorWrapper.cs" />

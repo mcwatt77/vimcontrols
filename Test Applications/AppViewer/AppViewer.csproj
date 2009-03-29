@@ -53,6 +53,7 @@
     <Compile Include="AppLauncherControl.cs" />
     <Compile Include="AppViewer.cs" />
     <Compile Include="AppWindow.cs" />
+    <Compile Include="Controls\3dView.cs" />
     <Compile Include="Controls\GridControl.cs" />
     <Compile Include="Controls\MediaViewerControl.cs" />
     <Compile Include="Controls\NoteViewerControl.cs" />

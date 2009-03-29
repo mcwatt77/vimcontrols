@@ -46,8 +46,13 @@
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="3dExtruder\I3dObjectData.cs" />
+    <Compile Include="3dExtruder\I3dObjectUpdate.cs" />
     <Compile Include="ListView\IListViewData.cs" />
     <Compile Include="ListView\IListViewUpdate.cs" />
     <Compile Include="MediaViewer\IMediaViewerData.cs" />
