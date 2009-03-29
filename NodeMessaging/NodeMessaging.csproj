@@ -70,6 +70,7 @@
     <Compile Include="ParentNodeWrapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RootNode.cs" />
+    <Compile Include="SuperCast.cs" />
     <Compile Include="Tests\NodeTest.cs" />
     <Compile Include="XmlNode.cs" />
   </ItemGroup>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Castle.Core.Interceptor;
 using Castle.DynamicProxy;
+using Utility.Core;
 
 namespace NodeMessaging
 {
@@ -69,7 +70,8 @@ namespace NodeMessaging
 
         public void Register<T>(T t)
         {
-            _registeredTypes[typeof (T)] = t;
+            var interfaces = t.GetType().GetInterfaces();
+            interfaces.Do(i => _registeredTypes[i] = t);
         }
 
         public IParentNode Parent
