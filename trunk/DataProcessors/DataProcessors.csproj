@@ -52,6 +52,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="3dExtruder\Controller.cs" />
     <Compile Include="AppLauncher.cs" />
     <Compile Include="Civilization\CivControl.cs" />
     <Compile Include="IText.cs" />
