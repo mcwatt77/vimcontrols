@@ -26,7 +26,6 @@ namespace UITemplateViewer.WPF
         public void Initialize()
         {
             _stackPanel = new StackPanel();
-            if (ID != null) _stackPanel.Name = ID;
             Parent.AddChild(_stackPanel);
 
             Rows.Do(row => row.Parent = this);
@@ -34,6 +33,5 @@ namespace UITemplateViewer.WPF
         }
 
         public IContainer Parent { get; set; }
-        public string ID { get; set; }
     }
 }

@@ -1,35 +1,94 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ActionDictionary;
+using System.Xml.Linq;
 using Castle.Core.Interceptor;
 using NodeMessaging;
 using UITemplateViewer.Controllers;
 using UITemplateViewer.Element;
 using UITemplateViewer.WPF;
+using Utility.Core;
 
 namespace UITemplateViewer
 {
     public class DynamicTemplate
     {
+        private readonly Dictionary<string, IParentNode> _nodeLookups = new Dictionary<string, IParentNode>();
+
+        private void ProcessTemplateElem(IParentNode templateNode)
+        {
+            var elem = templateNode.Nodes().First();
+
+            //find a class that matches the elem name
+            var types = typeof (DynamicTemplate)
+                .Assembly
+                .GetTypes()
+                .Where(type => type.Name.ToLower() == elem.Name.ToLower());
+
+            if (types.Count() != 1) throw new Exception("Found " + types.Count() + " of type " + elem.Name);
+
+            var newType = types.Single();
+            var newObj = newType.GetConstructor(Type.EmptyTypes).Invoke(new object[] {});
+
+            elem.Attributes().Do(attr => ProcessAttribute(elem, attr, newObj));
+        }
+
+        private void ProcessAttribute(IParentNode parent, INode node, object newObj)
+        {
+            var get = node.Get<IFieldAccessor<string>>();
+            if (node.Name == "id")
+            {
+                _nodeLookups[get.Value] = parent;
+                return;
+            }
+            if (get.Value[0] != '[' && get.Value[0] != '{')
+            {
+                var propToSet = newObj.GetType().GetProperties().SingleOrDefault(prop => prop.Name.ToLower() == node.Name.ToLower());
+                if (propToSet != null)
+                {
+                    propToSet.SetValue(newObj, get.Value, null);
+                }
+            }
+        }
+
+        //TODO: 1. $$$ Replace this method with the automatic template reading above
+        private static void BuildNoteList(IParentNode rootNode, Func<IParentNode, IEnumerable<IParentNode>> fnGetNotes, Func<IParentNode, IFieldAccessor<string>> fnGetDesc, IContainer container, out EntityList entityList)
+        {
+            var notesContext = fnGetNotes(rootNode);
+            var rows = notesContext.Take(2).Select(node => BuildEntityRow(node, fnGetDesc)).ToList();
+            entityList = new EntityList {Parent = container, Rows = rows};
+            rootNode.Register(entityList);
+        }
+
         public object InitializeController(IContainer container)
         {
-            var xmlNode = XmlNode.Parse("<root><note desc=\"1\" body=\"One!\"/><note desc=\"2\" body=\"Two?\"/></root>");
             var rootNode = new RootNode();
-            rootNode.Register<IParentNode>(xmlNode);
 
-            var storageNode = XmlNode.Parse("<root><rowSelector/><textOutput/></root>");
-            rootNode.Register<IParentNode>(new AggregateNode(xmlNode, storageNode));
+            var template = XDocument.Load(@"..\..\templates\noteviewer.xml");
+            if (template.Root == null) throw new Exception("Invalid xml document");
+
+            var xmlNode = XmlNode.Parse("<data><note desc=\"1\" body=\"One!\"/><note desc=\"2\" body=\"Two?\"/></data>");
+            //TODO: This needs to be generated dynamically somehow
+            var storageNode = XmlNode.Parse("<dynamicData><rowSelector/><textOutput/></dynamicData>");
+            var templateNode = XmlNode.Parse(template.ToString());
+
+            rootNode.Register<IParentNode>(new AggregateNode(xmlNode, storageNode, templateNode));
+
+            var uiRoot = rootNode.Nodes().Skip(2).First();
+            template.Root.Elements().Do(elem => ProcessTemplateElem(uiRoot));
 
             Func<IParentNode, IFieldAccessor<string>> fnGetDesc = node => node.Attribute("desc").Get<IFieldAccessor<string>>();
             Func<IParentNode, IFieldAccessor<string>> fnGetText = node => node.Attribute("body").Get<IFieldAccessor<string>>();
             Func<IParentNode, IEnumerable<IParentNode>> fnGetNotes = node => node.Nodes("note");
 
+            var dataRoot = rootNode.Nodes("data").First();
+            var dynamicData = rootNode.Nodes("dynamicData").First();
+
             EntityList entityList;
-            BuildNoteList(rootNode, fnGetNotes, fnGetDesc, container, out entityList);
-            var textDisplay = BuildTextDisplay(rootNode, container);
-            var _entityListController = BuildEntitySelector(rootNode, fnGetText);
-            Initialize(rootNode, (IUIInitialize)textDisplay, entityList);
+            BuildNoteList(dataRoot, fnGetNotes, fnGetDesc, container, out entityList);
+            var textDisplay = BuildTextDisplay(dynamicData, container);
+            var _entityListController = BuildEntitySelector(dataRoot, fnGetText, rootNode, dynamicData);
+            Initialize((IUIInitialize)textDisplay, entityList);
 
 
             //TODO:  3. Enforce the constraint that new objects go through a factory where the INode is known at creation time, and a proxy is returned
@@ -39,13 +98,13 @@ namespace UITemplateViewer
             return _entityListController;
         }
 
-        private static void Initialize(IEndNode rootNode, IUIInitialize textDisplay, EntityList entityList)
+        private static void Initialize(IUIInitialize textDisplay, IUIInitialize entityList)
         {
 //TODO:  I think maybe this should be a message that gets sent to the RootNode
             //And when that happens I won't need to cast text display and pass it in from above.  Or pass in any other stuff either.
 
-            var msg = Message.Create<IUIInitialize>(ui => ui.Initialize());
-            rootNode.Send(msg);
+/*            var msg = Message.Create<IUIInitialize>(ui => ui.Initialize());
+            rootNode.Send(msg);*/
 
             //should send the message to all top level controls
 
@@ -54,26 +113,14 @@ namespace UITemplateViewer
             textDisplay.Initialize();
         }
 
-        private static EntityListController BuildEntitySelector(RootNode rootNode, Func<IParentNode, IFieldAccessor<string>> fnGetText)
+        private static EntityListController BuildEntitySelector(IParentNode rootNode, Func<IParentNode, IFieldAccessor<string>> fnGetText, RootNode actualRootNode, IParentNode dynamicData)
         {
-            //TODO: entitySelector element spawns the EntitySelector class, and passes it to the EntityListController
-            //It also creates an adaptor of type IFieldAccessor<IEntityRow> that lives *BETWEEN* EntitySelector and EntityListController,
-                //which fires off events to each of the children underneath the entitySelector element
-            //It would be nice if something in the framework would conver the [noteList] to EntityList (not the interface)
-            //for the EntitySelector to do it's work.
+            var entityList = rootNode.Get<IEntityList<IUIEntityRow>>();
+            var selector = new EntitySelector {Rows = entityList.Rows, SelectedRow = entityList.Rows.First()};
+            var rowSelector = dynamicData.Nodes("rowSelector").First();
+            rowSelector.Register(selector);
 
-
-            var entityListCast = rootNode.Get<IEntityList>();
-            //TODO: This should  happen automatically through a register call... (see the rowSelector.Register below)
-            var entitySelector = new EntitySelectorWrapper(new EntitySelector())
-                                     {
-                                         Rows = entityListCast.Rows,
-                                         SelectedRow = entityListCast.Rows.First()
-                                     };
-
-            var textOutput = rootNode.Nodes("textOutput").First().Get<IFieldAccessor<string>>();
-            var rowSelector = rootNode.Nodes("rowSelector").First();
-            rowSelector.Register<IEntitySelector>(entitySelector);
+            var textOutput = dynamicData.Nodes("textOutput").First().Get<IFieldAccessor<string>>();
             var nodeMessage = new NodeMessage
                                   {
                                       NodePredicate = node => node.GetType() == typeof (XmlNode),
@@ -84,7 +131,7 @@ namespace UITemplateViewer
                                                        //TODO: 1. This seems a little complicated...
                                                        //Somebody, or something in the xml needs to clue the framework in to how to do this wiring.
                                   };
-            rootNode.InstallHook(nodeMessage);
+            actualRootNode.InstallHook(nodeMessage);
 
             var _entityListController = new EntityListController {EntityList = rowSelector.Get<IEntitySelector>()};
             _entityListController.Beginning();
@@ -104,14 +151,6 @@ namespace UITemplateViewer
             IEntityRow row = new EntityRow {Columns = new[] {fnGetDesc(node)}, Context = node};
             node.Register(row);
             return node.Get<IUIEntityRow>();
-        }
-
-        private static void BuildNoteList(IParentNode rootNode, Func<IParentNode, IEnumerable<IParentNode>> fnGetNotes, Func<IParentNode, IFieldAccessor<string>> fnGetDesc, IContainer container, out EntityList entityList)
-        {
-            var notesContext = fnGetNotes(rootNode);
-            var rows = notesContext.Select(node => BuildEntityRow(node, fnGetDesc)).ToList();
-            entityList = new EntityList {ID = "noteList", Parent = container, Rows = rows};
-            rootNode.Register(entityList);
         }
     }
 }

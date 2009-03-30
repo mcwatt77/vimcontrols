@@ -28,12 +28,22 @@ namespace NodeMessaging
             return _nodes.Select(node => node.Nodes(nameFilter)).Flatten();
         }
 
+        public IEnumerable<IParentNode> Nodes()
+        {
+            return _nodes.Select(node => node.Nodes()).Flatten();
+        }
+
         public IParentNode NodeAt(int index)
         {
             throw new System.NotImplementedException();
         }
 
         public IEndNode Attribute(string name)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public IEnumerable<IEndNode> Attributes()
         {
             throw new System.NotImplementedException();
         }

@@ -30,6 +30,5 @@ namespace UITemplateViewer.WPF
         }
 
         public IContainer Parent { get; set; }
-        public string ID { get; set; }
     }
 }
