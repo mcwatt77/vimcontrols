@@ -3,18 +3,32 @@ using System.Collections.Generic;
 using System.Linq;
 using ActionDictionary;
 using Castle.Core.Interceptor;
-using Castle.DynamicProxy;
 using Utility.Core;
 
 namespace NodeMessaging
 {
-    public class RootNode : IParentNode, IEndNode
+    public class RootNode : NodeBase, IParentNode, IEndNode
     {
         private readonly List<NodeMessage> _nodeMessages = new List<NodeMessage>();
-        private readonly Dictionary<Type, object> _registeredTypes = new Dictionary<Type, object>();
         private List<ParentNodeWrapper> _parentNodeWrappers;
+        private readonly Dictionary<string, IEnumerable<IParentNode>> _nodeDict = new Dictionary<string, IEnumerable<IParentNode>>();
 
         public IEnumerable<IParentNode> Nodes(string nameFilter)
+        {
+            if (_registeredTypes.ContainsKey(typeof(IParentNode)))
+            {
+                    var nodeHandler = (IParentNode) _registeredTypes[typeof (IParentNode)];
+                    if (!_nodeDict.ContainsKey(nameFilter))
+                    {
+                        _nodeDict[nameFilter] =
+                            nodeHandler.Nodes(nameFilter).Select(node => (IParentNode)new ParentNodeWrapper(this, node)).ToList();
+                    }
+                    return _nodeDict[nameFilter];
+            }
+            throw new Exception("You did not register an IParentNode handler");
+        }
+
+        public IEnumerable<IParentNode> Nodes()
         {
             if (_registeredTypes.ContainsKey(typeof(IParentNode)))
             {
@@ -22,7 +36,7 @@ namespace NodeMessaging
                 {
                     var nodeHandler = (IParentNode) _registeredTypes[typeof (IParentNode)];
                     _parentNodeWrappers =
-                        nodeHandler.Nodes(nameFilter).Select(node => new ParentNodeWrapper(this, node)).ToList();
+                        nodeHandler.Nodes().Select(node => new ParentNodeWrapper(this, node)).ToList();
                 }
                 return _parentNodeWrappers.Cast<IParentNode>();
             }
@@ -35,6 +49,11 @@ namespace NodeMessaging
         }
 
         public IEndNode Attribute(string name)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public IEnumerable<IEndNode> Attributes()
         {
             throw new System.NotImplementedException();
         }
@@ -52,55 +71,6 @@ namespace NodeMessaging
         public T Get<T>() where T : class
         {
             return (T) _registeredTypes[typeof (T)];
-        }
-
-        public void Register<T>(T t)
-        {
-            var interfaces = t.GetType().GetInterfaces().Select(i => AdditionalInterfaces(i, t)).Flatten();
-            interfaces.Do(i => _registeredTypes[i] = t);
-        }
-
-        private void RegisterWithWrapper(Type typeToSupport, object obj)
-        {
-            var proxy = new ProxyGenerator();
-            _registeredTypes[typeToSupport] = proxy.CreateInterfaceProxyWithoutTarget(typeToSupport, new SuperCast(obj));
-        }
-
-        private IEnumerable<Type> AdditionalInterfaces(Type type, object obj)
-        {
-            yield return type;
-            if (type.IsGenericType)
-            {
-                if (type.GetGenericArguments().Count() == 1)
-                {
-                    var subtype = type.GetGenericArguments().First();
-                    var interfaces = subtype.GetInterfaces();
-                    if (interfaces.Count() > 0)
-                    {
-                        var genericType = type.GetGenericTypeDefinition();
-                        var arg = genericType.GetGenericArguments().First();
-                        var constraint = arg.GetGenericParameterConstraints().First();
-                        var typeToLookFor = interfaces
-                            .Where(i => constraint == i)
-                            .Select(i => genericType.MakeGenericType(i))
-                            .SingleOrDefault();
-
-                        if (typeToLookFor != null)
-                        {
-                            var specialType = type.Assembly.GetTypes().SingleOrDefault(typeToLookFor.IsAssignableFrom);
-                            RegisterWithWrapper(specialType, obj);
-                        }
-
-                    }
-                }
-            }
-            yield break;
-        }
-
-        private IEnumerable<INode> DescendantNodes()
-        {
-//            Nodes();
-            return null;
         }
 
         public Message Send(Message message)

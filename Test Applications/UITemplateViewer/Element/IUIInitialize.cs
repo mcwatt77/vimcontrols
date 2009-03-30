@@ -4,6 +4,5 @@ namespace UITemplateViewer.Element
     {
         void Initialize();
         IContainer Parent { get; set; }
-        string ID { get; set; }
     }
 }

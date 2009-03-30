@@ -19,7 +19,7 @@ namespace NodeMessaging
 
         public string Name
         {
-            get { throw new System.NotImplementedException(); }
+            get { return _node.Name; }
         }
 
         public IParentNode Parent

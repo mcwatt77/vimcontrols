@@ -16,12 +16,17 @@ namespace NodeMessaging
         public static XmlNode Parse(string xml)
         {
             var doc = XDocument.Parse(xml);
-            return new XmlNode(doc.Root);
+            return new XmlNode(new XElement("root", doc.Root));
         }
 
         public IEnumerable<IParentNode> Nodes(string nameFilter)
         {
             return _elem.Elements(nameFilter).Select(elem => (IParentNode)new XmlNode(elem));
+        }
+
+        public IEnumerable<IParentNode> Nodes()
+        {
+            return _elem.Elements().Select(elem => (IParentNode) new XmlNode(elem));
         }
 
         public IParentNode NodeAt(int index)
@@ -37,6 +42,11 @@ namespace NodeMessaging
             var stringProvider = (IFieldAccessor<string>)new FieldAccessor<string> {Value = attr.Value};
             endNode.Register(stringProvider);
             return endNode;
+        }
+
+        public IEnumerable<IEndNode> Attributes()
+        {
+            return _elem.Attributes().Select(attr => Attribute(attr.Name.LocalName));
         }
 
         public T Get<T>() where T : class

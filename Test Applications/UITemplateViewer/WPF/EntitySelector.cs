@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UITemplateViewer.Element;
 using UITemplateViewer.WPF;
 
-namespace UITemplateViewer
+namespace UITemplateViewer.WPF
 {
     public class EntitySelector : IEntitySelector<IUIEntityRow>
     {
