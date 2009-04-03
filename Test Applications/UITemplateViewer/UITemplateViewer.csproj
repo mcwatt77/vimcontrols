@@ -41,6 +41,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\external-bin\Castle.DynamicProxy2.dll</HintPath>
     </Reference>
+    <Reference Include="nunit.framework, Version=2.4.7.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -60,8 +61,11 @@
   <ItemGroup>
     <Compile Include="AppWindow.cs" />
     <Compile Include="Controllers\EntityListController.cs" />
+    <Compile Include="DynamicPathDecoder.cs" />
+    <Compile Include="DynamicPath\Decoder.cs" />
     <Compile Include="DynamicTemplate.cs" />
     <Compile Include="Element\IEntitySelector.cs" />
+    <Compile Include="Tests\DynamicPath\Decoder.cs" />
     <Compile Include="WPF\EntitySelector.cs" />
     <Compile Include="WPF\EntityRow.cs" />
     <Compile Include="Element\IContainer.cs" />
@@ -86,11 +90,13 @@
     <Compile Include="Element\ITextDisplay.cs" />
     <Compile Include="WPF\IUIEntityRow.cs" />
     <Compile Include="WPF\TextDisplay.cs" />
+    <Compile Include="XPathDecoder.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <None Include="DynamicPath\syntax.p" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -117,6 +123,15 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Templates\noteviewer.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Templates\appviewer.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Templates\sketchnotes.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Templates\imageviewer.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
