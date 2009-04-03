@@ -54,6 +54,7 @@
     <Compile Include="GenericListExtensions.cs" />
     <Compile Include="MethodInfoExtensions.cs" />
     <Compile Include="ObjectExtensions.cs" />
+    <Compile Include="Parser.cs" />
     <Compile Include="PropertyInfoExtensions.cs" />
     <Compile Include="TypeExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

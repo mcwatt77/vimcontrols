@@ -134,6 +134,17 @@ namespace DataProcessors.Civilization
         }
     }
 
+    public class Occupation
+    {
+    }
+
+    public class Farmer : Occupation {} 
+    public class Monarch : Occupation {} 
+    public class Warrior : Occupation {}
+    public class Slave : Occupation {}
+    public class Academic : Occupation {}
+    public class CivilServant : Occupation {}
+
     public class Doctrine
     {}
 

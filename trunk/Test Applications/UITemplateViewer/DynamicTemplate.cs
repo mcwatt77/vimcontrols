@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
@@ -14,8 +15,9 @@ namespace UITemplateViewer
     public class DynamicTemplate
     {
         private readonly Dictionary<string, IParentNode> _nodeLookups = new Dictionary<string, IParentNode>();
+        private XPathDecoder _xpath;
 
-        private void ProcessTemplateElem(IParentNode templateNode)
+        private void ProcessTemplateElem(IParentNode dataNode, IParentNode templateNode)
         {
             var elem = templateNode.Nodes().First();
 
@@ -30,12 +32,15 @@ namespace UITemplateViewer
             var newType = types.Single();
             var newObj = newType.GetConstructor(Type.EmptyTypes).Invoke(new object[] {});
 
-            elem.Attributes().Do(attr => ProcessAttribute(elem, attr, newObj));
+            elem.Attributes().Do(attr => ProcessAttribute(dataNode, elem, attr, newObj));
         }
 
-        private void ProcessAttribute(IParentNode parent, INode node, object newObj)
+        private void ProcessAttribute(IParentNode data, IParentNode parent, INode node, object newObj)
         {
+            var propToSet = newObj.GetType().GetProperties().SingleOrDefault(prop => prop.Name.ToLower() == node.Name.ToLower());
             var get = node.Get<IFieldAccessor<string>>();
+
+            var dynamicPath = DynamicPathDecoder.FromPath(get.Value);
             if (node.Name == "id")
             {
                 _nodeLookups[get.Value] = parent;
@@ -43,15 +48,48 @@ namespace UITemplateViewer
             }
             if (get.Value[0] != '[' && get.Value[0] != '{')
             {
-                var propToSet = newObj.GetType().GetProperties().SingleOrDefault(prop => prop.Name.ToLower() == node.Name.ToLower());
                 if (propToSet != null)
                 {
                     propToSet.SetValue(newObj, get.Value, null);
                 }
+                return;
             }
+
+            var path = get.Value.Substring(1, get.Value.Length - 2);
+            var method = _xpath.GetType().GetMethods().Single(lmethod => lmethod.Name == "GetPathFunc" && !lmethod.IsGenericMethod);
+            var result = (Delegate)method.Invoke(_xpath, new object[] {path});
+            var invokeResult = result.DynamicInvoke(data);
+
+            if (typeof(IEnumerable).IsAssignableFrom(invokeResult.GetType()))
+            {
+                var nodes = ((IEnumerable) invokeResult).Cast<INode>();
+                //try to pack this into the propToSet
+
+                int debug2 = 0;
+            }
+
+            //NOTE:  This is the current design path... but as soon as I pass in data...
+            //I tie the whole system up in dynamic runtime execution.
+            //Would be much nicer if I could return delegates to operate later
+            //NOTE:  I might be able to an inversion type thing, where instead of passing in data, I pass in a delegate to data
+
+            //what I have here is the result of fnGetNotes
+            //TODO: 1. Now I need to build EntityRows out of them
+//            _xpath.GetPathFunc<>()
+
+            //The value of invokeResult is whatever gets returned by xpath, which should either be IEnum<Node> or Node...
+            //Should I always make it IEnum?
+            int debug = 0;
         }
 
-        //TODO: 1. $$$ Replace this method with the automatic template reading above
+        //TODO: 2. $$$ Replace this method with the automatic template reading above
+        private static IUIEntityRow BuildEntityRow(IParentNode node, Func<IParentNode, IFieldAccessor<string>> fnGetDesc)
+        {
+            IEntityRow row = new EntityRow {Columns = new[] {fnGetDesc(node)}, Context = node};
+            node.Register(row);
+            return node.Get<IUIEntityRow>();
+        }
+
         private static void BuildNoteList(IParentNode rootNode, Func<IParentNode, IEnumerable<IParentNode>> fnGetNotes, Func<IParentNode, IFieldAccessor<string>> fnGetDesc, IContainer container, out EntityList entityList)
         {
             var notesContext = fnGetNotes(rootNode);
@@ -62,6 +100,7 @@ namespace UITemplateViewer
 
         public object InitializeController(IContainer container)
         {
+            _xpath = new XPathDecoder();
             var rootNode = new RootNode();
 
             var template = XDocument.Load(@"..\..\templates\noteviewer.xml");
@@ -74,15 +113,18 @@ namespace UITemplateViewer
 
             rootNode.Register<IParentNode>(new AggregateNode(xmlNode, storageNode, templateNode));
 
-            var uiRoot = rootNode.Nodes().Skip(2).First();
-            template.Root.Elements().Do(elem => ProcessTemplateElem(uiRoot));
-
-            Func<IParentNode, IFieldAccessor<string>> fnGetDesc = node => node.Attribute("desc").Get<IFieldAccessor<string>>();
-            Func<IParentNode, IFieldAccessor<string>> fnGetText = node => node.Attribute("body").Get<IFieldAccessor<string>>();
-            Func<IParentNode, IEnumerable<IParentNode>> fnGetNotes = node => node.Nodes("note");
-
             var dataRoot = rootNode.Nodes("data").First();
             var dynamicData = rootNode.Nodes("dynamicData").First();
+            var uiRoot = rootNode.Nodes().Skip(2).First();
+            template.Root.Elements().Do(elem => ProcessTemplateElem(dataRoot, uiRoot));
+
+
+//            var fnGetDesc = _xpath.GetPathFunc<IFieldAccessor<string>>("@descr");
+//            var fnGetText = _xpath.GetPathFunc<IFieldAccessor<string>>("@body");
+            Func<IParentNode, IFieldAccessor<string>> fnGetDesc = node => node.Attribute("desc").Get<IFieldAccessor<string>>();
+            Func<IParentNode, IFieldAccessor<string>> fnGetText = node => node.Attribute("body").Get<IFieldAccessor<string>>();
+            var fnGetNotes = _xpath.GetPathFunc<IEnumerable<IParentNode>>("//note");
+
 
             EntityList entityList;
             BuildNoteList(dataRoot, fnGetNotes, fnGetDesc, container, out entityList);
@@ -113,7 +155,7 @@ namespace UITemplateViewer
             textDisplay.Initialize();
         }
 
-        private static EntityListController BuildEntitySelector(IParentNode rootNode, Func<IParentNode, IFieldAccessor<string>> fnGetText, RootNode actualRootNode, IParentNode dynamicData)
+        private static EntityListController BuildEntitySelector(INode rootNode, Func<IParentNode, IFieldAccessor<string>> fnGetText, RootNode actualRootNode, IParentNode dynamicData)
         {
             var entityList = rootNode.Get<IEntityList<IUIEntityRow>>();
             var selector = new EntitySelector {Rows = entityList.Rows, SelectedRow = entityList.Rows.First()};
@@ -144,13 +186,6 @@ namespace UITemplateViewer
             var textOutput = rootNode.Nodes("textOutput").First();
             textOutput.Register<IFieldAccessor<string>>(new TextDisplay {Parent = container});
             return textOutput.Get<IFieldAccessor<string>>();
-        }
-
-        private static IUIEntityRow BuildEntityRow(IParentNode node, Func<IParentNode, IFieldAccessor<string>> fnGetDesc)
-        {
-            IEntityRow row = new EntityRow {Columns = new[] {fnGetDesc(node)}, Context = node};
-            node.Register(row);
-            return node.Get<IUIEntityRow>();
         }
     }
 }
