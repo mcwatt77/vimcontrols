@@ -65,7 +65,7 @@
     <Compile Include="DynamicPath\Decoder.cs" />
     <Compile Include="DynamicTemplate.cs" />
     <Compile Include="Element\IEntitySelector.cs" />
-    <Compile Include="Tests\DynamicPath\Decoder.cs" />
+    <Compile Include="Tests\DynamicPath\DecoderTest.cs" />
     <Compile Include="WPF\EntitySelector.cs" />
     <Compile Include="WPF\EntityRow.cs" />
     <Compile Include="Element\IContainer.cs" />
@@ -96,6 +96,7 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <None Include="DynamicPath\xpath.p" />
     <None Include="DynamicPath\syntax.p" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

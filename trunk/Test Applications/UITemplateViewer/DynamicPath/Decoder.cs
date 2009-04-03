@@ -1,27 +1,31 @@
 ﻿using System.IO;
+using System.Xml.Linq;
 using Utility.Core;
 
 namespace UITemplateViewer.DynamicPath
 {
     public class Decoder
     {
-        private Decoder()
-        {}
+        private readonly XElement _element;
+
+        private Decoder(XElement element)
+        {
+            _element = element;
+        }
+
+        public override string ToString()
+        {
+            return _element.ToString();
+        }
 
         public static Decoder FromPath(string path)
         {
             var fileInfo = new FileInfo(@"..\..\DynamicPath\syntax.p");
-            var parser = new Parser(fileInfo.OpenText());
-/*            parser.Parse("[*]{/note}");
-            parser.Parse("[*]");
-            parser.Parse("{@descr}");
-            parser.Parse("{/dyn::rowSelector}");
-            parser.Parse(":noteList/@rows");
-            parser.Parse("[../@rowSelector]{@body}");*/
+            var parser = new PathParser(fileInfo.OpenText());
 
             var doc = parser.Parse(path);
 
-            return new Decoder();
+            return new Decoder(doc);
         }
     }
 }

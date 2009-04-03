@@ -1,5 +1,5 @@
 ﻿->
-{local_doc_path}|{std_xpath}|{literal_statement}
+^{element_group}+$
 $
 
 root->
@@ -16,18 +16,6 @@ $
 
 node->
 {attribute}|{element}|{self}|{parent}|{literal}
-$
-
-{local_doc_path}->
-(?<local_doc_path>^\[{element_group}+\]$)
-$
-
-{std_xpath}->
-(?<std_xpath>^\{{element_group}+\}$)
-$
-
-{literal_statement}->
-(?<literal_statement>^[^\[\{].*$)
 $
 
 {zero_to_two_slashes}->

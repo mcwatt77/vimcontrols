@@ -9,7 +9,18 @@ namespace UITemplateViewer.Tests.DynamicPath
         [Test]
         public void Test()
         {
-            var decoder = Decoder.FromPath("//bankruptcy[./filers[../@name = '12']]/charlie");
+            var decode = Decoder.FromPath("[*]{/note}").ToString();
+            Assert.Greater(decode.Length, 0);
+            decode = Decoder.FromPath("[*]").ToString();
+            Assert.Greater(decode.Length, 0);
+            decode = Decoder.FromPath("{@descr}").ToString();
+            Assert.Greater(decode.Length, 0);
+            decode = Decoder.FromPath("{/dyn::rowSelector}").ToString();
+            Assert.Greater(decode.Length, 0);
+            decode = Decoder.FromPath("[:noteList/@rows]").ToString();
+            Assert.Greater(decode.Length, 0);
+            decode = Decoder.FromPath("[../@rowSelector]{@body}").ToString();
+            Assert.Greater(decode.Length, 0);
         }
     }
 }
