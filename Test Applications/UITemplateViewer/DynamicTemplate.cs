@@ -57,6 +57,7 @@ namespace UITemplateViewer
 
             var path = get.Value.Substring(1, get.Value.Length - 2);
             var method = _xpath.GetType().GetMethods().Single(lmethod => lmethod.Name == "GetPathFunc" && !lmethod.IsGenericMethod);
+            return;
             var result = (Delegate)method.Invoke(_xpath, new object[] {path});
             var invokeResult = result.DynamicInvoke(data);
 
