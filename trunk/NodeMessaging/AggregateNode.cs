@@ -4,11 +4,11 @@ using Utility.Core;
 
 namespace NodeMessaging
 {
-    public class AggregateNode : IParentNode
+    public class AggregateNode : IParentNodeImplementor
     {
-        private readonly IParentNode[] _nodes;
+        private readonly IParentNodeImplementor[] _nodes;
 
-        public AggregateNode(params IParentNode[] nodes)
+        public AggregateNode(params IParentNodeImplementor[] nodes)
         {
             _nodes = nodes;
         }
@@ -18,32 +18,32 @@ namespace NodeMessaging
             get { throw new System.NotImplementedException(); }
         }
 
-        public IParentNode Parent
+        public IParentNodeImplementor Parent
         {
             get { throw new System.NotImplementedException(); }
         }
 
-        public IEnumerable<IParentNode> Nodes(string nameFilter)
+        public IEnumerable<IParentNodeImplementor> Nodes(string nameFilter)
         {
             return _nodes.Select(node => node.Nodes(nameFilter)).Flatten();
         }
 
-        public IEnumerable<IParentNode> Nodes()
+        public IEnumerable<IParentNodeImplementor> Nodes()
         {
             return _nodes.Select(node => node.Nodes()).Flatten();
         }
 
-        public IParentNode NodeAt(int index)
+        public IParentNodeImplementor NodeAt(int index)
         {
             throw new System.NotImplementedException();
         }
 
-        public IEndNode Attribute(string name)
+        public IEndNodeImplementor Attribute(string name)
         {
             throw new System.NotImplementedException();
         }
 
-        public IEnumerable<IEndNode> Attributes()
+        public IEnumerable<IEndNodeImplementor> Attributes()
         {
             throw new System.NotImplementedException();
         }

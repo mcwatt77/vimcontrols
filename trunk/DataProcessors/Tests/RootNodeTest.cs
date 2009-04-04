@@ -5,22 +5,22 @@ using ActionDictionary;
 
 namespace DataProcessors.Tests
 {
-    public class RootNode : IParentNode
+    public class RootNodeTest : IParentNodeTest
     {
-        private IParentNode _baseNode;
+        private IParentNodeTest _baseNode;
         private readonly Dictionary<Type, object> _typeRegistry = new Dictionary<Type, object>();
 
-        public IEnumerable<IParentNode> Nodes(string nameFilter)
+        public IEnumerable<IParentNodeTest> Nodes(string nameFilter)
         {
             return _baseNode.Nodes(nameFilter);
         }
 
-        public IParentNode NodeAt(int index)
+        public IParentNodeTest NodeAt(int index)
         {
             return _baseNode.NodeAt(index);
         }
 
-        public IParentNode Attribute(string name)
+        public IParentNodeTest Attribute(string name)
         {
             return _baseNode.Attribute(name);
         }
@@ -32,9 +32,9 @@ namespace DataProcessors.Tests
 
         public void Register<T>(T t)
         {
-            if (typeof(IParentNode).IsAssignableFrom(typeof(T)))
+            if (typeof(IParentNodeTest).IsAssignableFrom(typeof(T)))
             {
-                _baseNode = (IParentNode)t;
+                _baseNode = (IParentNodeTest)t;
             }
             else
             {
@@ -57,7 +57,7 @@ namespace DataProcessors.Tests
             throw new System.NotImplementedException();
         }
 
-        public void InstallHook<T>(string path, T recipient, Expression<Action<T, INode>> fnGetData)
+        public void InstallHook<T>(string path, T recipient, Expression<Action<T, INodeTest>> fnGetData)
         {}
         public void InstallHook<T, U>(string path, T recipient, Expression<Func<T, U>> fnGetData)
         {}

@@ -4,14 +4,14 @@ using ActionDictionary;
 
 namespace DataProcessors.Tests
 {
-    public interface IParentNode : INode
+    public interface IParentNodeTest : INodeTest
     {
-        IEnumerable<IParentNode> Nodes(string nameFilter);
-        IParentNode NodeAt(int index);
-        IParentNode Attribute(string name);
+        IEnumerable<IParentNodeTest> Nodes(string nameFilter);
+        IParentNodeTest NodeAt(int index);
+        IParentNodeTest Attribute(string name);
     }
 
-    public interface INode
+    public interface INodeTest
     {
         T Get<T>();
         void Register<T>(T t);

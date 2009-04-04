@@ -112,7 +112,7 @@ namespace UITemplateViewer
             var storageNode = XmlNode.Parse("<dynamicData><rowSelector/><textOutput/></dynamicData>");
             var templateNode = XmlNode.Parse(template.ToString());
 
-            rootNode.Register<IParentNode>(new AggregateNode(xmlNode, storageNode, templateNode));
+            rootNode.Register<IParentNodeImplementor>(new AggregateNode(xmlNode, storageNode, templateNode));
 
             var dataRoot = rootNode.Nodes("data").First();
             var dynamicData = rootNode.Nodes("dynamicData").First();
@@ -166,7 +166,6 @@ namespace UITemplateViewer
             var textOutput = dynamicData.Nodes("textOutput").First().Get<IFieldAccessor<string>>();
             var nodeMessage = new NodeMessage
                                   {
-                                      NodePredicate = node => node.GetType() == typeof (XmlNode),
                                       Target = textOutput,
                                       MessagePredicate = (message => message.Method.Name == "set_SelectedRow"),
                                       TargetDelegate = (Func<IInvocation, Action<IFieldAccessor<string>>>)

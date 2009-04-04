@@ -4,7 +4,7 @@ using ActionDictionary;
 
 namespace NodeMessaging
 {
-    public class EndNode : IEndNode
+    public class EndNode : IEndNodeImplementor
     {
         private readonly Dictionary<Type, object> _registeredTypes = new Dictionary<Type, object>();
 
@@ -35,6 +35,6 @@ namespace NodeMessaging
 
         public string Name { get; set; }
 
-        public IParentNode Parent { get; set; }
+        public IParentNodeImplementor Parent { get; set; }
     }
 }

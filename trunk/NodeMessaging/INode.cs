@@ -6,5 +6,6 @@
         IParentNode Parent { get; }
         T Get<T>() where T : class;
         void Register<T>(T t);
+        IParentNode Root { get; }
     }
 }

@@ -5,9 +5,9 @@ namespace NodeMessaging
     public class FinalInterceptor : IInterceptor
     {
         private readonly RootNode _rootNode;
-        private readonly IEndNode _node;
+        private readonly IEndNodeImplementor _node;
 
-        public FinalInterceptor(RootNode rootNode, IEndNode node)
+        public FinalInterceptor(RootNode rootNode, IEndNodeImplementor node)
         {
             _rootNode = rootNode;
             _node = node;

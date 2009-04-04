@@ -9,9 +9,9 @@ namespace NodeMessaging
     public class EndNodeWrapper : IEndNode
     {
         private readonly RootNode _rootNode;
-        private readonly IEndNode _node;
+        private readonly IEndNodeImplementor _node;
 
-        public EndNodeWrapper(RootNode rootNode, IEndNode node)
+        public EndNodeWrapper(RootNode rootNode, IEndNodeImplementor node)
         {
             _rootNode = rootNode;
             _node = node;
@@ -30,6 +30,11 @@ namespace NodeMessaging
         public void Register<T>(T t)
         {
             throw new System.NotImplementedException();
+        }
+
+        public IParentNode Root
+        {
+            get { return _rootNode; }
         }
 
         public Message Send(Message message)
@@ -63,16 +68,6 @@ namespace NodeMessaging
             var generator = new ProxyGenerator();
             var proxy = (T) generator.CreateInterfaceProxyWithTarget(typeof (T), new[] {typeof (IEndNode)}, t, new DelegateInterceptor(fnIntercept));
             return proxy;
-        }
-
-        private Message Intercept(Message message)
-        {
-            if (message.MethodType == typeof(INode))
-            {
-                message.Invoke(_node);
-                return null;
-            }
-            return message;
         }
 
         //TODO: Remove duplication

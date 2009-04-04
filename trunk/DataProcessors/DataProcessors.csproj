@@ -72,11 +72,11 @@
     <Compile Include="SgNavigator\SgNavigator.cs" />
     <Compile Include="TemplateParser\Controller.cs" />
     <Compile Include="Tests\AppLauncher.cs" />
-    <Compile Include="Tests\IParentNode.cs" />
+    <Compile Include="Tests\IParentNodeTest.cs" />
     <Compile Include="Tests\NoteViewer\Controller.cs" />
     <Compile Include="Tests\ProjectTracker.cs" />
     <Compile Include="Tests\ProxyGenerator.cs" />
-    <Compile Include="Tests\RootNode.cs" />
+    <Compile Include="Tests\RootNodeTest.cs" />
     <Compile Include="Tests\SpecialMessageTest.cs" />
     <Compile Include="Tests\TemplateParser\Controller.cs" />
     <Compile Include="Tests\TestBase.cs" />
