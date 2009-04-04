@@ -5,7 +5,6 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Xml.Linq;
 using ActionDictionary;
-using ActionDictionary.Interfaces;
 using NUnit.Framework;
 
 namespace DataProcessors.Tests
@@ -13,8 +12,8 @@ namespace DataProcessors.Tests
     [TestFixture]
     public class SpecialMessageTest
     {
-        private RootNode _rootNode;
-        private IParentNode _node;
+        private RootNodeTest _rootNode;
+        private IParentNodeTest _node;
 
         [Test]
         public void TestRegisterGet()
@@ -43,7 +42,7 @@ namespace DataProcessors.Tests
         [SetUp]
         public void setup()
         {
-            _rootNode = new RootNode();
+            _rootNode = new RootNodeTest();
             _rootNode.Register(XmlNode.FromString("<note descr=\"1\" body=\"one\"/>"));
             _node = _rootNode.Nodes("note").First().Attribute("body");
         }
@@ -102,7 +101,7 @@ namespace DataProcessors.Tests
 
 
             var path = doc.Element("entityList").Attribute("path").Value;
-            var expr = (Expression<Action<ICopy, INode>>)((obj, node) => obj.Copy(node));
+            var expr = (Expression<Action<ICopy, INodeTest>>)((obj, node) => obj.Copy(node));
 
             //path parsing looks something like this:
             /*
@@ -157,7 +156,7 @@ namespace DataProcessors.Tests
         //I feel like copy should be receiving the data, plus the INode... or maybe just the INode
         public interface ICopy
         {
-            void Copy(INode node);
+            void Copy(INodeTest node);
         }
 
         public class MissingTest : ICopy
@@ -169,14 +168,14 @@ namespace DataProcessors.Tests
                 _sb = sb;
             }
 
-            public void Copy(INode node)
+            public void Copy(INodeTest node)
             {
                 _sb.Append("hit it");
             }
         }
     }
 
-    public class MetadataNode : IParentNode
+    public class MetadataNode : IParentNodeTest
     {
         public static MetadataNode FromString(string s)
         {
@@ -208,25 +207,25 @@ namespace DataProcessors.Tests
             throw new System.NotImplementedException();
         }
 
-        public IEnumerable<IParentNode> Nodes(string nameFilter)
+        public IEnumerable<IParentNodeTest> Nodes(string nameFilter)
         {
             throw new System.NotImplementedException();
         }
 
-        public IParentNode NodeAt(int index)
+        public IParentNodeTest NodeAt(int index)
         {
             throw new System.NotImplementedException();
         }
 
-        public IParentNode Attribute(string name)
+        public IParentNodeTest Attribute(string name)
         {
             throw new System.NotImplementedException();
         }
     }
 
-    public class AggregateNode : IParentNode
+    public class AggregateNode : IParentNodeTest
         {
-            public AggregateNode(params IParentNode[] nodes)
+            public AggregateNode(params IParentNodeTest[] nodes)
             {}
 
             public T Get<T>()
@@ -254,17 +253,17 @@ namespace DataProcessors.Tests
                 throw new System.NotImplementedException();
             }
 
-            public IEnumerable<IParentNode> Nodes(string nameFilter)
+            public IEnumerable<IParentNodeTest> Nodes(string nameFilter)
             {
                 throw new System.NotImplementedException();
             }
 
-            public IParentNode NodeAt(int index)
+            public IParentNodeTest NodeAt(int index)
             {
                 throw new System.NotImplementedException();
             }
 
-            public IParentNode Attribute(string name)
+            public IParentNodeTest Attribute(string name)
             {
                 throw new System.NotImplementedException();
             }
@@ -307,7 +306,7 @@ namespace DataProcessors.Tests
         }
     }
 
-    public class XmlNode : IParentNode
+    public class XmlNode : IParentNodeTest
     {
         private class FilterHookPair
         {
@@ -347,19 +346,19 @@ namespace DataProcessors.Tests
             _obj = obj;
         }
 
-        public IEnumerable<IParentNode> Nodes(string nameFilter)
+        public IEnumerable<IParentNodeTest> Nodes(string nameFilter)
         {
             if (_obj.GetType() != typeof(XDocument)) throw new Exception("Needed to be an element, yo.");
-            var result = ((XDocument)_obj).Elements(nameFilter).Select(elem => (IParentNode)(new XmlNode(elem)));
+            var result = ((XDocument)_obj).Elements(nameFilter).Select(elem => (IParentNodeTest)(new XmlNode(elem)));
             return result;
         }
 
-        public IParentNode NodeAt(int index)
+        public IParentNodeTest NodeAt(int index)
         {
             throw new System.NotImplementedException();
         }
 
-        public IParentNode Attribute(string name)
+        public IParentNodeTest Attribute(string name)
         {
             if (_obj.GetType() != typeof(XElement)) throw new Exception("Needed to be an element, yo.");
             return new XmlNode(((XElement) _obj).Attribute(name));
@@ -408,19 +407,19 @@ namespace DataProcessors.Tests
         }
     }
 
-    public class ResultNode : IParentNode
+    public class ResultNode : IParentNodeTest
     {
-        public IEnumerable<IParentNode> Nodes(string nameFilter)
+        public IEnumerable<IParentNodeTest> Nodes(string nameFilter)
         {
             throw new System.NotImplementedException();
         }
 
-        public IParentNode NodeAt(int index)
+        public IParentNodeTest NodeAt(int index)
         {
             throw new System.NotImplementedException();
         }
 
-        public IParentNode Attribute(string name)
+        public IParentNodeTest Attribute(string name)
         {
             throw new System.NotImplementedException();
         }
@@ -452,19 +451,19 @@ namespace DataProcessors.Tests
     }
 
 
-    public class TestNode : IParentNode
+    public class TestNode : IParentNodeTest
     {
-        public IEnumerable<IParentNode> Nodes(string nameFilter)
+        public IEnumerable<IParentNodeTest> Nodes(string nameFilter)
         {
             throw new System.NotImplementedException();
         }
 
-        public IParentNode NodeAt(int index)
+        public IParentNodeTest NodeAt(int index)
         {
             return new ResultNode();
         }
 
-        public IParentNode Attribute(string name)
+        public IParentNodeTest Attribute(string name)
         {
             throw new System.NotImplementedException();
         }

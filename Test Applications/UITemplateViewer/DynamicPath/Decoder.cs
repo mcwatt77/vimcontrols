@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq.Expressions;
 using System.Xml.Linq;
 using Utility.Core;
 
@@ -10,6 +11,9 @@ namespace UITemplateViewer.DynamicPath
         {
             Element = element;
         }
+
+        public Expression Local { get; set; }
+        public Expression Data { get; set; }
 
         public XElement Element { get; private set; }
 

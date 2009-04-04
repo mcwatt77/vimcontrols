@@ -4,7 +4,7 @@ using System.Xml.Linq;
 
 namespace NodeMessaging
 {
-    public class XmlNode : IParentNode
+    public class XmlNode : IParentNodeImplementor
     {
         private readonly XElement _elem;
 
@@ -19,22 +19,22 @@ namespace NodeMessaging
             return new XmlNode(new XElement("root", doc.Root));
         }
 
-        public IEnumerable<IParentNode> Nodes(string nameFilter)
+        public IEnumerable<IParentNodeImplementor> Nodes(string nameFilter)
         {
-            return _elem.Elements(nameFilter).Select(elem => (IParentNode)new XmlNode(elem));
+            return _elem.Elements(nameFilter).Select(elem => (IParentNodeImplementor)new XmlNode(elem));
         }
 
-        public IEnumerable<IParentNode> Nodes()
+        public IEnumerable<IParentNodeImplementor> Nodes()
         {
-            return _elem.Elements().Select(elem => (IParentNode) new XmlNode(elem));
+            return _elem.Elements().Select(elem => (IParentNodeImplementor) new XmlNode(elem));
         }
 
-        public IParentNode NodeAt(int index)
+        public IParentNodeImplementor NodeAt(int index)
         {
             throw new System.NotImplementedException();
         }
 
-        public IEndNode Attribute(string name)
+        public IEndNodeImplementor Attribute(string name)
         {
             var attr = _elem.Attribute(name);
 
@@ -44,7 +44,7 @@ namespace NodeMessaging
             return endNode;
         }
 
-        public IEnumerable<IEndNode> Attributes()
+        public IEnumerable<IEndNodeImplementor> Attributes()
         {
             return _elem.Attributes().Select(attr => Attribute(attr.Name.LocalName));
         }
@@ -59,7 +59,7 @@ namespace NodeMessaging
             throw new System.NotImplementedException();
         }
 
-        public IParentNode Parent
+        public IParentNodeImplementor Parent
         {
             get { throw new System.NotImplementedException(); }
         }

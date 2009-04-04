@@ -62,7 +62,10 @@
     <Compile Include="FieldAccessor.cs" />
     <Compile Include="FinalInterceptor.cs" />
     <Compile Include="IEndNode.cs" />
+    <Compile Include="IEndNodeImplementor.cs" />
     <Compile Include="INode.cs" />
+    <Compile Include="INodeImplementor.cs" />
+    <Compile Include="IParentNodeImplementor.cs" />
     <Compile Include="MessageAdaptor.cs" />
     <Compile Include="NodeBase.cs" />
     <Compile Include="NodeMessage.cs" />

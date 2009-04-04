@@ -15,9 +15,9 @@ namespace NodeMessaging
 
         public IEnumerable<IParentNode> Nodes(string nameFilter)
         {
-            if (_registeredTypes.ContainsKey(typeof(IParentNode)))
+            if (_registeredTypes.ContainsKey(typeof(IParentNodeImplementor)))
             {
-                    var nodeHandler = (IParentNode) _registeredTypes[typeof (IParentNode)];
+                    var nodeHandler = (IParentNodeImplementor) _registeredTypes[typeof (IParentNodeImplementor)];
                     if (!_nodeDict.ContainsKey(nameFilter))
                     {
                         _nodeDict[nameFilter] =
@@ -30,11 +30,11 @@ namespace NodeMessaging
 
         public IEnumerable<IParentNode> Nodes()
         {
-            if (_registeredTypes.ContainsKey(typeof(IParentNode)))
+            if (_registeredTypes.ContainsKey(typeof(IParentNodeImplementor)))
             {
                 if (_parentNodeWrappers == null)
                 {
-                    var nodeHandler = (IParentNode) _registeredTypes[typeof (IParentNode)];
+                    var nodeHandler = (IParentNodeImplementor) _registeredTypes[typeof (IParentNodeImplementor)];
                     _parentNodeWrappers =
                         nodeHandler.Nodes().Select(node => new ParentNodeWrapper(this, node)).ToList();
                 }
@@ -73,6 +73,11 @@ namespace NodeMessaging
             return (T) _registeredTypes[typeof (T)];
         }
 
+        public IParentNode Root
+        {
+            get { return this; }
+        }
+
         public Message Send(Message message)
         {
             //how do I know who to send to?
@@ -94,21 +99,27 @@ namespace NodeMessaging
             _nodeMessages.Add(nodeMessage);
         }
 
-        public void Intercept(INode node, IInvocation invocation)
+        public void Intercept(INodeImplementor node, IInvocation invocation)
         {
             _nodeMessages.Do(message => ProcessMessage(message, node, invocation));
         }
 
-        private void ProcessMessage(NodeMessage message, INode node, IInvocation invocation)
+        private void ProcessMessage(NodeMessage message, INodeImplementor node, IInvocation invocation)
         {
+            if (invocation.Method.Name == "set_SelectedRow")
+            {
+                int debug = 0;
+            }
+            INode nodeCmp = null;
+            if (typeof(IParentNodeImplementor).IsAssignableFrom(node.GetType()))
+                nodeCmp = new ParentNodeWrapper(this, (IParentNodeImplementor)node);
+            if (typeof(IEndNodeImplementor).IsAssignableFrom(node.GetType()))
+                nodeCmp = new EndNodeWrapper(this, (IEndNodeImplementor)node);
+
             if (message.NodePredicate != null)
-                if (!message.NodePredicate(node)) return;
+                if (!message.NodePredicate(nodeCmp)) return;
             if (message.MessagePredicate != null)
                 if (!message.MessagePredicate(invocation)) return;
-
-            var lambda = invocation.Method.BuildLambda(invocation.Arguments);
-/*            var msgOut = Message.Create(lambda, invocation.Method.DeclaringType);
-            msgOut.Invoke(message.Target);*/
 
             var del = message.TargetDelegate;
             var action = del.GetType().GetMethod("Invoke").Invoke(del, new object[] {invocation});

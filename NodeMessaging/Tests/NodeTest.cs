@@ -13,7 +13,7 @@ namespace NodeMessaging.Tests
         {
             var rootNode = new RootNode();
             var xmlNode = XmlNode.Parse("<root><note desc=\"1\" body=\"One!\"/><note desc=\"2\" body=\"Two?\"/></root>");
-            rootNode.Register<IParentNode>(xmlNode);
+            rootNode.Register<IParentNodeImplementor>(xmlNode);
 
             Predicate<INode> nodePredicate = node => node.Name == "desc" && node.Parent.Name == "note";
             Predicate<IInvocation> messagePredicate = invocation => invocation.Method.DeclaringType == typeof (IFieldAccessor<string>);

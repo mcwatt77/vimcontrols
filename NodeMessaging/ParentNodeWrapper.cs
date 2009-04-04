@@ -9,11 +9,11 @@ namespace NodeMessaging
     public class ParentNodeWrapper : NodeBase, IParentNode
     {
         private readonly RootNode _rootNode;
-        private readonly IParentNode _node;
+        private readonly IParentNodeImplementor _node;
         private readonly Dictionary<string, IEnumerable<IParentNode>> _nodeDict = new Dictionary<string, IEnumerable<IParentNode>>();
         private IEnumerable<IEndNode> _attributes;
 
-        public ParentNodeWrapper(RootNode rootNode, IParentNode node)
+        public ParentNodeWrapper(RootNode rootNode, IParentNodeImplementor node)
         {
             _rootNode = rootNode;
             _node = node;
@@ -61,6 +61,11 @@ namespace NodeMessaging
         {
             var ret = (T) _registeredTypes[typeof (T)];
             return InjectNode(ret, Intercept);
+        }
+
+        public IParentNode Root
+        {
+            get { return _rootNode; }
         }
 
         //TODO: Remove duplication
