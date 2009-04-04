@@ -6,16 +6,16 @@ namespace UITemplateViewer.DynamicPath
 {
     public class Decoder
     {
-        private readonly XElement _element;
-
         private Decoder(XElement element)
         {
-            _element = element;
+            Element = element;
         }
+
+        public XElement Element { get; private set; }
 
         public override string ToString()
         {
-            return _element.ToString();
+            return Element.ToString();
         }
 
         public static Decoder FromPath(string path)
