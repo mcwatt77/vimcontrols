@@ -62,9 +62,21 @@ namespace UITemplateViewer.Tests.DynamicPath
 
             if (goToRoot)
             {
+                var e = ((LambdaExpression) expr).Body;
+                var m = ((MethodCallExpression) e).Method;
                 OneToOnePath path = a => a.Root;
+                var lBody = path.Body;
+
+
+                var parameter = Expression.Parameter(typeof(IParentNode), "a");
+                OneToManyPath pe = a => a.Root.Nodes("note");
+
+                var l = MemberExpression.MakeMemberAccess(parameter, typeof (INode).GetProperty("Root"));
+                var le = Expression.Call(l, m, ConstantExpression.Constant("note"));
+
+                return Expression.Lambda(le, parameter);
+
                 //TODO:  Now I need to use this as an argument in building the ProcessNode expression
-                //now I need
                 int debug = 0;
             }
 
@@ -111,9 +123,7 @@ namespace UITemplateViewer.Tests.DynamicPath
             masterDoc.Add(decode.Element);
             doit(decode);
             Assert.AreEqual("a => a.Nodes()", decode.Local.ToString());
-//            expr = parentNode => parentNode.Nodes();
-//            expr = parentNode => parentNode.Root.Nodes("note").Cast<INode>();
-            var dataString = decode.Data.ToString();
+            Assert.AreEqual("a => a.Root.Nodes(\"note\")", decode.Data.ToString());
 
             decode = Decoder.FromPath("{@descr}");
             masterDoc.Add(decode.Element);
