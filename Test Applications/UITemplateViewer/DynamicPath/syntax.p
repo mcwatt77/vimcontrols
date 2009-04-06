@@ -119,7 +119,7 @@ element_capture->
 $
 
 {attribute}->
-(?<attribute>@{identifier})
+@(?<attribute>{identifier})
 $
 
 {identifier}->

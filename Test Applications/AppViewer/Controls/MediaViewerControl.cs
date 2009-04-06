@@ -38,8 +38,21 @@ namespace AppViewer.Controls
         public void Update()
         {
             if (_processor == null) return;
-            var bitmap = new BitmapImage(new Uri(_processor.UpdateImage()));
-            _image.Source = bitmap;
+            try
+            {
+                var bitmap = new BitmapImage(new Uri(_processor.UpdateImage()));
+                _image.Source = bitmap;
+
+                var grid = _image.Parent as Grid;
+                if (grid != null)
+                {
+                    var app = grid.Parent as AppWindow;
+                    if (app != null)
+                        app.Title = bitmap.UriSource.LocalPath;
+                }
+            }
+            catch (NotSupportedException)
+            {}
         }
     }
 }

@@ -33,6 +33,11 @@ namespace NodeMessaging
             return _nodeDict[nameFilter];
         }
 
+        public IEnumerable<IParentNode> Nodes(string nameSpace, string nameFilter)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public IEnumerable<IParentNode> Nodes()
         {
             if (!_nodeDict.ContainsKey(""))
@@ -55,6 +60,11 @@ namespace NodeMessaging
             if (_attributes == null)
                 _attributes = _node.Attributes().Select(attr => (IEndNode)new EndNodeWrapper(_rootNode, attr)).ToList();
             return _attributes;
+        }
+
+        public IParentNode NodeById(string id)
+        {
+            throw new System.NotImplementedException();
         }
 
         public T Get<T>() where T : class

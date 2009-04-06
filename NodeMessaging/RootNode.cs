@@ -28,6 +28,11 @@ namespace NodeMessaging
             throw new Exception("You did not register an IParentNode handler");
         }
 
+        public IEnumerable<IParentNode> Nodes(string nameSpace, string nameFilter)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public IEnumerable<IParentNode> Nodes()
         {
             if (_registeredTypes.ContainsKey(typeof(IParentNodeImplementor)))
@@ -54,6 +59,11 @@ namespace NodeMessaging
         }
 
         public IEnumerable<IEndNode> Attributes()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public IParentNode NodeById(string id)
         {
             throw new System.NotImplementedException();
         }
