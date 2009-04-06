@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Xml.Linq;
 using NodeMessaging;
@@ -10,6 +11,7 @@ using ManyToOnePath = System.Linq.Expressions.Expression<System.Func<System.Coll
 using OneToManyPath = System.Linq.Expressions.Expression<System.Func<NodeMessaging.IParentNode, System.Collections.Generic.IEnumerable<NodeMessaging.IParentNode>>>;
 using ManyToManyPath = System.Linq.Expressions.Expression<System.Func<NodeMessaging.IParentNode, System.Collections.Generic.IEnumerable<NodeMessaging.IParentNode>>>;
 using OneToOnePath = System.Linq.Expressions.Expression<System.Func<NodeMessaging.IParentNode, NodeMessaging.IParentNode>>;
+using EndNodePath = System.Linq.Expressions.Expression<System.Func<NodeMessaging.IParentNode, NodeMessaging.IEndNode>>;
 
 namespace UITemplateViewer.Tests.DynamicPath
 {
@@ -30,7 +32,10 @@ namespace UITemplateViewer.Tests.DynamicPath
                     .Elements("elementGroup")
                     .Select(elem => ProcessElementGroup(elem))
                     .ToList();
-                decoder.Local = result.First();
+                if (result.Count() == 2)
+                    decoder.Local = CombineCalls(result);
+                else
+                    decoder.Local = result.First();
             }
             else decoder.Local = expr;
             if (dataCapture != null)
@@ -42,6 +47,22 @@ namespace UITemplateViewer.Tests.DynamicPath
                 decoder.Data = result.First();
             }
             else decoder.Data = expr;
+        }
+
+        private Expression CombineCalls(List<Expression> expressions)
+        {
+/*                var e = (MethodCallExpression)(((LambdaExpression) expr).Body);
+                OneToOnePath path = a => a.Root;
+                var parameter = Expression.Parameter(typeof(IParentNode), "a");
+                var le = Expression.Call(path.Body, e.Method, e.Arguments);
+                return Expression.Lambda(le, parameter);*/
+            
+            var e = (MethodCallExpression)(((LambdaExpression) expressions.Skip(1).First()).Body);
+//            OneToOnePath path = a => a.Root;
+            var path = (LambdaExpression)expressions.First();
+            var parameter = Expression.Parameter(typeof(IParentNode), "a");
+            var le = Expression.Call(path.Body, e.Method, e.Arguments);
+            return Expression.Lambda(le, parameter);
         }
 
         private Expression ProcessElementGroup(XElement element)
@@ -62,22 +83,11 @@ namespace UITemplateViewer.Tests.DynamicPath
 
             if (goToRoot)
             {
-                var e = ((LambdaExpression) expr).Body;
-                var m = ((MethodCallExpression) e).Method;
+                var e = (MethodCallExpression)(((LambdaExpression) expr).Body);
                 OneToOnePath path = a => a.Root;
-                var lBody = path.Body;
-
-
                 var parameter = Expression.Parameter(typeof(IParentNode), "a");
-                OneToManyPath pe = a => a.Root.Nodes("note");
-
-                var l = MemberExpression.MakeMemberAccess(parameter, typeof (INode).GetProperty("Root"));
-                var le = Expression.Call(l, m, ConstantExpression.Constant("note"));
-
+                var le = Expression.Call(path.Body, e.Method, e.Arguments);
                 return Expression.Lambda(le, parameter);
-
-                //TODO:  Now I need to use this as an argument in building the ProcessNode expression
-                int debug = 0;
             }
 
             return expr;
@@ -94,13 +104,37 @@ namespace UITemplateViewer.Tests.DynamicPath
             if (innerNode.Name.LocalName == "element_capture")
             {
                 var name = innerNode.Element("element_name").Attribute("data").Value;
-                OneToManyPath expr = node => node.Nodes(name);
-                var methodInfo = typeof (IParentNode).GetMethods().Single(
-                    method => method.Name == "Nodes" && method.GetParameters().Count() == 1);
-                return methodInfo.BuildLambda(name);
+                var nameSpace =  innerNode.Element("namespace");
+                if (nameSpace == null)
+                {
+                    var methodInfo = typeof (IParentNode).GetMethods().Single(
+                        method => method.Name == "Nodes" && method.GetParameters().Count() == 1);
+                    return methodInfo.BuildLambda(name);
+                }
+                else
+                {
+                    var methodInfo = typeof (IParentNode).GetMethods().Single(
+                        method => method.Name == "Nodes" && method.GetParameters().Count() == 2);
+                    return methodInfo.BuildLambda(nameSpace.Attribute("data").Value, name);
+                }
+            }
+            if (innerNode.Name.LocalName == "attribute")
+            {
+                return BuildDynamicCall("Attribute", innerNode.Attribute("data").Value);
+            }
+            if (innerNode.Name.LocalName == "element_lookup")
+            {
+                return BuildDynamicCall("NodeById", innerNode.Attribute("data").Value);
             }
 
             return null;
+        }
+
+        private Expression BuildDynamicCall(string methodName, params object[] @params)
+        {
+            var methodInfo = typeof (IParentNode).GetMethods().Single(
+                method => method.Name == methodName && method.GetParameters().Count() == @params.Length);
+            return methodInfo.BuildLambda(@params);
         }
 
 // ReSharper disable JoinDeclarationAndInitializer
@@ -127,15 +161,28 @@ namespace UITemplateViewer.Tests.DynamicPath
 
             decode = Decoder.FromPath("{@descr}");
             masterDoc.Add(decode.Element);
+            doit(decode);
+            Assert.AreEqual("a => a.Attribute(\"descr\")", decode.Data.ToString());
 
             decode = Decoder.FromPath("{/dyn::rowSelector}");
             masterDoc.Add(decode.Element);
+            doit(decode);
+            //TODO: This is pretty sketchy.  I should consider a different approach to handling namespaces.
+            //And how will I remember to update Decoder when I change the interfaces around?
+            //I need to get decode to build itself from hardcoded interface calls, so they'll break when I change the interface
+            //  and not jus during testing
+            Assert.AreEqual("a => a.Root.Nodes(\"dyn\", \"rowSelector\")", decode.Data.ToString());
 
             decode = Decoder.FromPath("[:noteList/@rows]");
             masterDoc.Add(decode.Element);
+            doit(decode);
+            Assert.AreEqual("a => a.Root.NodeById(\"noteList\").Attribute(\"rows\")", decode.Local.ToString());
 
             decode = Decoder.FromPath("[../@rowSelector]{@body}");
             masterDoc.Add(decode.Element);
+            doit(decode);
+            Assert.AreEqual("a => a.Parent.Attribute(\"rowSelector\")", decode.Local.ToString());
+            Assert.AreEqual("a => a.Attribute(\"body\")", decode.Data.ToString());
         }
 // ReSharper restore JoinDeclarationAndInitializer
     }

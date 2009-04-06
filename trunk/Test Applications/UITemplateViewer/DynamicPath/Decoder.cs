@@ -5,6 +5,10 @@ using Utility.Core;
 
 namespace UITemplateViewer.DynamicPath
 {
+            //TODO: This is pretty sketchy.  I should consider a different approach to handling namespaces.
+            //And how will I remember to update Decoder when I change the interfaces around?
+            //I need to get decode to build itself from hardcoded interface calls, so they'll break when I change the interface
+            //  and not jus during testing
     public class Decoder
     {
         private Decoder(XElement element)
