@@ -1,11 +1,12 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Xml.Linq;
 using Castle.Core.Interceptor;
 using NodeMessaging;
 using UITemplateViewer.Controllers;
+using UITemplateViewer.DynamicPath;
 using UITemplateViewer.Element;
 using UITemplateViewer.WPF;
 using Utility.Core;
@@ -40,7 +41,6 @@ namespace UITemplateViewer
             var propToSet = newObj.GetType().GetProperties().SingleOrDefault(prop => prop.Name.ToLower() == node.Name.ToLower());
             var get = node.Get<IFieldAccessor<string>>();
 
-            var dynamicPath = DynamicPathDecoder.FromPath(get.Value);
             if (node.Name == "id")
             {
                 _nodeLookups[get.Value] = parent;
@@ -55,9 +55,27 @@ namespace UITemplateViewer
                 return;
             }
 
-            var path = get.Value.Substring(1, get.Value.Length - 2);
-            var method = _xpath.GetType().GetMethods().Single(lmethod => lmethod.Name == "GetPathFunc" && !lmethod.IsGenericMethod);
+            var path = Decoder.FromPath(get.Value);
+            //if both local and data are set, this means that each of the children in Local gets each instance of Data
+            if (path.Local != null && path.Data != null)
+            {
+                //TODO: Get all of this expression processing into a separate class.
+                //Might even wrap some of the functionality in a localized class
+                var lambda = (LambdaExpression) path.Data;
+                var methodCall = (MethodCallExpression) lambda.Body;
+                var returnType = methodCall.Method.ReturnType;
+                var enumerable = returnType.IsGenericType
+                                     ? typeof (IEnumerable<>).IsAssignableFrom(returnType.GetGenericTypeDefinition())
+                                     : false;
+                var fn = lambda.Compile();
+                var ret = fn.DynamicInvoke(data);
+
+                int debug = 0;
+            }
             return;
+
+/*            var path = get.Value.Substring(1, get.Value.Length - 2);
+            var method = _xpath.GetType().GetMethods().Single(lmethod => lmethod.Name == "GetPathFunc" && !lmethod.IsGenericMethod);
             var result = (Delegate)method.Invoke(_xpath, new object[] {path});
             var invokeResult = result.DynamicInvoke(data);
 
@@ -80,7 +98,7 @@ namespace UITemplateViewer
 
             //The value of invokeResult is whatever gets returned by xpath, which should either be IEnum<Node> or Node...
             //Should I always make it IEnum?
-            int debug = 0;
+            int debug = 0;*/
         }
 
         //TODO: 2. $$$ Replace this method with the automatic template reading above
