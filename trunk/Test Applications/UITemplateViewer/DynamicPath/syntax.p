@@ -111,7 +111,7 @@ $
 $
 
 {element_lookup}->
-(?<element_lookup>:{identifier})
+:(?<element_lookup>{identifier})
 $
 
 element_capture->
