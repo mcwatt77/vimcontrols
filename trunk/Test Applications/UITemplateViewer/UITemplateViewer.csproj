@@ -61,7 +61,6 @@
   <ItemGroup>
     <Compile Include="AppWindow.cs" />
     <Compile Include="Controllers\EntityListController.cs" />
-    <Compile Include="DynamicPathDecoder.cs" />
     <Compile Include="DynamicPath\Decoder.cs" />
     <Compile Include="DynamicTemplate.cs" />
     <Compile Include="Element\IEntitySelector.cs" />

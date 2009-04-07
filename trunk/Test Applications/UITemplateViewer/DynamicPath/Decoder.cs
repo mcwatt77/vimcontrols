@@ -26,10 +26,10 @@ namespace UITemplateViewer.DynamicPath
             Element = element;
         }
 
-        private static readonly Dictionary<string, Func<XElement, string, Expression>> _templates = InitializeTemplates();
+        private static readonly Dictionary<string, Func<XElement, string, LambdaExpression>> _templates = InitializeTemplates();
 
-        public Expression Local { get; private set; }
-        public Expression Data { get; private set; }
+        public LambdaExpression Local { get; private set; }
+        public LambdaExpression Data { get; private set; }
 
         public XElement Element { get; private set; }
 
@@ -51,12 +51,11 @@ namespace UITemplateViewer.DynamicPath
 
         private static void SetExpressionFromParsedDoc(Decoder decoder)
         {
-            OneToOnePath expr = a => a;
-            decoder.Local = ParseElement(decoder.Element.Element("local_doc_path_capture")) ?? expr;
-            decoder.Data = ParseElement(decoder.Element.Element("std_xpath_capture")) ?? expr;
+            decoder.Local = ParseElement(decoder.Element.Element("local_doc_path_capture"));
+            decoder.Data = ParseElement(decoder.Element.Element("std_xpath_capture"));
         }
 
-        private static Expression ParseElement(XContainer element)
+        private static LambdaExpression ParseElement(XContainer element)
         {
             if (element == null) return null;
 
@@ -69,16 +68,38 @@ namespace UITemplateViewer.DynamicPath
                                 : result.First();
         }
 
-        private static Expression CombineCalls(params Expression[] expressions)
+        private static LambdaExpression CombineCalls(params Expression[] expressions)
         {
             var e = (MethodCallExpression)(((LambdaExpression) expressions.Skip(1).First()).Body);
             var path = (LambdaExpression)expressions.First();
-            var parameter = Expression.Parameter(typeof(IParentNode), "a");
             var le = Expression.Call(path.Body, e.Method, e.Arguments);
+
+            ParameterExpression parameter;
+            if (typeof(MemberExpression).IsAssignableFrom(le.Object.GetType()))
+            {
+                var me = (MemberExpression) le.Object;
+                parameter = (ParameterExpression) me.Expression;
+            }
+            else if (typeof(MethodCallExpression).IsAssignableFrom(le.Object.GetType()))
+            {
+                var mce = (MethodCallExpression)le.Object;
+                if (typeof(MemberExpression).IsAssignableFrom(mce.Object.GetType()))
+                {
+                    var me = (MemberExpression)mce.Object;
+                    parameter = (ParameterExpression)me.Expression;
+                }
+                else if (typeof(ParameterExpression).IsAssignableFrom(mce.Object.GetType()))
+                    parameter = (ParameterExpression) mce.Object;
+                else
+                    throw new Exception("CombineCall could not interpret expressions");
+            }
+            else
+                throw new Exception("CombineCall could not interpret expressions");
+
             return Expression.Lambda(le, parameter);
         }
 
-        private static Expression ProcessElementGroup(XContainer element)
+        private static LambdaExpression ProcessElementGroup(XContainer element)
         {
             var node = element.Element("node");
             var expr = ProcessNode(node);
@@ -98,9 +119,9 @@ namespace UITemplateViewer.DynamicPath
             return attr == null ? null : attr.Value;
         }
 
-        private static Dictionary<string, Func<XElement, string, Expression>> InitializeTemplates()
+        private static Dictionary<string, Func<XElement, string, LambdaExpression>> InitializeTemplates()
         {
-            var templates = new Dictionary<string, Func<XElement, string, Expression>>();
+            var templates = new Dictionary<string, Func<XElement, string, LambdaExpression>>();
             templates["wildcard"] = (innerNode, data) => BuildDynamicCall("Nodes");
             templates["element_capture"] = (innerNode, data) => BuildElementCapture(innerNode);
             templates["attribute"] = (innerNode, data) => BuildDynamicCall("Attribute", data);
@@ -109,7 +130,7 @@ namespace UITemplateViewer.DynamicPath
             return templates;
         }
 
-        private static Expression BuildElementCapture(XContainer innerNode)
+        private static LambdaExpression BuildElementCapture(XContainer innerNode)
         {
             return BuildDynamicCall("Nodes", new[]
                                                  {
@@ -120,7 +141,7 @@ namespace UITemplateViewer.DynamicPath
                                                  .ToArray());
         }
 
-        private static Expression ProcessNode(XContainer element)
+        private static LambdaExpression ProcessNode(XContainer element)
         {
             var innerNode2 = element.Elements().First();
             var elementName = innerNode2.Name.LocalName;
@@ -130,7 +151,7 @@ namespace UITemplateViewer.DynamicPath
             throw new Exception("Could not interpret " + innerNode2.Name.LocalName);
         }
 
-        private static Expression BuildDynamicCall(string methodName, params object[] @params)
+        private static LambdaExpression BuildDynamicCall(string methodName, params object[] @params)
         {
             var methods = typeof (IParentNode).GetMethods().Concat(typeof (INode).GetMethods());
             var methodInfo = methods.Single(
