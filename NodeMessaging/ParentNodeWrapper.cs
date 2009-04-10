@@ -1,22 +1,25 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using Castle.Core.Interceptor;
-using Castle.DynamicProxy;
 
 namespace NodeMessaging
 {
     public class ParentNodeWrapper : NodeBase, IParentNode
     {
-        private readonly RootNode _rootNode;
-        private readonly IParentNodeImplementor _node;
+        private readonly IParentNode _contextRoot;
         private readonly Dictionary<string, IEnumerable<IParentNode>> _nodeDict = new Dictionary<string, IEnumerable<IParentNode>>();
         private IEnumerable<IEndNode> _attributes;
+        private IParentNodeImplementor _parentNode;
 
-        public ParentNodeWrapper(RootNode rootNode, IParentNodeImplementor node)
+        private ParentNodeWrapper(RootNode rootNode, IParentNode contextRoot, IParentNodeImplementor node) : base(rootNode, node)
         {
-            _rootNode = rootNode;
-            _node = node;
+            _contextRoot = contextRoot;
+            _parentNode = node;
+        }
+            
+        public ParentNodeWrapper(RootNode rootNode, IParentNodeImplementor node) : base(rootNode, node)
+        {
+            _contextRoot = this;
+            _parentNode = node;
         }
 
         public string Name
@@ -28,7 +31,7 @@ namespace NodeMessaging
         {
             if (!_nodeDict.ContainsKey(nameFilter))
             {
-                _nodeDict[nameFilter] = _node.Nodes(nameFilter).Select(node => (IParentNode)new ParentNodeWrapper(_rootNode, node)).ToList();
+                _nodeDict[nameFilter] = _parentNode.Nodes(nameFilter).Select(node => (IParentNode)new ParentNodeWrapper(_rootNode, _contextRoot, node)).ToList();
             }
             return _nodeDict[nameFilter];
         }
@@ -41,7 +44,7 @@ namespace NodeMessaging
         public IEnumerable<IParentNode> Nodes()
         {
             if (!_nodeDict.ContainsKey(""))
-                _nodeDict[""] = _node.Nodes().Select(node => (IParentNode) new ParentNodeWrapper(_rootNode, node)).ToList();
+                _nodeDict[""] = _parentNode.Nodes().Select(node => (IParentNode) new ParentNodeWrapper(_rootNode, _contextRoot, node)).ToList();
             return _nodeDict[""];
         }
 
@@ -58,7 +61,7 @@ namespace NodeMessaging
         public IEnumerable<IEndNode> Attributes()
         {
             if (_attributes == null)
-                _attributes = _node.Attributes().Select(attr => (IEndNode)new EndNodeWrapper(_rootNode, attr)).ToList();
+                _attributes = _parentNode.Attributes().Select(attr => (IEndNode)new EndNodeWrapper(_rootNode, attr)).ToList();
             return _attributes;
         }
 
@@ -67,37 +70,9 @@ namespace NodeMessaging
             throw new System.NotImplementedException();
         }
 
-        public T Get<T>() where T : class
-        {
-            var ret = (T) _registeredTypes[typeof (T)];
-            return InjectNode(ret, Intercept);
-        }
-
         public IParentNode Root
         {
-            get { return _rootNode; }
-        }
-
-        //TODO: Remove duplication
-        private void Intercept(IInvocation invocation)
-        {
-            if (invocation.TargetType != typeof(INode) && invocation.Method.DeclaringType == typeof(INode))
-            {
-                invocation.ReturnValue = invocation.Method.Invoke(_node, invocation.Arguments);
-                return;
-            }
-            invocation.Proceed();
-            _rootNode.Intercept(_node, invocation);
-        }
-
-        //TODO: Remove duplication
-        private static T InjectNode<T>(T t, Action<IInvocation> fnIntercept) where T : class
-        {
-            var generator = new ProxyGenerator();
-            var interfaces = t.GetType().GetInterfaces().Concat(new[] {typeof (IEndNode)}).ToArray();
-            var proxy = (T) generator.CreateInterfaceProxyWithTarget(typeof(T), interfaces, t, new DelegateInterceptor(fnIntercept));
-            //TODO: Include all child interfaces in Proxy
-            return proxy;
+            get { return _contextRoot; }
         }
 
         public IParentNode Parent

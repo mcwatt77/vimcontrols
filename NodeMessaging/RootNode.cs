@@ -13,6 +13,10 @@ namespace NodeMessaging
         private List<ParentNodeWrapper> _parentNodeWrappers;
         private readonly Dictionary<string, IEnumerable<IParentNode>> _nodeDict = new Dictionary<string, IEnumerable<IParentNode>>();
 
+        public RootNode() : base(null, null)
+        {
+        }
+
         public IEnumerable<IParentNode> Nodes(string nameFilter)
         {
             if (_registeredTypes.ContainsKey(typeof(IParentNodeImplementor)))
@@ -78,7 +82,7 @@ namespace NodeMessaging
             get { throw new System.NotImplementedException(); }
         }
 
-        public T Get<T>() where T : class
+        public override T Get<T>()
         {
             return (T) _registeredTypes[typeof (T)];
         }

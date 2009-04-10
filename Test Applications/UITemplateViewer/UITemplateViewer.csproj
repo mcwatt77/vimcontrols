@@ -89,6 +89,7 @@
     <Compile Include="Element\ITextDisplay.cs" />
     <Compile Include="WPF\IUIEntityRow.cs" />
     <Compile Include="WPF\TextDisplay.cs" />
+    <Compile Include="WPF\UI.cs" />
     <Compile Include="XPathDecoder.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

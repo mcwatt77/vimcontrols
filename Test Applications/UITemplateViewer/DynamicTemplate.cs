@@ -1,7 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Xml.Linq;
 using Castle.Core.Interceptor;
 using NodeMessaging;
@@ -18,22 +18,28 @@ namespace UITemplateViewer
         private readonly Dictionary<string, IParentNode> _nodeLookups = new Dictionary<string, IParentNode>();
         private XPathDecoder _xpath;
 
-        private void ProcessTemplateElem(IParentNode dataNode, IParentNode templateNode)
+        private object ProcessTemplateElem(IParentNode dataNode, IParentNode templateNode)
         {
-            var elem = templateNode.Nodes().First();
+            //create an object based on the template node, and insert it in the template node
 
-            //find a class that matches the elem name
-            var types = typeof (DynamicTemplate)
+            var nodeTypes = typeof (DynamicTemplate)
                 .Assembly
                 .GetTypes()
-                .Where(type => type.Name.ToLower() == elem.Name.ToLower());
+                .Where(type => type.Name.ToLower() == templateNode.Name.ToLower());
 
-            if (types.Count() != 1) throw new Exception("Found " + types.Count() + " of type " + elem.Name);
+            if (nodeTypes.Count() != 1) throw new Exception("Found " + nodeTypes.Count() + " of type " + templateNode.Name);
 
-            var newType = types.Single();
+            var newType = nodeTypes.Single();
             var newObj = newType.GetConstructor(Type.EmptyTypes).Invoke(new object[] {});
 
-            elem.Attributes().Do(attr => ProcessAttribute(dataNode, elem, attr, newObj));
+            templateNode.Attributes().Do(attr => ProcessAttribute(dataNode, templateNode, attr, newObj));
+
+            //TODO: now do child elements of the templateNode
+            //each element in the template will have data registered to it,
+            //even if the parent never explicitly calls it.
+            //A later optimization step could cull this out
+
+            return newObj;
         }
 
         private void ProcessAttribute(IParentNode data, IParentNode parent, INode node, object newObj)
@@ -61,16 +67,53 @@ namespace UITemplateViewer
             {
                 //TODO: Get all of this expression processing into a separate class.
                 //Might even wrap some of the functionality in a localized class
-                var lambda = (LambdaExpression) path.Data;
-                var methodCall = (MethodCallExpression) lambda.Body;
-                var returnType = methodCall.Method.ReturnType;
-                var enumerable = returnType.IsGenericType
-                                     ? typeof (IEnumerable<>).IsAssignableFrom(returnType.GetGenericTypeDefinition())
-                                     : false;
-                var fn = lambda.Compile();
-                var ret = fn.DynamicInvoke(data);
+                var fnData = path.Data.Compile();
+                var dataRows = fnData.DynamicInvoke(data);
+
+                var fnLocal = path.Local.Compile();
+                var localRows = ((IEnumerable)fnLocal.DynamicInvoke(parent)).Cast<IParentNode>();
+                var localRow = localRows.Single();
+
+                var isEnumerable = typeof (System.Collections.IEnumerable).IsAssignableFrom(dataRows.GetType());
+                var propIsEnumerable = typeof (System.Collections.IEnumerable).IsAssignableFrom(propToSet.PropertyType);
+                if (propIsEnumerable && isEnumerable)
+                {
+                    var innerType = propToSet.PropertyType.GetGenericArguments().First();
+                    var e = ((System.Collections.IEnumerable) dataRows).Cast<IParentNode>();
+                    foreach (var row in e)
+                    {
+                        ProcessTemplateElem(row, localRow);
+                        //call back to ProcessTemplateElem?
+                        //ultimately need to create an object of type innerType, with the context of row
+                        int debug2 = 0;
+                    }
+                }
+                if (!isEnumerable)
+                {
+                    //make it a list?
+                }
+
+                //if the the target consists of a single element, then Rows should be an IEnum
+                //if the target consists of multiple elements, then Rows should be an IEnum of an IEnum
+                //If the rows member doesn't exist... it's no biggie
 
                 int debug = 0;
+            }
+            if (path.Local != null)
+            {
+                var fnLocal = path.Local.Compile();
+                var localRows = ((IEnumerable)fnLocal.DynamicInvoke(parent)).Cast<IParentNode>();
+
+                var dataRows = localRows.Select(localRow => ProcessTemplateElem(data, localRow)).ToList();
+
+                //TODO: don't register localRows, create a new object for each one
+                node.Register(dataRows);
+                //TODO: This will have to be done dynamically
+                var children = node.Get<IUIInitialize>();
+                propToSet.SetValue(newObj, children, null);
+
+                int debug = 0;
+                //now set this to propToSet
             }
             return;
 
@@ -99,6 +142,11 @@ namespace UITemplateViewer
             //The value of invokeResult is whatever gets returned by xpath, which should either be IEnum<Node> or Node...
             //Should I always make it IEnum?
             int debug = 0;*/
+        }
+
+        private object CreateObject(Type type, INode node)
+        {
+            return null;
         }
 
         //TODO: 2. $$$ Replace this method with the automatic template reading above
@@ -135,7 +183,8 @@ namespace UITemplateViewer
             var dataRoot = rootNode.Nodes("data").First();
             var dynamicData = rootNode.Nodes("dynamicData").First();
             var uiRoot = rootNode.Nodes().Skip(2).First();
-            template.Root.Elements().Do(elem => ProcessTemplateElem(dataRoot, uiRoot));
+            //bug: here it is...  this needs to be implemented.  Will want to switch EndNodeWrapper to derive from NodeBase to fix
+            ProcessTemplateElem(dataRoot, uiRoot);
 
 
 //            var fnGetDesc = _xpath.GetPathFunc<IFieldAccessor<string>>("@descr");

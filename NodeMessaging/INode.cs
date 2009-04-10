@@ -4,8 +4,8 @@
     {
         string Name { get; }
         IParentNode Parent { get; }
-        T Get<T>() where T : class;
-        void Register<T>(T t);
         IParentNode Root { get; }
+        void Register<T>(T t);
+        T Get<T>() where T : class;
     }
 }

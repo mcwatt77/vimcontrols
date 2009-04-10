@@ -89,7 +89,7 @@ namespace DataProcessors.Tests
             var fileName = @"..\..\noteviewer\ui.xml";
 
             _rootNode.Register(XmlNode.FromString("<note descr=\"1\" body=\"one\"/>"));
-            _rootNode.Register(new AggregateNode(
+            _rootNode.Register(new AggregateNodeTest(
                                    XmlNode.FromString("<note descr=\"1\" body=\"one\"/>"),
                                    MetadataNode.FromString(fileName)
                                    ));
@@ -223,9 +223,9 @@ namespace DataProcessors.Tests
         }
     }
 
-    public class AggregateNode : IParentNodeTest
+    public class AggregateNodeTest : IParentNodeTest
         {
-            public AggregateNode(params IParentNodeTest[] nodes)
+            public AggregateNodeTest(params IParentNodeTest[] nodes)
             {}
 
             public T Get<T>()
