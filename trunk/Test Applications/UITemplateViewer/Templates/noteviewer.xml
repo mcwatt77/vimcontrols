@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<ui id="noteViewer">
+<ui id="noteViewer" children="[*]">
   <entityList id="noteList" displayName="Note Viewer" rows="[*]{/note}">
     <entityRow columns="[*]">
       <field value="{@descr}"/>
