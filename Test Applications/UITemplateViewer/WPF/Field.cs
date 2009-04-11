@@ -1,14 +1,14 @@
-﻿using System.Collections.Generic;
-using UITemplateViewer.Element;
+﻿using UITemplateViewer.Element;
 
 namespace UITemplateViewer.WPF
 {
-    public class UI : IUIInitialize
+    public class Field : IUIInitialize
     {
-        public IEnumerable<IUIInitialize> Children { get; set; }
+        public string Value { get; set; }
 
         public void Initialize()
         {
+            throw new System.NotImplementedException();
         }
 
         public IContainer Parent

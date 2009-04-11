@@ -65,6 +65,8 @@
     <Compile Include="DynamicTemplate.cs" />
     <Compile Include="Element\IEntitySelector.cs" />
     <Compile Include="Tests\DynamicPath\DecoderTest.cs" />
+    <Compile Include="Tests\NodeBaseTest.cs" />
+    <Compile Include="Tests\PathContainerTest.cs" />
     <Compile Include="WPF\EntitySelector.cs" />
     <Compile Include="WPF\EntityRow.cs" />
     <Compile Include="Element\IContainer.cs" />
@@ -87,6 +89,7 @@
     </Compile>
     <Compile Include="UITemplateViewer.cs" />
     <Compile Include="Element\ITextDisplay.cs" />
+    <Compile Include="WPF\Field.cs" />
     <Compile Include="WPF\IUIEntityRow.cs" />
     <Compile Include="WPF\TextDisplay.cs" />
     <Compile Include="WPF\UI.cs" />

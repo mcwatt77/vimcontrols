@@ -78,6 +78,7 @@ namespace UITemplateViewer
                 var propIsEnumerable = typeof (System.Collections.IEnumerable).IsAssignableFrom(propToSet.PropertyType);
                 if (propIsEnumerable && isEnumerable)
                 {
+                    //I should cast here... cause I can
                     var innerType = propToSet.PropertyType.GetGenericArguments().First();
                     var e = ((System.Collections.IEnumerable) dataRows).Cast<IParentNode>();
                     foreach (var row in e)
@@ -90,14 +91,8 @@ namespace UITemplateViewer
                 }
                 if (!isEnumerable)
                 {
-                    //make it a list?
                 }
 
-                //if the the target consists of a single element, then Rows should be an IEnum
-                //if the target consists of multiple elements, then Rows should be an IEnum of an IEnum
-                //If the rows member doesn't exist... it's no biggie
-
-                int debug = 0;
             }
             if (path.Local != null)
             {
@@ -106,42 +101,16 @@ namespace UITemplateViewer
 
                 var dataRows = localRows.Select(localRow => ProcessTemplateElem(data, localRow)).ToList();
 
-                //TODO: don't register localRows, create a new object for each one
-                node.Register(dataRows);
-                //TODO: This will have to be done dynamically
-                var children = node.Get<IUIInitialize>();
-                propToSet.SetValue(newObj, children, null);
+                var e = dataRows.Cast<IUIInitialize>().ToList();
+                node.Register(e);
+
+                var child = node.Get<IEnumerable<IUIInitialize>>();
+                propToSet.SetValue(newObj, child, null);
 
                 int debug = 0;
                 //now set this to propToSet
             }
             return;
-
-/*            var path = get.Value.Substring(1, get.Value.Length - 2);
-            var method = _xpath.GetType().GetMethods().Single(lmethod => lmethod.Name == "GetPathFunc" && !lmethod.IsGenericMethod);
-            var result = (Delegate)method.Invoke(_xpath, new object[] {path});
-            var invokeResult = result.DynamicInvoke(data);
-
-            if (typeof(IEnumerable).IsAssignableFrom(invokeResult.GetType()))
-            {
-                var nodes = ((IEnumerable) invokeResult).Cast<INode>();
-                //try to pack this into the propToSet
-
-                int debug2 = 0;
-            }
-
-            //NOTE:  This is the current design path... but as soon as I pass in data...
-            //I tie the whole system up in dynamic runtime execution.
-            //Would be much nicer if I could return delegates to operate later
-            //NOTE:  I might be able to an inversion type thing, where instead of passing in data, I pass in a delegate to data
-
-            //what I have here is the result of fnGetNotes
-            //TODO: 1. Now I need to build EntityRows out of them
-//            _xpath.GetPathFunc<>()
-
-            //The value of invokeResult is whatever gets returned by xpath, which should either be IEnum<Node> or Node...
-            //Should I always make it IEnum?
-            int debug = 0;*/
         }
 
         private object CreateObject(Type type, INode node)

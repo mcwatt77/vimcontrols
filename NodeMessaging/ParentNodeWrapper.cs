@@ -61,7 +61,7 @@ namespace NodeMessaging
         public IEnumerable<IEndNode> Attributes()
         {
             if (_attributes == null)
-                _attributes = _parentNode.Attributes().Select(attr => (IEndNode)new EndNodeWrapper(_rootNode, attr)).ToList();
+                _attributes = _parentNode.Attributes().Select(attr => (IEndNode)new EndNodeWrapper(_rootNode, attr, this)).ToList();
             return _attributes;
         }
 
