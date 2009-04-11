@@ -6,8 +6,11 @@ namespace NodeMessaging
 {
     public class EndNodeWrapper : NodeBase, IEndNode
     {
-        public EndNodeWrapper(RootNode rootNode, INodeImplementor node) : base(rootNode, node)
+        private readonly IParentNode _parent;
+
+        public EndNodeWrapper(RootNode rootNode, INodeImplementor node, IParentNode parent) : base(rootNode, node)
         {
+            _parent = parent;
         }
 
         public string Name
@@ -17,7 +20,7 @@ namespace NodeMessaging
 
         public IParentNode Parent
         {
-            get { throw new System.NotImplementedException(); }
+            get { return _parent; }
         }
 
         public IParentNode Root

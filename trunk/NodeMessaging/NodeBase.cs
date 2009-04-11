@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Castle.Core.Interceptor;
@@ -7,6 +8,19 @@ using Utility.Core;
 
 namespace NodeMessaging
 {
+    public class EnumerableWrapper<T> : IEnumerable<T>
+    {
+        public IEnumerator<T> GetEnumerator()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+    }
+
     public class NodeBase
     {
         protected readonly Dictionary<Type, object> _registeredTypes = new Dictionary<Type, object>();
@@ -21,6 +35,11 @@ namespace NodeMessaging
 
         public virtual T Get<T>() where T : class
         {
+            if ((typeof(IEnumerable).IsAssignableFrom(typeof(T))))
+            {
+                var argType = typeof (T).GetGenericArguments().First();
+                return (T)typeof (EnumerableWrapper<>).MakeGenericType(argType).GetConstructor(Type.EmptyTypes).Invoke(new object[]{});
+            }
             var ret = _registeredTypes.ContainsKey(typeof (T))
                           ? ((T) _registeredTypes[typeof (T)])
                           : _node.Get<T>();
@@ -50,6 +69,17 @@ namespace NodeMessaging
 
         public virtual void Register<T>(T t)
         {
+            //TODO: The problem with what I'm doing is that this could be really expansive...
+            //For instance I'm getting passed IEnumerable<object>, but need to retrieve IEnumerable<Field> or something
+            //Maybe this shouldn't be a dictionary?
+            //I could do it all on the get side
+            if (typeof(System.Collections.IEnumerable).IsAssignableFrom(typeof(T)))
+            {
+                var g = typeof (T).GetGenericArguments().First();
+                var fTypes = g.GetInterfaces().Select(i => AdditionalInterfaces(i, g)).Flatten().Select(f => typeof(IEnumerable<>).MakeGenericType(f));
+                int debug = 0;
+                //super cast here?
+            }
             var interfaces = t.GetType().GetInterfaces().Select(i => AdditionalInterfaces(i, t)).Flatten();
             interfaces.Do(i => _registeredTypes[i] = t);
         }

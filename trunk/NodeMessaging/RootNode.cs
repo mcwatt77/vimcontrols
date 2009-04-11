@@ -128,7 +128,7 @@ namespace NodeMessaging
             if (typeof(IParentNodeImplementor).IsAssignableFrom(node.GetType()))
                 nodeCmp = new ParentNodeWrapper(this, (IParentNodeImplementor)node);
             if (typeof(IEndNodeImplementor).IsAssignableFrom(node.GetType()))
-                nodeCmp = new EndNodeWrapper(this, (IEndNodeImplementor)node);
+                nodeCmp = new EndNodeWrapper(this, (IEndNodeImplementor)node, this);
 
             if (message.NodePredicate != null)
                 if (!message.NodePredicate(nodeCmp)) return;
