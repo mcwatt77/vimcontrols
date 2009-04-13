@@ -38,7 +38,7 @@ namespace NodeMessaging
         {
             var attr = _elem.Attribute(name);
 
-            var endNode = new EndNode {Name = name, Parent = this};
+            var endNode = new EndNode {Name = name, Parent = this, Value = attr.Value};
             var stringProvider = (IAccessor<string>)new Accessor<string> {Value = attr.Value};
             endNode.Register(stringProvider);
             return endNode;

@@ -28,6 +28,8 @@ namespace NodeMessaging
             throw new System.NotImplementedException();
         }
 
+        public object Value { get; set; }
+
         public T Get<T>() where T : class
         {
             return (T) _registeredTypes[typeof (T)];

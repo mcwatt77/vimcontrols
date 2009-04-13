@@ -23,6 +23,7 @@ namespace UITemplateViewer
             var ui = template.GetUI();
             ui.Parent = this;
             ui.Initialize();
+            _controller = ui;
 
 /*            var template = new DynamicTemplate();
             _controller = template.InitializeController(this);*/

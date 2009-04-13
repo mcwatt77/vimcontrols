@@ -25,7 +25,7 @@ namespace NodeMessaging
                     if (!_nodeDict.ContainsKey(nameFilter))
                     {
                         _nodeDict[nameFilter] =
-                            nodeHandler.Nodes(nameFilter).Select(node => (IParentNode)new ParentNodeWrapper(this, node)).ToList();
+                            nodeHandler.Nodes(nameFilter).Select(node => (IParentNode)new ParentNodeWrapper(this, node, this)).ToList();
                     }
                     return _nodeDict[nameFilter];
             }
@@ -45,7 +45,7 @@ namespace NodeMessaging
                 {
                     var nodeHandler = (IParentNodeImplementor) _registeredTypes[typeof (IParentNodeImplementor)];
                     _parentNodeWrappers =
-                        nodeHandler.Nodes().Select(node => new ParentNodeWrapper(this, node)).ToList();
+                        nodeHandler.Nodes().Select(node => new ParentNodeWrapper(this, node, this)).ToList();
                 }
                 return _parentNodeWrappers.Cast<IParentNode>();
             }
@@ -149,7 +149,7 @@ namespace NodeMessaging
             }
             INode nodeCmp = null;
             if (typeof(IParentNodeImplementor).IsAssignableFrom(node.GetType()))
-                nodeCmp = new ParentNodeWrapper(this, (IParentNodeImplementor)node);
+                nodeCmp = new ParentNodeWrapper(this, (IParentNodeImplementor)node, this);
             if (typeof(IEndNodeImplementor).IsAssignableFrom(node.GetType()))
                 nodeCmp = new EndNodeWrapper(this, (IEndNodeImplementor)node, this);
 

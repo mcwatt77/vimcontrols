@@ -35,16 +35,29 @@ namespace NodeMessaging
 
         public virtual T Get<T>() where T : class
         {
-            if ((typeof(IEnumerable).IsAssignableFrom(typeof(T))))
+            if ((typeof(IEnumerable<T>).IsAssignableFrom(typeof(T))))
             {
                 var argType = typeof (T).GetGenericArguments().First();
                 return (T)typeof (EnumerableWrapper<>).MakeGenericType(argType).GetConstructor(Type.EmptyTypes).Invoke(new object[]{});
             }
+            object value = null;
+            if (typeof(IEndNodeImplementor).IsAssignableFrom(_node.GetType()))
+            {
+                value = ((IEndNodeImplementor) _node).Value;
+                if (!typeof(T).IsAssignableFrom(value.GetType()))
+                    value = _node.Get<T>();
+            }
+            else
+                value = _node.Get<T>();
+
             var ret = _registeredTypes.ContainsKey(typeof (T))
                           ? ((T) _registeredTypes[typeof (T)])
-                          : _node.Get<T>();
+                          : (T)value;
 
-            return InjectNode(ret, Intercept);
+            if (typeof(T).IsInterface)
+                return InjectNode(ret, Intercept);
+            else
+                return ret;
         }
 
         private void Intercept(IInvocation invocation)
