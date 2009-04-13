@@ -59,7 +59,7 @@ namespace NodeMessaging
 
         public IEndNode Attribute(string name)
         {
-            throw new System.NotImplementedException();
+            return null;
         }
 
         public IEnumerable<IEndNode> Attributes()
@@ -67,9 +67,32 @@ namespace NodeMessaging
             throw new System.NotImplementedException();
         }
 
+        private Dictionary<string, IParentNode> _nodeLookup;
+
         public IParentNode NodeById(string id)
         {
-            throw new System.NotImplementedException();
+            if (_nodeLookup == null)
+            {
+                _nodeLookup = new Dictionary<string, IParentNode>();
+                Descendants().Do(node =>
+                                     {
+                                         if (node.Attribute("id") != null)
+                                         {
+                                             var accessor = node.Attribute("id").Get<IAccessor<string>>();
+                                             _nodeLookup[accessor.Value.ToLower()] = node;
+                                         }
+                                     });
+            }
+            return _nodeLookup.ContainsKey(id.ToLower())
+                       ? _nodeLookup[id.ToLower()]
+                       : null;
+        }
+
+        private IEnumerable<IParentNode> Descendants()
+        {
+            Func<IParentNode, IEnumerable<IParentNode>> fnDescendants = null;
+            fnDescendants = node => new []{node}.Concat(node.Nodes().Select(subNode => fnDescendants(subNode)).Flatten());
+            return fnDescendants(this);
         }
 
         public IParentNode Parent

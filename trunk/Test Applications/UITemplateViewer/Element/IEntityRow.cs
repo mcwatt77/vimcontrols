@@ -6,6 +6,6 @@ namespace UITemplateViewer.Element
     public interface IEntityRow
     {
         IParentNode Context { get; set; }
-        IEnumerable<IFieldAccessor<string>> Columns { get; set; }
+        IEnumerable<IAccessor<string>> Columns { get; set; }
     }
 }

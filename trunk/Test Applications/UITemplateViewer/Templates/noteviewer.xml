@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ui id="noteViewer" children="[*]" controller="[:controller]">
-  <entityList id="noteList" displayName="Note Viewer" rows="[entityRow]{/note}">
-    <entityRow columns="[*]">
-      <field value="{@descr}"/>
+  <entityList id="noteList" displayName="Note Viewer" rows="{/note}[entityRow]">
+    <entityRow fields="[*]">
+      <field value="{@desc}"/>
     </entityRow>
-    <entitySelector rowSelector="{/dyn::rowSelector}" rows="[:noteList/@rows]">
+    <entitySelector id="selector" rowSelector="[@rows[1]]" rows="[:noteList/@rows]">
       <entitySelectorController id="controller" selector="[..]"/>
     </entitySelector>
   </entityList>
-  <text value="{/dyn::rowSelector/@body}"/>
+  <textDisplay value="[:selector/@rowSelector]{@body}"/>
 </ui>

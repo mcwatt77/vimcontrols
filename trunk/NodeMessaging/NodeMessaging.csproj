@@ -59,7 +59,7 @@
     <Compile Include="DelegateInterceptor.cs" />
     <Compile Include="EndNode.cs" />
     <Compile Include="EndNodeWrapper.cs" />
-    <Compile Include="FieldAccessor.cs" />
+    <Compile Include="Accessor.cs" />
     <Compile Include="FinalInterceptor.cs" />
     <Compile Include="IEndNode.cs" />
     <Compile Include="IEndNodeImplementor.cs" />
@@ -70,7 +70,7 @@
     <Compile Include="NodeBase.cs" />
     <Compile Include="NodeMessage.cs" />
     <Compile Include="IParentNode.cs" />
-    <Compile Include="IFieldAccessor.cs" />
+    <Compile Include="IAccessor.cs" />
     <Compile Include="ParentNodeWrapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RootNode.cs" />

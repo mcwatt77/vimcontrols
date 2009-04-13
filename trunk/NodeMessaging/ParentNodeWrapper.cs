@@ -8,7 +8,7 @@ namespace NodeMessaging
         private readonly IParentNode _contextRoot;
         private readonly Dictionary<string, IEnumerable<IParentNode>> _nodeDict = new Dictionary<string, IEnumerable<IParentNode>>();
         private IEnumerable<IEndNode> _attributes;
-        private IParentNodeImplementor _parentNode;
+        private readonly IParentNodeImplementor _parentNode;
 
         private ParentNodeWrapper(RootNode rootNode, IParentNode contextRoot, IParentNodeImplementor node) : base(rootNode, node)
         {
@@ -55,7 +55,7 @@ namespace NodeMessaging
 
         public IEndNode Attribute(string name)
         {
-            return Attributes().Single(attr => attr.Name == name);
+            return Attributes().SingleOrDefault(attr => attr.Name == name);
         }
 
         public IEnumerable<IEndNode> Attributes()
@@ -67,7 +67,7 @@ namespace NodeMessaging
 
         public IParentNode NodeById(string id)
         {
-            throw new System.NotImplementedException();
+            return _rootNode.NodeById(id);
         }
 
         public IParentNode Root

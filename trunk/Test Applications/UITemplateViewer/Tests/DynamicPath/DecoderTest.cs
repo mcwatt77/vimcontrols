@@ -38,6 +38,13 @@ namespace UITemplateViewer.Tests.DynamicPath
             Assert.AreEqual("a => a.Root.Nodes(\"note\")", decode.Data.ToString());
             decode.Data.Compile();
 
+            decode = Decoder.FromPath("{/note}[entityRow]");
+            masterDoc.Add(decode.Element);
+            Assert.AreEqual("a => a.Nodes(\"entityRow\")", decode.Local.ToString());
+            decode.Local.Compile();
+            Assert.AreEqual("a => a.Root.Nodes(\"note\")", decode.Data.ToString());
+            decode.Data.Compile();
+
             decode = Decoder.FromPath("{@descr}");
             masterDoc.Add(decode.Element);
             Assert.AreEqual("a => a.Attribute(\"descr\")", decode.Data.ToString());

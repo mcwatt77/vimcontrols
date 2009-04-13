@@ -4,14 +4,15 @@ using UITemplateViewer.Element;
 
 namespace UITemplateViewer.WPF
 {
-    public class TextDisplay : IFieldAccessor<string>, IUIInitialize
+    public class TextDisplay : IAccessor<string>, IUIInitialize
     {
         private TextBlock _text;
+        private bool _initialized;
 
         public string Value
         {
-            get { return TextBlock.Text; }
-            set { TextBlock.Text = value; }
+            get { return _initialized ? TextBlock.Text : null; }
+            set { if (_initialized) TextBlock.Text = value; }
         }
 
         private TextBlock TextBlock
@@ -26,6 +27,7 @@ namespace UITemplateViewer.WPF
 
         public void Initialize()
         {
+            _initialized = true;
             Parent.AddChild(TextBlock);
         }
 

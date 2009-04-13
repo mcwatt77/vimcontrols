@@ -19,8 +19,13 @@ namespace UITemplateViewer
         {
             Content = new StackPanel();
 
-            var template = new DynamicTemplate();
-            _controller = template.InitializeController(this);
+            var template = new DynamicTemplate2();
+            var ui = template.GetUI();
+            ui.Parent = this;
+            ui.Initialize();
+
+/*            var template = new DynamicTemplate();
+            _controller = template.InitializeController(this);*/
         }
 
         public void Maximize()
