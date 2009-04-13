@@ -9,5 +9,6 @@ namespace NodeMessaging
         Message Send(Message message);
         IEnumerable<Type> RegisteredTypes { get; }
         void InstallHook<T>(T tHook, object recipient);
+        object Value { get; }
     }
 }

@@ -5,8 +5,23 @@
       <field value="{@desc}"/>
     </entityRow>
     <entitySelector id="selector" rowSelector="[@rows[1]]" rows="[:noteList/@rows]">
-      <entitySelectorController id="controller" selector="[..]"/>
+      <entityListController id="controller" selector="[..]"/>
+      <!--Should rename to entitySelectorController-->
     </entitySelector>
   </entityList>
   <textDisplay value="[:selector/@rowSelector]{@body}"/>
 </ui>
+<!--
+There are a couple of novel problems remaining.
+What does it mean when i refer to another element from a path?
+
+Each element slot becomes a factory.
+If doing a {}[], it creates a new object per request and stuffs the {} into it
+If just doing [], it returns a the same instance on subsequent calls
+
+Also, how are events wired together?  I think through [] type references.
+
+
+To resolve rows="[:noteList/@rows]" I think I need to do something like GetProperty in Dynamic templates
+It needs to have a reference to go retrieve the object
+-->

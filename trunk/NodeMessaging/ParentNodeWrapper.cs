@@ -9,17 +9,20 @@ namespace NodeMessaging
         private readonly Dictionary<string, IEnumerable<IParentNode>> _nodeDict = new Dictionary<string, IEnumerable<IParentNode>>();
         private IEnumerable<IEndNode> _attributes;
         private readonly IParentNodeImplementor _parentNode;
+        private readonly IParentNode _parent;
 
-        private ParentNodeWrapper(RootNode rootNode, IParentNode contextRoot, IParentNodeImplementor node) : base(rootNode, node)
+        private ParentNodeWrapper(RootNode rootNode, IParentNode contextRoot, IParentNodeImplementor node, IParentNode parent) : base(rootNode, node)
         {
             _contextRoot = contextRoot;
             _parentNode = node;
+            _parent = parent;
         }
             
-        public ParentNodeWrapper(RootNode rootNode, IParentNodeImplementor node) : base(rootNode, node)
+        public ParentNodeWrapper(RootNode rootNode, IParentNodeImplementor node, IParentNode parent) : base(rootNode, node)
         {
             _contextRoot = this;
             _parentNode = node;
+            _parent = parent;
         }
 
         public string Name
@@ -31,7 +34,7 @@ namespace NodeMessaging
         {
             if (!_nodeDict.ContainsKey(nameFilter))
             {
-                _nodeDict[nameFilter] = _parentNode.Nodes(nameFilter).Select(node => (IParentNode)new ParentNodeWrapper(_rootNode, _contextRoot, node)).ToList();
+                _nodeDict[nameFilter] = _parentNode.Nodes(nameFilter).Select(node => (IParentNode)new ParentNodeWrapper(_rootNode, _contextRoot, node, this)).ToList();
             }
             return _nodeDict[nameFilter];
         }
@@ -44,7 +47,7 @@ namespace NodeMessaging
         public IEnumerable<IParentNode> Nodes()
         {
             if (!_nodeDict.ContainsKey(""))
-                _nodeDict[""] = _parentNode.Nodes().Select(node => (IParentNode) new ParentNodeWrapper(_rootNode, _contextRoot, node)).ToList();
+                _nodeDict[""] = _parentNode.Nodes().Select(node => (IParentNode) new ParentNodeWrapper(_rootNode, _contextRoot, node, this)).ToList();
             return _nodeDict[""];
         }
 
@@ -77,7 +80,7 @@ namespace NodeMessaging
 
         public IParentNode Parent
         {
-            get { throw new System.NotImplementedException(); }
+            get { return _parent; }
         }
     }
 }

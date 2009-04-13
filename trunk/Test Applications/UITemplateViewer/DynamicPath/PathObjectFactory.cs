@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Castle.DynamicProxy;
 using NodeMessaging;
 using UITemplateViewer.DynamicPath;
 
@@ -9,6 +10,8 @@ namespace UITemplateViewer.DynamicPath
 {
     public class PathObjectFactory
     {
+        //TODO:  This should be more like a factory type implementation, where sometimes it's new,
+            //sometimes it retrieves existing instances, but it needs to maintain unique identity of requests
         private readonly Func<IParentNode, INode, object> _fnNodeBuilder;
         private readonly INode _attribute;
         private readonly Type _propertyType;
@@ -37,19 +40,39 @@ namespace UITemplateViewer.DynamicPath
                                    if (path.Data.ToString() == "a => a.Attribute(\"desc\")")
                                    {
                                        return accessor.Value;
-                                       //                                   var data = dataResult.Get<IAccessor<string>>();
-                                       var parent = (IParentNode) dataNode;
-                                       var val = parent.Attribute("descr");
-                                       int debug = 0;
                                    }
                                }
                            }
                            if (path.Local == null) return null;
 
+                           if (path.Local.ToString() == "a => a.Root.NodeById(\"controller\")")
+                           {
+                               int debug = 0;
+                           }
+
                            var fnLocal = path.Local.Compile();
                            var di = fnLocal.DynamicInvoke(_attribute.Parent);
                            if (!typeof(IEnumerable<IParentNode>).IsAssignableFrom(di.GetType()))
                            {
+                               if (typeof(INode).IsAssignableFrom(di.GetType()))
+                               {
+                                   //take di, and call _fnNodeBuilder
+                                   if (path.Data == null)
+                                   {
+                                       if (typeof(IEndNode).IsAssignableFrom(di.GetType()))
+                                       {
+                                           int debug = 0;
+                                           return null;
+                                       }
+                                       var newObj = _fnNodeBuilder((IParentNode)di, dataNode);
+                                       if (!_propertyType.IsAssignableFrom(newObj.GetType()))
+                                       {
+                                           var proxy = new ProxyGenerator();
+                                           return proxy.CreateInterfaceProxyWithoutTarget(_propertyType, new SuperCast(newObj));
+                                       }
+                                       return newObj;
+                                   }
+                               }
                                //TODO: Implement this.  This is [:selector/@rowSelector]{@body}
                                return null;
                            }
