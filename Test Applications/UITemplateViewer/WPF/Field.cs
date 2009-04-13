@@ -2,7 +2,7 @@
 
 namespace UITemplateViewer.WPF
 {
-    public class Field : IUIInitialize
+    public class Field : IField, IUIInitialize
     {
         public string Value { get; set; }
 

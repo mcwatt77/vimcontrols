@@ -45,7 +45,7 @@ namespace UITemplateViewer
         private void ProcessAttribute(IParentNode data, IParentNode parent, INode node, object newObj)
         {
             var propToSet = newObj.GetType().GetProperties().SingleOrDefault(prop => prop.Name.ToLower() == node.Name.ToLower());
-            var get = node.Get<IFieldAccessor<string>>();
+            var get = node.Get<IAccessor<string>>();
 
             if (node.Name == "id")
             {
@@ -119,14 +119,14 @@ namespace UITemplateViewer
         }
 
         //TODO: 2. $$$ Replace this method with the automatic template reading above
-        private static IUIEntityRow BuildEntityRow(IParentNode node, Func<IParentNode, IFieldAccessor<string>> fnGetDesc)
+        private static IUIEntityRow BuildEntityRow(IParentNode node, Func<IParentNode, IAccessor<string>> fnGetDesc)
         {
             IEntityRow row = new EntityRow {Columns = new[] {fnGetDesc(node)}, Context = node};
             node.Register(row);
             return node.Get<IUIEntityRow>();
         }
 
-        private static void BuildNoteList(IParentNode rootNode, Func<IParentNode, IEnumerable<IParentNode>> fnGetNotes, Func<IParentNode, IFieldAccessor<string>> fnGetDesc, IContainer container, out EntityList entityList)
+        private static void BuildNoteList(IParentNode rootNode, Func<IParentNode, IEnumerable<IParentNode>> fnGetNotes, Func<IParentNode, IAccessor<string>> fnGetDesc, IContainer container, out EntityList entityList)
         {
             var notesContext = fnGetNotes(rootNode);
             var rows = notesContext.Take(2).Select(node => BuildEntityRow(node, fnGetDesc)).ToList();
@@ -153,13 +153,13 @@ namespace UITemplateViewer
             var dynamicData = rootNode.Nodes("dynamicData").First();
             var uiRoot = rootNode.Nodes().Skip(2).First();
             //bug: here it is...  this needs to be implemented.  Will want to switch EndNodeWrapper to derive from NodeBase to fix
-            ProcessTemplateElem(dataRoot, uiRoot);
+//            ProcessTemplateElem(dataRoot, uiRoot);
 
 
-//            var fnGetDesc = _xpath.GetPathFunc<IFieldAccessor<string>>("@descr");
-//            var fnGetText = _xpath.GetPathFunc<IFieldAccessor<string>>("@body");
-            Func<IParentNode, IFieldAccessor<string>> fnGetDesc = node => node.Attribute("desc").Get<IFieldAccessor<string>>();
-            Func<IParentNode, IFieldAccessor<string>> fnGetText = node => node.Attribute("body").Get<IFieldAccessor<string>>();
+//            var fnGetDesc = _xpath.GetPathFunc<IAccessor<string>>("@descr");
+//            var fnGetText = _xpath.GetPathFunc<IAccessor<string>>("@body");
+            Func<IParentNode, IAccessor<string>> fnGetDesc = node => node.Attribute("desc").Get<IAccessor<string>>();
+            Func<IParentNode, IAccessor<string>> fnGetText = node => node.Attribute("body").Get<IAccessor<string>>();
             var fnGetNotes = _xpath.GetPathFunc<IEnumerable<IParentNode>>("//note");
 
 
@@ -173,7 +173,7 @@ namespace UITemplateViewer
             //TODO:  3. Enforce the constraint that new objects go through a factory where the INode is known at creation time, and a proxy is returned
             //This will eliminate a lot of the difficulty I've been having figuring out what to do when I new objects
 
-            //TODO:  $$ Overall this is pretty awesome, but it can't respond to changes to the IFieldAccessor<string>, only to the column list of the IEntityRow
+            //TODO:  $$ Overall this is pretty awesome, but it can't respond to changes to the IAccessor<string>, only to the column list of the IEntityRow
             return _entityListController;
         }
 
@@ -192,19 +192,19 @@ namespace UITemplateViewer
             textDisplay.Initialize();
         }
 
-        private static EntityListController BuildEntitySelector(INode rootNode, Func<IParentNode, IFieldAccessor<string>> fnGetText, RootNode actualRootNode, IParentNode dynamicData)
+        private static EntityListController BuildEntitySelector(INode rootNode, Func<IParentNode, IAccessor<string>> fnGetText, RootNode actualRootNode, IParentNode dynamicData)
         {
             var entityList = rootNode.Get<IEntityList<IUIEntityRow>>();
             var selector = new EntitySelector {Rows = entityList.Rows, SelectedRow = entityList.Rows.First()};
             var rowSelector = dynamicData.Nodes("rowSelector").First();
             rowSelector.Register(selector);
 
-            var textOutput = dynamicData.Nodes("textOutput").First().Get<IFieldAccessor<string>>();
+            var textOutput = dynamicData.Nodes("textOutput").First().Get<IAccessor<string>>();
             var nodeMessage = new NodeMessage
                                   {
                                       Target = textOutput,
                                       MessagePredicate = (message => message.Method.Name == "set_SelectedRow"),
-                                      TargetDelegate = (Func<IInvocation, Action<IFieldAccessor<string>>>)
+                                      TargetDelegate = (Func<IInvocation, Action<IAccessor<string>>>)
                                                        (row => accessor => accessor.Value = fnGetText(((IEntityRow)row.Arguments.First()).Context).Value)
                                                        //TODO: 1. This seems a little complicated...
                                                        //Somebody, or something in the xml needs to clue the framework in to how to do this wiring.
@@ -217,11 +217,11 @@ namespace UITemplateViewer
             return _entityListController;
         }
 
-        private static IFieldAccessor<string> BuildTextDisplay(IParentNode rootNode, IContainer container)
+        private static IAccessor<string> BuildTextDisplay(IParentNode rootNode, IContainer container)
         {
             var textOutput = rootNode.Nodes("textOutput").First();
-            textOutput.Register<IFieldAccessor<string>>(new TextDisplay {Parent = container});
-            return textOutput.Get<IFieldAccessor<string>>();
+            textOutput.Register<IAccessor<string>>(new TextDisplay {Parent = container});
+            return textOutput.Get<IAccessor<string>>();
         }
     }
 }

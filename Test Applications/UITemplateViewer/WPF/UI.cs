@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UITemplateViewer.Element;
+using Utility.Core;
 
 namespace UITemplateViewer.WPF
 {
@@ -9,12 +10,13 @@ namespace UITemplateViewer.WPF
 
         public void Initialize()
         {
+            Children.Do(child =>
+                            {
+                                child.Parent = Parent;
+                                child.Initialize();
+                            });
         }
 
-        public IContainer Parent
-        {
-            get { throw new System.NotImplementedException(); }
-            set { throw new System.NotImplementedException(); }
-        }
+        public IContainer Parent { get; set; }
     }
 }

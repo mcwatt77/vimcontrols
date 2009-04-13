@@ -1,6 +1,6 @@
 namespace NodeMessaging
 {
-    public class FieldAccessor<T> : IFieldAccessor<T>
+    public class Accessor<T> : IAccessor<T>
     {
         public T Value { get; set; }
     }

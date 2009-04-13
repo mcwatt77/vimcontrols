@@ -2,7 +2,7 @@ using System;
 
 namespace NodeMessaging
 {
-    public class DelegateFieldAccessor<T> : IFieldAccessor<T>
+    public class DelegateFieldAccessor<T> : IAccessor<T>
     {
         private readonly Func<T> _get;
         private readonly Action<T> _set;

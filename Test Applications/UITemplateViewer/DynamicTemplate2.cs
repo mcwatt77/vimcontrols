@@ -1,19 +1,22 @@
 ﻿using System.Linq;
 using System.Xml.Linq;
 using NodeMessaging;
-using NUnit.Framework;
 using UITemplateViewer.DynamicPath;
 using UITemplateViewer.Element;
 
-namespace UITemplateViewer.Tests
+namespace UITemplateViewer
 {
-    [TestFixture]
-    public class PathContainerTest
+    public class DynamicTemplate2
     {
         private IParentNode dataNode;
         private IParentNode templateNode;
 
-        private void SetupRootNodes()
+        public DynamicTemplate2()
+        {
+            Setup();
+        }
+
+        public void Setup()
         {
             var rootNode = new RootNode();
             var dataXml = XmlNode.Parse("<data><note desc=\"1\" body=\"One!\"/><note desc=\"2\" body=\"Two?\"/></data>");
@@ -24,17 +27,10 @@ namespace UITemplateViewer.Tests
             templateNode = rootNode.Nodes().Skip(1).First();
         }
 
-        [SetUp]
-        public void Setup()
+        public IUIInitialize GetUI()
         {
-            SetupRootNodes();
-        }
-
-        [Test]
-        public void Test()
-        {
-            var pathContainer = new PathContainer(typeof (PathContainerTest).Assembly);
-            var ui = pathContainer.CreateObject<IUIInitialize>(templateNode, dataNode);
+            var pathContainer = new PathContainer(typeof (IUIInitialize).Assembly);
+            return pathContainer.CreateObject<IUIInitialize>(templateNode, dataNode);
         }
     }
 }
