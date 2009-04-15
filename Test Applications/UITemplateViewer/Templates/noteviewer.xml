@@ -4,12 +4,12 @@
     <entityRow fields="[*]">
       <field value="{@desc}"/>
     </entityRow>
-    <entitySelector id="selector" rowSelector="[@rows[1]]" rows="[:noteList/@rows]">
+    <entitySelector id="selector" selectedRow="[@rows[1]]" rows="[:noteList/@rows]">
       <entityListController id="controller" selector="[..]"/>
       <!--Should rename to entitySelectorController-->
     </entitySelector>
   </entityList>
-  <textDisplay value="[:selector/@rowSelector]{@body}"/>
+  <textDisplay value="[:selector/@selectedRow]{@body}"/>
 </ui>
 <!--
 There are a couple of novel problems remaining.

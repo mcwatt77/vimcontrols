@@ -10,5 +10,7 @@ namespace NodeMessaging
         IEnumerable<Type> RegisteredTypes { get; }
         void InstallHook<T>(T tHook, object recipient);
         object Value { get; }
+        T Get<T>() where T : class;
+        void Register<T>(T t);
     }
 }

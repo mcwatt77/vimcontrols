@@ -61,6 +61,7 @@
   <ItemGroup>
     <Compile Include="AppWindow.cs" />
     <Compile Include="Controllers\EntityListController.cs" />
+    <Compile Include="DynamicPath\DecodedExpression.cs" />
     <Compile Include="DynamicPath\Decoder.cs" />
     <Compile Include="DynamicTemplate.cs" />
     <Compile Include="DynamicTemplate2.cs" />

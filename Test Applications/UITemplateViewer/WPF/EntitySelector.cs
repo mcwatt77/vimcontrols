@@ -16,7 +16,7 @@ namespace UITemplateViewer.WPF
             {
                 if (_selectedRow != null) _selectedRow.Selected = false;
                 _selectedRow = value;
-                _selectedRow.Selected = true;
+                if (_selectedRow != null) _selectedRow.Selected = true;
             }
         }
     }

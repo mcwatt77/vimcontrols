@@ -35,29 +35,37 @@ namespace NodeMessaging
 
         public virtual T Get<T>() where T : class
         {
-            if ((typeof(IEnumerable<T>).IsAssignableFrom(typeof(T))))
+            try
             {
-                var argType = typeof (T).GetGenericArguments().First();
-                return (T)typeof (EnumerableWrapper<>).MakeGenericType(argType).GetConstructor(Type.EmptyTypes).Invoke(new object[]{});
+                if ((typeof (IEnumerable<T>).IsAssignableFrom(typeof (T))))
+                {
+                    var argType = typeof (T).GetGenericArguments().First();
+                    return
+                        (T)
+                        typeof (EnumerableWrapper<>).MakeGenericType(argType).GetConstructor(Type.EmptyTypes).Invoke(
+                            new object[] {});
+                }
+                object value = null;
+                if (typeof (IEndNodeImplementor).IsAssignableFrom(_node.GetType()))
+                {
+                    value = ((IEndNodeImplementor) _node).Value;
+                    if (!typeof (T).IsAssignableFrom(value.GetType()))
+                        value = ((IEndNodeImplementor) _node).Get<T>();
+                }
+
+                var ret = _registeredTypes.ContainsKey(typeof (T))
+                              ? ((T) _registeredTypes[typeof (T)])
+                              : (T) value;
+
+                return (ret != null && typeof (T).IsInterface)
+                           ? InjectNode(ret, Intercept)
+                           : ret;
             }
-            object value = null;
-            if (typeof(IEndNodeImplementor).IsAssignableFrom(_node.GetType()))
+            catch(Exception e)
             {
-                value = ((IEndNodeImplementor) _node).Value;
-                if (!typeof(T).IsAssignableFrom(value.GetType()))
-                    value = _node.Get<T>();
+                int debug = 0;
+                throw e;
             }
-            else
-                value = _node.Get<T>();
-
-            var ret = _registeredTypes.ContainsKey(typeof (T))
-                          ? ((T) _registeredTypes[typeof (T)])
-                          : (T)value;
-
-            if (typeof(T).IsInterface)
-                return InjectNode(ret, Intercept);
-            else
-                return ret;
         }
 
         private void Intercept(IInvocation invocation)
@@ -73,6 +81,7 @@ namespace NodeMessaging
 
         private static T InjectNode<T>(T t, Action<IInvocation> fnIntercept) where T : class
         {
+            return t;
             var generator = new ProxyGenerator();
             var interfaces = t.GetType().GetInterfaces().Concat(new[] {typeof (IEndNode)}).ToArray();
             var proxy = (T) generator.CreateInterfaceProxyWithTarget(typeof(T), interfaces, t, new DelegateInterceptor(fnIntercept));

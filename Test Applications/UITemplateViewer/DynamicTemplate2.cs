@@ -30,7 +30,7 @@ namespace UITemplateViewer
         public IUIInitialize GetUI()
         {
             var pathContainer = new PathContainer(typeof (IUIInitialize).Assembly);
-            return pathContainer.CreateObject<IUIInitialize>(templateNode, dataNode);
+            return pathContainer.GetObject<IUIInitialize>(templateNode, dataNode);
         }
     }
 }

@@ -49,9 +49,9 @@ namespace UITemplateViewer
             return msg.Invoke(_controller);
         }
 
-        public void Report(Exception e)
+        public void Report(Exception ex)
         {
-            throw new System.NotImplementedException();
+            MessageBox.Show(ex.FormatError());
         }
 
         protected override void OnKeyDown(KeyEventArgs e)

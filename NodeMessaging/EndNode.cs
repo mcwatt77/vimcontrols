@@ -32,6 +32,7 @@ namespace NodeMessaging
 
         public T Get<T>() where T : class
         {
+            if (!_registeredTypes.ContainsKey(typeof(T))) return null;
             return (T) _registeredTypes[typeof (T)];
         }
 

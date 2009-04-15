@@ -34,7 +34,7 @@ namespace UITemplateViewer.Tests
         public void Test()
         {
             var pathContainer = new PathContainer(typeof (PathContainerTest).Assembly);
-            var ui = pathContainer.CreateObject<IUIInitialize>(templateNode, dataNode);
+            var ui = pathContainer.GetObject<IUIInitialize>(templateNode, dataNode);
         }
     }
 }
