@@ -19,23 +19,52 @@ namespace UITemplateViewer.DynamicPath
             _assemblies = assemblies;
         }
 
-        public T CreateObject<T>(IParentNode templateNode, INode dataNode)
+        private object GetObject(INode templateNode, INode dataNode, Type type)
         {
-            var creator = GetObjectCreator(_assemblies, templateNode);
-            return (T) creator(dataNode);
+            var existingObject = templateNode.GetType().GetMethod("Get").MakeGenericMethod(type).Invoke(templateNode, new object[] {});
+            if (existingObject == null)
+            {
+                if (typeof(IParentNode).IsAssignableFrom(templateNode.GetType()))
+                {
+                    var creator = GetObjectCreator(_assemblies, (IParentNode) templateNode);
+                    existingObject = creator(dataNode, o => templateNode.Register(o));
+                }
+                else
+                {
+                    var endNode = (IEndNode) templateNode;
+                    var parentObject = GetObject(endNode.Parent, dataNode, typeof (object));
+                    var property = parentObject.GetType().GetProperties().Single(prop => prop.Name.ToLower() == endNode.Name);
+                    existingObject = property.GetValue(parentObject, null);
+                    templateNode.Register(existingObject);
+                }
+            }
+            return existingObject;
+        }
+
+        public T GetObject<T>(INode templateNode, INode dataNode) where T : class
+        {
+            var existingObject = templateNode.Get<T>();
+            if (existingObject == null && typeof(IParentNode).IsAssignableFrom(dataNode.GetType()))
+            {
+                var creator = GetObjectCreator(_assemblies, (IParentNode)templateNode);
+                var t = (T) creator(dataNode, o => templateNode.Register(o));
+                existingObject = t;
+            }
+            return existingObject;
         }
 
         //TODO: Call this recursively for all of the template nodes, and put it in a data structure for simpler retrieval later
-        private Func<INode, object> GetObjectCreator(IEnumerable<Assembly> assemblies, IParentNode templateNode)
+        private Func<INode, Action<object>, object> GetObjectCreator(IEnumerable<Assembly> assemblies, IParentNode templateNode)
         {
             var predicate = BuildFilterFromElement(templateNode);
             var type = GetElementType(assemblies, predicate);
             var constructor = type.GetConstructors().Single();
             var setter = GetPropertiesSetter(type, templateNode);
 
-            return node =>
+            return (node, fnDo) =>
                        {
                            var newObj = constructor.Invoke(new object[] {});
+                           fnDo(newObj);
                            setter(newObj, node);
                            return newObj;
                        };
@@ -55,10 +84,15 @@ namespace UITemplateViewer.DynamicPath
 
             if (propToSet == null) return (o, node) => { };
 
-            var pathObjectFactory = new PathObjectFactory(CreateObject<object>, attribute, propToSet.PropertyType);
+            var pathObjectFactory = new PathObjectFactory(GetObject, attribute, propToSet.PropertyType);
             var factory = pathObjectFactory.CreateFactory();
 
-            return (o, node) => propToSet.SetValue(o, factory(node), null);
+            return (o, node) =>
+                       {
+                           var newObj = factory(node);
+                           if (newObj != null) attribute.Register(newObj);
+                           propToSet.SetValue(o, newObj, null);
+                       };
         }
 
         private static Predicate<Type> BuildFilterFromElement(INode templateNode)

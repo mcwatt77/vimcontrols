@@ -25,6 +25,10 @@ namespace NodeMessaging
 
         public object TranslateArgument(object obj, Type typeTarget)
         {
+            if (obj == null)
+            {
+                int debug = 0;
+            }
             if (typeTarget.IsGenericType)
             {
                 if (typeTarget.GetGenericTypeDefinition() == typeof(IEnumerable<>))

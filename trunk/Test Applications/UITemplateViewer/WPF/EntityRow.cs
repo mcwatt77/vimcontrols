@@ -1,16 +1,18 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Media;
 using NodeMessaging;
 using UITemplateViewer.Element;
-using Utility.Core;
 
 namespace UITemplateViewer.WPF
 {
     public class EntityRow : IUIEntityRow
     {
+        public EntityRow()
+        {
+            int debug = 0;
+        }
         private Label _label;
         private IEnumerable<IAccessor<string>> _columns;
         private bool _selected;
@@ -24,7 +26,7 @@ namespace UITemplateViewer.WPF
             set
             {
                 _selected = value;
-                _label.Background = _selected ? Brushes.SpringGreen : Brushes.White;
+                Label.Background = _selected ? Brushes.SpringGreen : Brushes.White;
             }
         }
 
@@ -56,8 +58,6 @@ namespace UITemplateViewer.WPF
 
         public void Initialize()
         {
-            var values = Fields.Select(field => field.Value).ToList();
-
             Columns = Fields.Select(field => (IAccessor<string>)new Accessor<string> {Value = field.Value});
             Parent.AddChild(Label);
         }

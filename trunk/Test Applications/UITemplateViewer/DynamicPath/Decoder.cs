@@ -7,7 +7,7 @@ using System.Xml.Linq;
 using NodeMessaging;
 using Utility.Core;
 
-using ManyToOnePath = System.Linq.Expressions.Expression<System.Func<System.Collections.Generic.IEnumerable<NodeMessaging.IParentNode>, System.Collections.Generic.IEnumerable<NodeMessaging.IParentNode>>>;
+using ManyToOnePath = System.Linq.Expressions.Expression<System.Func<System.Collections.Generic.IEnumerable<NodeMessaging.IParentNode>, NodeMessaging.IParentNode>>;
 using OneToManyPath = System.Linq.Expressions.Expression<System.Func<NodeMessaging.IParentNode, System.Collections.Generic.IEnumerable<NodeMessaging.IParentNode>>>;
 using ManyToManyPath = System.Linq.Expressions.Expression<System.Func<NodeMessaging.IParentNode, System.Collections.Generic.IEnumerable<NodeMessaging.IParentNode>>>;
 using OneToOnePath = System.Linq.Expressions.Expression<System.Func<NodeMessaging.IParentNode, NodeMessaging.IParentNode>>;
@@ -19,6 +19,7 @@ namespace UITemplateViewer.DynamicPath
             //And how will I remember to update Decoder when I change the interfaces around?
             //I need to get decode to build itself from hardcoded interface calls, so they'll break when I change the interface
             //  and not jus during testing
+
     public class Decoder
     {
         private Decoder(XElement element)
@@ -30,6 +31,8 @@ namespace UITemplateViewer.DynamicPath
 
         public LambdaExpression Local { get; private set; }
         public LambdaExpression Data { get; private set; }
+
+        public IEnumerable<DecodedExpression> Expressions { get; private set; }
 
         public XElement Element { get; private set; }
 
@@ -45,27 +48,45 @@ namespace UITemplateViewer.DynamicPath
 
             var doc = parser.Parse(path);
             var decoder = new Decoder(doc);
-            SetExpressionFromParsedDoc(decoder);
+            decoder.SetExpressionFromParsedDoc();
             return decoder;
         }
 
-        private static void SetExpressionFromParsedDoc(Decoder decoder)
+        private void SetExpressionFromParsedDoc()
         {
-            decoder.Local = ParseElement(decoder.Element.Element("local_doc_path_capture"));
-            decoder.Data = ParseElement(decoder.Element.Element("std_xpath_capture"));
+            var expressions = new List<DecodedExpression>();
+            Element.Elements().Do(element =>
+                                      {
+                                          var parsed = ParseElement(element);
+                                          if (element.Name.LocalName == "local_doc_path_capture")
+                                              expressions.Add(new DecodedExpression(Local = parsed) { Local = true });
+                                          else if (element.Name.LocalName == "std_xpath_capture")
+                                              expressions.Add(new DecodedExpression(Data = parsed) {Local = false});
+                                      });
+            Expressions = expressions;
         }
 
-        private static LambdaExpression ParseElement(XContainer element)
+        private static LambdaExpression ParseElement(XElement element)
         {
             if (element == null) return null;
+
+            if (element.Name.LocalName == "literal_statement")
+                return BuildLiteralCall(element.Attribute("data").Value);
 
             var result = element
                 .Elements("elementGroup")
                 .Select(elem => ProcessElementGroup(elem))
                 .ToList();
+
             return result.Count() == 2
                                 ? CombineCalls(result.ToArray())
                                 : result.First();
+        }
+
+        private static LambdaExpression BuildLiteralCall(string value)
+        {
+            var constant = Expression.Constant(value);
+            return Expression.Lambda(typeof (Func<INode, string>), constant, Expression.Parameter(typeof(INode), "node"));
         }
 
         private static LambdaExpression CombineCalls(params Expression[] expressions)
@@ -102,7 +123,19 @@ namespace UITemplateViewer.DynamicPath
         private static LambdaExpression ProcessElementGroup(XContainer element)
         {
             var node = element.Element("node");
+            var filter = element.Element("filter");
             var expr = ProcessNode(node);
+            if (filter != null)
+            {
+                var filterData = filter.Attribute("data").Value;
+                if (filterData == "1")
+                {
+                    var filterExpr = (ManyToOnePath) (a => a.ElementAtOrDefault(0));
+//                    expr = CombineCalls(filterExpr, expr);
+                }
+                else
+                    throw new Exception("Can only support filter '1'");
+            }
 
             if (element.PreviousNode != null) return expr;
             var hierarchy = GetElementValue(element, "hierarchy");

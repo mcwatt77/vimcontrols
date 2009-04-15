@@ -12,11 +12,11 @@ namespace UITemplateViewer.DynamicPath
     {
         //TODO:  This should be more like a factory type implementation, where sometimes it's new,
             //sometimes it retrieves existing instances, but it needs to maintain unique identity of requests
-        private readonly Func<IParentNode, INode, object> _fnNodeBuilder;
+        private readonly Func<INode, INode, Type, object> _fnNodeBuilder;
         private readonly INode _attribute;
         private readonly Type _propertyType;
 
-        public PathObjectFactory(Func<IParentNode, INode, object> fnNodeBuilder, INode attribute, Type propertyType)
+        public PathObjectFactory(Func<INode, INode, Type, object> fnNodeBuilder, INode attribute, Type propertyType)
         {
             _fnNodeBuilder = fnNodeBuilder;
             _attribute = attribute;
@@ -25,10 +25,26 @@ namespace UITemplateViewer.DynamicPath
 
         public Func<INode, object> CreateFactory()
         {
+            //if local point to data, then local retrieves the underlying template node
+            //standard local behavior instantiates the object as a singleton from the template
+            //If data pass the actual data, if virtualizable, wrap it (there might a flag to have it only wrap if it needs to)
+
             var get = _attribute.Get<IAccessor<string>>();
             var path = Decoder.FromPath(get.Value);
             return dataNode =>
                        {
+                           if (get.Value == "[@rows[1]]")
+                           {
+//                               throw new Exception("Debug from here.  For some reason what it's doing here is causing infinite recursion.");
+                               return null;
+                           }
+                           //TODO: I think this will be needed to support certain orderings of properties
+/*                            var existingObject = _attribute
+                                .GetType()
+                                .GetMethod("Get")
+                                .MakeGenericMethod(_propertyType)
+                                .Invoke(_attribute, new object[] {});*/
+
                            if (path.Data != null)
                            {
                                var fnData = path.Data.Compile();
@@ -45,11 +61,6 @@ namespace UITemplateViewer.DynamicPath
                            }
                            if (path.Local == null) return null;
 
-                           if (path.Local.ToString() == "a => a.Root.NodeById(\"controller\")")
-                           {
-                               int debug = 0;
-                           }
-
                            var fnLocal = path.Local.Compile();
                            var di = fnLocal.DynamicInvoke(_attribute.Parent);
                            if (!typeof(IEnumerable<IParentNode>).IsAssignableFrom(di.GetType()))
@@ -61,10 +72,9 @@ namespace UITemplateViewer.DynamicPath
                                    {
                                        if (typeof(IEndNode).IsAssignableFrom(di.GetType()))
                                        {
-                                           int debug = 0;
-                                           return null;
+                                           return _fnNodeBuilder((INode)di, dataNode, _propertyType);
                                        }
-                                       var newObj = _fnNodeBuilder((IParentNode)di, dataNode);
+                                       var newObj = _fnNodeBuilder((IParentNode)di, dataNode, typeof(object));
                                        if (!_propertyType.IsAssignableFrom(newObj.GetType()))
                                        {
                                            var proxy = new ProxyGenerator();
@@ -81,7 +91,7 @@ namespace UITemplateViewer.DynamicPath
 
                            IEnumerable<object> finalResult;
                            if (path.Data == null)
-                               finalResult = result.Select(templateNode => _fnNodeBuilder(templateNode, dataNode));
+                               finalResult = result.Select(templateNode => _fnNodeBuilder(templateNode, dataNode, typeof(object)));
                            else
                            {
                                //TODO: if _propertyType does not have a nested IEnumerable and result.Count() > 1, Fail!
@@ -89,7 +99,7 @@ namespace UITemplateViewer.DynamicPath
                                var fnData = path.Data.Compile();
                                var dataResult = fnData.DynamicInvoke(dataNode);
                                var eResult = ((IEnumerable) dataResult).Cast<IParentNode>();
-                               finalResult = eResult.Select(e => _fnNodeBuilder(result.First(), e));
+                               finalResult = eResult.Select(e => _fnNodeBuilder(result.First(), e, typeof(object)));
 //                               finalResult = result.Select(templateNode => _fnNodeBuilder(templateNode, dataNode));
                            }
                            finalResult = finalResult.ToList();

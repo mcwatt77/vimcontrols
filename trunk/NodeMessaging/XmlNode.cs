@@ -49,16 +49,6 @@ namespace NodeMessaging
             return _elem.Attributes().Select(attr => Attribute(attr.Name.LocalName));
         }
 
-        public T Get<T>() where T : class
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public void Register<T>(T t)
-        {
-            throw new System.NotImplementedException();
-        }
-
         public IParentNodeImplementor Parent
         {
             get { throw new System.NotImplementedException(); }

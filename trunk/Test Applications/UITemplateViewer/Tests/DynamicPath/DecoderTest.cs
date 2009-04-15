@@ -64,6 +64,11 @@ namespace UITemplateViewer.Tests.DynamicPath
             Assert.AreEqual("a => a.Root.NodeById(\"noteList\").Attribute(\"rows\")", decode.Local.ToString());
             decode.Local.Compile();
 
+            decode = Decoder.FromPath("[@rows[1]]");
+            masterDoc.Add(decode.Element);
+            Assert.AreEqual("a => a.Attribute(\"rows\").ElementAtOrDefault(0)", decode.Local.ToString());
+            decode.Local.Compile();
+
             decode = Decoder.FromPath("[../@rowSelector]{@body}");
             masterDoc.Add(decode.Element);
             Assert.AreEqual("a => a.get_Parent().Attribute(\"rowSelector\")", decode.Local.ToString());

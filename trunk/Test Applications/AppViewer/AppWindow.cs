@@ -88,8 +88,7 @@ namespace AppViewer
 
         public void Report(Exception ex)
         {
-            var inner = ex.ChainWithSelf(e => e.InnerException).Last();
-            MessageBox.Show(inner.Message + "\r\n\r\n\r\n" + inner.StackTrace);
+            MessageBox.Show(ex.FormatError());
         }
     }
 
