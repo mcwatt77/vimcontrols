@@ -59,9 +59,14 @@ namespace UITemplateViewer.DynamicPath
                                       {
                                           var parsed = ParseElement(element);
                                           if (element.Name.LocalName == "local_doc_path_capture")
-                                              expressions.Add(new DecodedExpression(Local = parsed) { Local = true });
+                                          {
+                                              if (Local == null)
+                                                  expressions.Add(new DecodedExpression(Local = parsed) {Local = true});
+                                              else
+                                                  expressions.Add(new DecodedExpression(parsed) {Local = true});
+                                          }
                                           else if (element.Name.LocalName == "std_xpath_capture")
-                                              expressions.Add(new DecodedExpression(Data = parsed) {Local = false});
+                                              expressions.Add(new DecodedExpression(Data = parsed) { Local = false });
                                       });
             Expressions = expressions;
         }
@@ -72,6 +77,11 @@ namespace UITemplateViewer.DynamicPath
 
             if (element.Name.LocalName == "literal_statement")
                 return BuildLiteralCall(element.Attribute("data").Value);
+            if (element.Name.LocalName == "local_doc_path_capture" && element.Attribute("data").Value == "1")
+            {
+                Expression<Func<IEnumerable<IParentNode>, IParentNode>> ret = a => a.ElementAtOrDefault(0);
+                return ret;
+            }
 
             var result = element
                 .Elements("elementGroup")
@@ -131,7 +141,7 @@ namespace UITemplateViewer.DynamicPath
                 if (filterData == "1")
                 {
                     var filterExpr = (ManyToOnePath) (a => a.ElementAtOrDefault(0));
-//                    expr = CombineCalls(filterExpr, expr);
+                    expr = CombineCalls(expr, filterExpr);
                 }
                 else
                     throw new Exception("Can only support filter '1'");

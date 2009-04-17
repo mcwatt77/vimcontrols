@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NodeMessaging", "..\..\Node
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UITemplateViewer", "..\UITemplateViewer\UITemplateViewer.csproj", "{0B843D6B-CC5A-4CAD-9FE7-8BFAA76580DA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathContainer", "..\PathContainer\PathContainer.csproj", "{D152993A-0308-4CFD-ABA5-D212007F5B80}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +63,10 @@ Global
 		{0B843D6B-CC5A-4CAD-9FE7-8BFAA76580DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0B843D6B-CC5A-4CAD-9FE7-8BFAA76580DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0B843D6B-CC5A-4CAD-9FE7-8BFAA76580DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D152993A-0308-4CFD-ABA5-D212007F5B80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D152993A-0308-4CFD-ABA5-D212007F5B80}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D152993A-0308-4CFD-ABA5-D212007F5B80}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D152993A-0308-4CFD-ABA5-D212007F5B80}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Xml.Linq;
 using NUnit.Framework;
 using UITemplateViewer.DynamicPath;
@@ -64,9 +65,10 @@ namespace UITemplateViewer.Tests.DynamicPath
             Assert.AreEqual("a => a.Root.NodeById(\"noteList\").Attribute(\"rows\")", decode.Local.ToString());
             decode.Local.Compile();
 
-            decode = Decoder.FromPath("[@rows[1]]");
+            decode = Decoder.FromPath("[@rows][1]");
             masterDoc.Add(decode.Element);
-            Assert.AreEqual("a => a.Attribute(\"rows\").ElementAtOrDefault(0)", decode.Local.ToString());
+            Assert.AreEqual("a => a.Attribute(\"rows\")", decode.Expressions.First().ToString());
+            Assert.AreEqual("a => a.ElementAtOrDefault(0)", decode.Expressions.Skip(1).First().ToString());
             decode.Local.Compile();
 
             decode = Decoder.FromPath("[../@rowSelector]{@body}");

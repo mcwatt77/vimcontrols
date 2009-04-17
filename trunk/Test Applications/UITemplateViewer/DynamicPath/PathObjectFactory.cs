@@ -33,8 +33,11 @@ namespace UITemplateViewer.DynamicPath
             var path = Decoder.FromPath(get.Value);
             return dataNode =>
                        {
-                           if (get.Value == "[@rows[1]]")
+                           if (get.Value == "[@rows][1]")
                            {
+                               var firstExpr = path.Expressions.First();
+                               var firstResult = firstExpr.Invoke(_attribute.Parent);
+                               var objResult = _fnNodeBuilder((INode)firstResult, dataNode, typeof(object));
 //                               throw new Exception("Debug from here.  For some reason what it's doing here is causing infinite recursion.");
                                return null;
                            }

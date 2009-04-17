@@ -1,5 +1,5 @@
 ﻿->
-{mixed_path_std}|{mixed_path_local}|{local_doc_path}|{std_xpath}|{literal_statement}
+{mixed_path_std}|{mixed_path_local}|{double_local}|{local_doc_path}|{std_xpath}|{literal_statement}
 $
 
 root->
@@ -24,6 +24,10 @@ $
 
 local_doc_path_capture->
 {element_group}+
+$
+
+{double_local}->
+^\[(?<local_doc_path_capture>.+)\]\[(?<local_doc_path_capture>.+)\]$
 $
 
 {mixed_path_local}->
