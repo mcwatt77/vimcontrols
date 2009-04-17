@@ -4,7 +4,7 @@
     <entityRow fields="[*]">
       <field value="{@desc}"/>
     </entityRow>
-    <entitySelector id="selector" selectedRow="[@rows[1]]" rows="[:noteList/@rows]">
+    <entitySelector id="selector" selectedRow="[@rows][1]" rows="[:noteList/@rows]">
       <entityListController id="controller" selector="[..]"/>
       <!--Should rename to entitySelectorController-->
     </entitySelector>
