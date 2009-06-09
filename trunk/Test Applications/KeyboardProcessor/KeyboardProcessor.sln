@@ -21,6 +21,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UITemplateViewer", "..\UITe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathContainer", "..\PathContainer\PathContainer.csproj", "{D152993A-0308-4CFD-ABA5-D212007F5B80}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModelBuilder3D", "..\..\ModelBuilder3D\ModelBuilder3D.csproj", "{F924D27C-6A13-4A6D-9A54-E794919D647F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parser", "..\..\Parser\Parser.csproj", "{1C34769A-9F7B-4C95-A418-02BB46139EA3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -67,6 +71,14 @@ Global
 		{D152993A-0308-4CFD-ABA5-D212007F5B80}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D152993A-0308-4CFD-ABA5-D212007F5B80}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D152993A-0308-4CFD-ABA5-D212007F5B80}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F924D27C-6A13-4A6D-9A54-E794919D647F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F924D27C-6A13-4A6D-9A54-E794919D647F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F924D27C-6A13-4A6D-9A54-E794919D647F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F924D27C-6A13-4A6D-9A54-E794919D647F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C34769A-9F7B-4C95-A418-02BB46139EA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C34769A-9F7B-4C95-A418-02BB46139EA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C34769A-9F7B-4C95-A418-02BB46139EA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C34769A-9F7B-4C95-A418-02BB46139EA3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

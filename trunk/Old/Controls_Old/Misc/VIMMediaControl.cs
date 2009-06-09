@@ -55,6 +55,9 @@ namespace VIMControls.Controls.Misc
 
         public void HeartBeat()
         {
+            try
+            {
+
             if (_maxTs == default(TimeSpan)) return;
 
             if (DateTime.Now.Subtract(_visibleStartTime).TotalSeconds > 5 && !_alwaysVisible)
@@ -66,6 +69,11 @@ namespace VIMControls.Controls.Misc
             var pos = _mediaElement.Position;
             var pct = 100*pos.TotalMilliseconds/_maxTs.TotalMilliseconds;
             _progress.Value = pct;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         public Uri Source
@@ -107,8 +115,15 @@ namespace VIMControls.Controls.Misc
 
         void timeline_CurrentTimeInvalidated(object sender, EventArgs e)
         {
-            if (_progress.Visibility == Visibility.Visible)
-                HeartBeat();
+            try
+            {
+                if (_progress.Visibility == Visibility.Visible)
+                    HeartBeat();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         void VIMMediaControl_MediaEnded(object sender, RoutedEventArgs e)
@@ -118,19 +133,26 @@ namespace VIMControls.Controls.Misc
 
         public void MoveVertically(int i)
         {
-            SetVisible();
-
-            var ts = _mediaElement.Position.Add(new TimeSpan(0, 0, 10*i));
-            if (ts.TotalMilliseconds == 0) return;
-
-            if (ts > _maxTs)
+            try
             {
-                VIMMediaControl_MediaEnded(null, null);
-                return;
-            }
+                SetVisible();
 
-            _story.SeekAlignedToLastTick(_mediaElement, ts, TimeSeekOrigin.BeginTime);
-            HeartBeat();
+                var ts = _mediaElement.Position.Add(new TimeSpan(0, 0, 10*i));
+                if (ts.TotalMilliseconds == 0) return;
+
+                if (ts > _maxTs)
+                {
+                    VIMMediaControl_MediaEnded(null, null);
+                    return;
+                }
+
+                _story.SeekAlignedToLastTick(_mediaElement, ts, TimeSeekOrigin.BeginTime);
+                HeartBeat();
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         public void MoveHorizontally(int i)

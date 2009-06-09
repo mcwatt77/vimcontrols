@@ -9,6 +9,7 @@ using AppControlInterfaces._3dExtruder;
 
 namespace AppViewer.Controls
 {
+
     public class _3dView<TDataProcessor> : IAppControl, IMissing, I3dObjectUpdate
         where TDataProcessor : I3dObjectData, new()
     {
@@ -27,6 +28,15 @@ namespace AppViewer.Controls
         {
             _processor = processor;
             _processor.Updater = this;
+            Camera = new PerspectiveCamera
+                         {
+                             FarPlaneDistance = 100,
+                             LookDirection = new Vector3D(lookAtX, lookAtY, lookAtZ),
+                             UpDirection = new Vector3D(0, 0, 1),
+                             NearPlaneDistance = 1,
+                             Position = new Point3D(cameraPositionX, cameraPositionY, cameraPositionZ),
+                             FieldOfView = 70
+                         };
         }
 
         public UIElement GetControl()
@@ -35,15 +45,7 @@ namespace AppViewer.Controls
             {
                 mainViewport = new Viewport3D
                                    {
-                                       Camera = new PerspectiveCamera
-                                                    {
-                                                        FarPlaneDistance = 100,
-                                                        LookDirection = new Vector3D(lookAtX, lookAtY, lookAtZ),
-                                                        UpDirection = new Vector3D(0, 1, 0),
-                                                        NearPlaneDistance = 1,
-                                                        Position = new Point3D(cameraPositionX, cameraPositionY, cameraPositionZ),
-                                                        FieldOfView = 70
-                                                    }
+                                       Camera = Camera
                                    };
                 _control = mainViewport;
 
@@ -102,5 +104,7 @@ namespace AppViewer.Controls
                 var model = new ModelVisual3D {Content = _processor.GetModel()};
                 mainViewport.Children.Add(model);
         }
+
+        public PerspectiveCamera Camera { get; set; }
     }
 }
