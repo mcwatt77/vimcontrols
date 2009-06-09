@@ -56,6 +56,7 @@
     <Compile Include="AppLauncher.cs" />
     <Compile Include="Civilization\CivControl.cs" />
     <Compile Include="IText.cs" />
+    <Compile Include="KevinBacon\Controller.cs" />
     <Compile Include="MessagePipe.cs" />
     <Compile Include="NoteViewer\Controller.cs" />
     <Compile Include="NoteViewer\IFormattedTextController.cs" />

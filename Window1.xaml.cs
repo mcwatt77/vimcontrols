@@ -23,7 +23,6 @@ namespace VIMControls
 
         protected override void OnKeyDown(KeyEventArgs e)
         {
-
             try
             {
                 var keyStates = KeyStates.None;
