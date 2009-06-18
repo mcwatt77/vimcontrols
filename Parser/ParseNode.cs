@@ -1,4 +1,25 @@
-﻿using System;
+﻿/*
+ * 
+ * I need to use a tokenizer.
+ * The tokenizer will have these states (at a minimum):
+ *      Code, StringLiteral, CharacterLiteral, SingleLineComment, MultiLineComment
+ *   (might also have Identifier, for allowing numbers in the identifier... will need to)
+ * Each character, within it's tokenizer state will either:
+ *  AddToToken(), CreateNewToken(), SetTokenState().
+ *  
+ * Nesting operators (), {}, [], etc, will have unique tokens...
+ * Inside comments or literals, these characters won't generate tokens.
+ * 
+ * Trying to build from that Token stream instead of from the character stream will be far easier.
+ * 
+ * I could read token patterns, or have some sort of token aggregator, or something.
+ * 
+ * But that's a crucial step, and should be relatively easy.  It's also a common way to solve the problem.
+ * 
+ */
+
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -162,7 +183,7 @@ namespace Parser
 
         public override IEnumerable<ParseNode> Parse(ParseNode node)
         {
-            return null;
+            return new ParseNode[] {};
         }
     }
 
@@ -206,126 +227,6 @@ namespace Parser
             var element = base.GetXml();
             element.Add(new XAttribute("command", CommandData));
             return element;
-        }
-    }
-
-    public class StatementParserNode : ParseTemplate
-    {
-        public StatementParserNode(Func<ParseNode, IEnumerable<ParseNode>> apply) : base(node => true, apply)
-        {}
-
-        //There are a couple of ways to accomplish this...
-        //When I hit {, I could go into recursive mode
-        //Alternatively, when I hit { I could seek ahead for the end node
-        //This causes hard to follow looping logic if done correctly though
-        public override IEnumerable<ParseNode> Parse(ParseNode node)
-        {
-            var c = node.ReadChar();
-            while (c != '\0')
-            {
-//                while (c != ';' && c != '{' && c != '\0' && c != '/' && c != '\'' && c != '"')
-                while (c != ';' && c != '{' && c != '\0' && c != '/' && c != '\'' && c != '"')
-                    c = node.ReadChar();
-
-                if (c == '"')
-                {
-                    c = node.ReadChar();
-                    while (c == '\\')
-                    {
-                        node.ReadChar();
-                        c = node.ReadChar();
-                    }
-                    while (c != '"')
-                    {
-                        c = node.ReadChar();
-                        {
-                            while (c == '\\')
-                            {
-                                node.ReadChar();
-                                c = node.ReadChar();
-                            }
-                        }
-                    }
-                    c = node.ReadChar();
-                }
-                if (c == '/')
-                {
-                    c = node.ReadChar();
-                    if (c == '/')
-                    {
-                        while (c != '\r')
-                            c = node.ReadChar();
-                    }
-                }
-                if (c == '\'')
-                {
-                    c = node.ReadChar();
-                    if (c == '\\')
-                        node.ReadChar();
-                    c = node.ReadChar();
-                    continue;
-                }
-                if (c == ';')
-                {
-                    yield return new StatementNode
-                                     {
-                                         Name = "statement",
-                                         Data = new StringReader(node.Buffer.ToString().TrimStart(' ', '\r', '\n', '\t'))
-                                     };
-                    node.ResetBuffer();
-                    c = node.ReadChar();
-                    continue;
-                }
-                if (c == '{')
-                {
-                    var nestCount = 1;
-                    while (nestCount > 0)
-                    {
-                        c = node.ReadChar();
-                        //Would be much better to create CharacterLiteral, StringLiteral, Comment classes, then parse them
-                        if (c == '/')
-                        {
-                            c = node.ReadChar();
-                            if (c == '/')
-                            {
-                                while (c != '\r')
-                                    c = node.ReadChar();
-                            }
-                        }
-                        if (c == '\'')
-                        {
-                            c = node.ReadChar();
-                            if (c == '\\')
-                                node.ReadChar();
-                            c = node.ReadChar();
-                            continue;
-                        }
-                        if (c == '{') nestCount++;
-                        if (c == '}') nestCount--;
-                    }
-                    var stringData = node.Buffer.ToString().TrimStart(' ', '\r', '\n', '\t');
-                    var firstBracket = stringData.IndexOf('{');
-                    var innerData = stringData.Substring(firstBracket + 1, stringData.Length - firstBracket - 2).Trim();
-                    var nestedNode = new NestedStatementNode
-                                         {
-                                             CommandData = stringData.Substring(0, firstBracket - 1).Trim(),
-                                             Name = "nestedStatement",
-                                             Data = new StringReader(innerData)
-                                         };
-
-                    if (nestedNode.CommandData == "public virtual XElement GetXml()")
-                    {
-                        int debug = 0;
-                    }
-
-                    nestedNode.Children = ApplyTemplates(nestedNode).ToArray();
-                    yield return nestedNode;
-                    node.ResetBuffer();
-                    c = node.ReadChar();
-                    continue;
-                }
-                yield break;
-            }
         }
     }
 }

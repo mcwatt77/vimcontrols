@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSTokenizer", "CSTokenizer.csproj", "{50473C0E-F7FE-4F19-93A0-7FE130C1E489}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UtilityCore", "..\..\UtilityCore\UtilityCore.csproj", "{AEB6E54A-DCCC-4C77-A4B3-81580A945B0E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{50473C0E-F7FE-4F19-93A0-7FE130C1E489}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50473C0E-F7FE-4F19-93A0-7FE130C1E489}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50473C0E-F7FE-4F19-93A0-7FE130C1E489}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50473C0E-F7FE-4F19-93A0-7FE130C1E489}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AEB6E54A-DCCC-4C77-A4B3-81580A945B0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEB6E54A-DCCC-4C77-A4B3-81580A945B0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEB6E54A-DCCC-4C77-A4B3-81580A945B0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEB6E54A-DCCC-4C77-A4B3-81580A945B0E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
