@@ -24,6 +24,7 @@ namespace CSTokenizer
         private SequencedDictionary<char, CharacterType> _sequencedDictionary;
         private Dictionary<CharacterType, CharDescriptor> _characterMap;
         private Dictionary<CharacterType, Action> _actionMap;
+        private Type _defaultStateChangeType;
 
         protected NewHandler(CommonHandlerData commonData)
         {
@@ -34,6 +35,10 @@ namespace CSTokenizer
         protected abstract Dictionary<string, Type> GetStateChangeStrings();
         public abstract Dictionary<CharacterType, Action> GetActionMap();
         public abstract CharacterType GetDefaultCharacterType();
+        public virtual Type GetDefaultStateChange()
+        {
+            return null;
+        }
         public virtual Action GetDefaultAction()
         {
             return () => { };
@@ -47,10 +52,6 @@ namespace CSTokenizer
 
         protected void ProcessControl()
         {
-            if (_commonData._buffer.ToString().Contains("<"))
-            {
-                int debug = 0;
-            }
             PushToken();
             AddBufferToToken();
             _commonData.PrevCharacterType = _commonData.CurrentCharacterType;
@@ -75,11 +76,16 @@ namespace CSTokenizer
         {
             _commonData.PrevCharacterType = _commonData.CurrentCharacterType;
             PushToken();
+
             if (!_stateChangeStrings.ContainsKey(_commonData._buffer.ToString()))
             {
-                throw new Exception("Key not found: " + _commonData._buffer);
+                if (_defaultStateChangeType == null)
+                    throw new Exception("Key not found: " + _commonData._buffer);
+                _commonData._changeState(_defaultStateChangeType);
             }
-            _commonData._changeState(_stateChangeStrings[_commonData._buffer.ToString()]);
+            else
+                _commonData._changeState(_stateChangeStrings[_commonData._buffer.ToString()]);
+            
             _commonData._buffer.Length = 0;
         }
 
@@ -90,6 +96,7 @@ namespace CSTokenizer
             _stateChangeStrings = GetStateChangeStrings();
             _actionMap = GetActionMap();
             _characterMap = GetCharacterMap();
+            _defaultStateChangeType = GetDefaultStateChange();
 
             _sequencedDictionary = new SequencedDictionary<char, CharacterType>();
             _characterMap.Do(pair => pair.Value.GetStrings().Do(s => _sequencedDictionary.Add(s, pair.Key)));

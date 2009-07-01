@@ -1,114 +1,73 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using Utility.Core;
 
-using Model;
-
-namespace CSTokenizer
+namespace CSTokenizer.Templates
 {
-    public abstract class Template
+    public abstract class Template<TObject> : TemplateCollection<Token[]>.Template<TObject>
     {
-        public abstract bool Matches(Token[] tokens, object @object);
-        public abstract object Process(Token[] tokens, object @object);
-    }
-    public abstract class Template<TObject> : Template
-    {
-        public abstract bool Matches(Token[] tokens, TObject @object);
-        public abstract object Process(Token[] tokens, TObject @object);
+        protected Template(Expression<Predicate<Token[]>> match, int rank) : base(match, rank) { }
+        protected Template(Expression<Predicate<Token[]>> match) : base(match) { }
 
-        public override bool Matches(Token[] tokens, object @object)
+        //TODO: I should be able to handle this be creating more handlers... more conditional states...
+        //For instance hitting a semi-colon or something, or coming off identifiers... or something...
+        //Creates a different state where it knows the difference between "less than" and "generic grouping"
+        protected IEnumerable<Token> ProcessIdentifiers(Token[] tokens)
         {
-            if (!typeof(TObject).IsAssignableFrom(@object.GetType())) return false;
-            return Matches(tokens, (TObject) @object);
-        }
+            IEnumerator eTokens = tokens.GetEnumerator();
+            while (eTokens.MoveNext())
+            {
+                var token = (Token)eTokens.Current;
+                if (token.CharacterType != CodeCharacterType.IdentifierCharacters)
+                {
+                    yield return token;
+                    continue;
+                }
 
-        public override object Process(Token[] tokens, object @object)
-        {
-            return Process(tokens, (TObject) @object);
-        }
-    }
+                if (!eTokens.MoveNext())
+                {
+                    yield return token;
+                    yield break;
+                }
 
-    public class UsingTemplate : Template<Model.CodeListing>
-    {
-        public override bool Matches(Token[] tokens, CodeListing @object)
-        {
-            if (tokens.Length == 0) return false;
-            return tokens.First().Characters == "using";
-        }
+                var nextToken = (Token) eTokens.Current;
 
-        public override object Process(Token[] tokens, CodeListing @object)
-        {
-            var result = tokens.Skip(1).Aggregate("", (s, t) => s + t.Characters);
-            var @using = new Using{Namespace = result};
-            @object.Usings.Add(@using);
-            return @using;
-        }
-    }
+                while (nextToken.CharacterType == CodeCharacterType.IdentifierCharacters)
+                {
+                    yield return token;
+                    token = nextToken;
+                    if (!eTokens.MoveNext())
+                    {
+                        yield return token;
+                        yield break;
+                    }
+                    nextToken = (Token) eTokens.Current;
+                }
 
-    public class NamespaceTemplate : Template<Model.CodeListing>
-    {
-        public override bool Matches(Token[] tokens, CodeListing @object)
-        {
-            if (tokens.Length == 0) return false;
-            return tokens.First().Characters == "namespace";
-        }
+                if (nextToken.CharacterType != CodeCharacterType.OperatorStrings || nextToken.Characters != "<")
+                {
+                    yield return token;
+                    yield return nextToken;
+                    continue;
+                }
 
-        public override object Process(Token[] tokens, CodeListing @object)
-        {
-            var name = tokens.Skip(1).Aggregate("", (s, t) => s + t.Characters);
-            var result = new Model.Namespace();
-            result.CodeListing = @object;
-            result.Name = name;
-            return result;
-        }
-    }
+                if (token.Children.Count == 0)
+                {
+                    var tokenList = new List<Token>();
+                    while (eTokens.MoveNext())
+                    {
+                        nextToken = (Token) eTokens.Current;
+                        if (nextToken.CharacterType == CodeCharacterType.OperatorStrings && nextToken.Characters == ">")
+                            break;
+                        tokenList.Add(nextToken);
+                    }
 
-    public class MethodTemplate : Template<Model.Class>
-    {
-        public override bool Matches(Token[] tokens, Class @object)
-        {
-            return tokens
-                       .Count(token => token.CharacterType == CodeCharacterType.ControlCharacters
-                                       && token.Characters == "(") > 0
-                   && tokens
-                          .Count(token => token.CharacterType == CodeCharacterType.OperatorStrings
-                                          && token.Characters == "=") == 0;
-        }
-
-        public override object Process(Token[] tokens, Class @object)
-        {
-            var comments = tokens
-                .TakeWhile(token => token.CharacterType == SingleLineCommentCharacterType.StateChangeStrings);
-            var identifiers = tokens
-                .Skip(comments.Count())
-                .TakeWhile(token => token.CharacterType == CodeCharacterType.IdentifierCharacters);
-
-            var name = identifiers.Last().Characters;
-            var method = new Method {Name = name};
-            @object.Methods.Add(method);
-            return method;
-        }
-    }
-
-    public class ClassTemplate : Template<Model.Namespace>
-    {
-        public override bool Matches(Token[] tokens, Namespace @object)
-        {
-            return tokens.Count(token => token.Characters == "class") > 0;
-        }
-
-        public override object Process(Token[] tokens, Namespace @object)
-        {
-            var comments = tokens
-                .TakeWhile(token => token.CharacterType == SingleLineCommentCharacterType.StateChangeStrings);
-            var identifiers = tokens
-                .Skip(comments.Count())
-                .TakeWhile(token => token.CharacterType == CodeCharacterType.IdentifierCharacters);
-
-            var name = identifiers.Last().Characters;
-            var @class = new Class();
-            @object.CodeListing.Assembly.Classes.Add(@class);
-            @class.Namespace = @object.Name;
-            @class.Name = name;
-            return @class;
+                    token.Children = tokenList;
+                }
+                yield return token;
+            }
         }
     }
 }

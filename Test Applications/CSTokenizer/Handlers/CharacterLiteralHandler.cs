@@ -3,25 +3,25 @@ using System.Collections.Generic;
 
 namespace CSTokenizer.Handlers
 {
-    public static class SingleLineCommentCharacterType
+    public static class CharacterLiteralCharacterType
     {
-        public static readonly CharacterType StateChangeStrings = new CharacterType("Comment.StateChange");
+        public static readonly CharacterType StateChangeStrings = new CharacterType("Character.StateChange");
     }
 
-    public class SingleLineCommentHandler : NewHandler
+    public class CharacterLiteralHandler : NewHandler
     {
         public override CharacterType GetDefaultCharacterType()
         {
-            return SingleLineCommentCharacterType.StateChangeStrings;
+            return CharacterLiteralCharacterType.StateChangeStrings;
         }
 
-        public SingleLineCommentHandler(CommonHandlerData data) : base(data) { }
+        public CharacterLiteralHandler(CommonHandlerData data) : base(data) { }
 
         public override Dictionary<CharacterType, CharDescriptor> GetCharacterMap()
         {
             return new Dictionary<CharacterType, CharDescriptor>
                        {
-                           {SingleLineCommentCharacterType.StateChangeStrings, CharDescriptor.FromStrings("\r", "\n")}
+                           {CharacterLiteralCharacterType.StateChangeStrings, CharDescriptor.FromStrings("'")}
                        };
         }
 
@@ -29,7 +29,7 @@ namespace CSTokenizer.Handlers
         {
             return new Dictionary<string, Type>
                        {
-                           {"\r", typeof (CodeHandler)}, {"\n", typeof(CodeHandler)}
+                           {"'", typeof (CodeHandler)}
                        };
         }
 
@@ -37,7 +37,7 @@ namespace CSTokenizer.Handlers
         {
             return new Dictionary<CharacterType, Action>
                        {
-                           {SingleLineCommentCharacterType.StateChangeStrings, ChangeState}
+                           {CharacterLiteralCharacterType.StateChangeStrings, ChangeState}
                        };
         }
 

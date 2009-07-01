@@ -46,10 +46,6 @@ namespace KeyStringParser
         private void Set(IEnumerable<TKey> key, IEnumerable<TValue> value, bool replace)
         {
             var val = key.Cast<char>().Aggregate(String.Empty, (s, c) => s + c);
-            if (val == "-" || val == "--")
-            {
-                int debug = 0;
-            }
             var dict = _backingStore;
             var e = key.GetEnumerator();
 

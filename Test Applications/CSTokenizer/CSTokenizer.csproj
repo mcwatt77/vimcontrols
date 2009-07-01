@@ -68,9 +68,14 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CharacterType.xaml.cs" />
     <Compile Include="CharDescriptor.cs" />
     <Compile Include="Class1.cs" />
+    <Compile Include="Handlers\CharacterLiteralHandler.cs" />
     <Compile Include="Handlers\CodeHandler.cs" />
+    <Compile Include="Handlers\IStackStream.cs" />
+    <Compile Include="Handlers\PragmaHandler.cs" />
+    <Compile Include="Handlers\StringEscapeHandler.cs" />
     <Compile Include="Model\CodeListing.cs" />
     <Compile Include="Handlers\MultiLineCommentHandler.cs" />
     <Compile Include="Handlers\NewHandler.cs" />
@@ -90,18 +95,37 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="Handlers\StringLiteralHandler.cs" />
+    <Compile Include="Templates\ClassTemplate.cs" />
+    <Compile Include="Templates\CommentTemplate.cs" />
+    <Compile Include="Templates\MethodTemplate.cs" />
+    <Compile Include="Templates\NamespaceTemplate.cs" />
+    <Compile Include="Templates\PragmaTemplate.cs" />
+    <Compile Include="Templates\StatementTemplate.cs" />
     <Compile Include="Templates\Template.cs" />
+    <Compile Include="Templates\UsingTemplate.cs" />
     <Compile Include="Token.cs" />
     <Compile Include="Handlers\VerbatimStringLiteralHandler.cs" />
+    <Compile Include="TokenNester.xaml.cs" />
+    <Compile Include="TreeProcessor.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\UtilityCore\UtilityCore.csproj">
+      <Project>{AEB6E54A-DCCC-4C77-A4B3-81580A945B0E}</Project>
+      <Name>UtilityCore</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="output.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
