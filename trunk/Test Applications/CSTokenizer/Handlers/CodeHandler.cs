@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using CSTokenizer.Handlers;
 
 namespace CSTokenizer
 {
@@ -26,8 +27,8 @@ namespace CSTokenizer
         {
             return new Dictionary<string, Type>
                        {
-                           {"\"", typeof (StringLiteralHandler)}, {"'", typeof(Handler)}, {"//", typeof(SingleLineCommentHandler)},
-                           {"/*", typeof(MultiLineCommentHandler)}, {"@\"", typeof(VerbatimStringLiteralHandler)}, {"#", typeof(Handler)}
+                           {"\"", typeof (StringLiteralHandler)}, {"'", typeof(CharacterLiteralHandler)}, {"//", typeof(SingleLineCommentHandler)},
+                           {"/*", typeof(MultiLineCommentHandler)}, {"@\"", typeof(VerbatimStringLiteralHandler)}, {"#", typeof(PragmaHandler)}
                        };
         }
 

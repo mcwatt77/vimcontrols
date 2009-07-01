@@ -1,15 +1,15 @@
 using System;
 using System.Collections.Generic;
 
-namespace CSTokenizer
+namespace CSTokenizer.Handlers
 {
+    public static class StringLiteralCharacterType
+    {
+        public static readonly CharacterType StateChangeStrings = new CharacterType("Literal.StateChange");
+    }
+
     public class StringLiteralHandler : NewHandler
     {
-        private static class StringLiteralCharacterType
-        {
-            public static readonly CharacterType StateChangeStrings = new CharacterType("Literal.StateChange");
-        }
-
         public override CharacterType GetDefaultCharacterType()
         {
             return StringLiteralCharacterType.StateChangeStrings;
@@ -21,7 +21,7 @@ namespace CSTokenizer
         {
             return new Dictionary<CharacterType, CharDescriptor>
                        {
-                           {StringLiteralCharacterType.StateChangeStrings, CharDescriptor.FromStrings("\"")}
+                           {StringLiteralCharacterType.StateChangeStrings, CharDescriptor.FromStrings("\"", "\\")}
                        };
         }
 
@@ -29,7 +29,7 @@ namespace CSTokenizer
         {
             return new Dictionary<string, Type>
                        {
-                           {"\"", typeof (CodeHandler)}
+                           {"\"", typeof (CodeHandler)}, {"\\", typeof(StringEscapeHandler)}
                        };
         }
 

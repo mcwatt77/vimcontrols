@@ -3,25 +3,25 @@ using System.Collections.Generic;
 
 namespace CSTokenizer.Handlers
 {
-    public static class SingleLineCommentCharacterType
+    public static class PragmaCharacterType
     {
-        public static readonly CharacterType StateChangeStrings = new CharacterType("Comment.StateChange");
+        public static readonly CharacterType StateChangeStrings = new CharacterType("Pragma.StateChange");
     }
 
-    public class SingleLineCommentHandler : NewHandler
+    public class PragmaHandler : NewHandler
     {
         public override CharacterType GetDefaultCharacterType()
         {
-            return SingleLineCommentCharacterType.StateChangeStrings;
+            return PragmaCharacterType.StateChangeStrings;
         }
 
-        public SingleLineCommentHandler(CommonHandlerData data) : base(data) { }
+        public PragmaHandler(CommonHandlerData data) : base(data) { }
 
         public override Dictionary<CharacterType, CharDescriptor> GetCharacterMap()
         {
             return new Dictionary<CharacterType, CharDescriptor>
                        {
-                           {SingleLineCommentCharacterType.StateChangeStrings, CharDescriptor.FromStrings("\r", "\n")}
+                           {PragmaCharacterType.StateChangeStrings, CharDescriptor.FromStrings("\r", "\n")}
                        };
         }
 
@@ -37,7 +37,7 @@ namespace CSTokenizer.Handlers
         {
             return new Dictionary<CharacterType, Action>
                        {
-                           {SingleLineCommentCharacterType.StateChangeStrings, ChangeState}
+                           {PragmaCharacterType.StateChangeStrings, ChangeState}
                        };
         }
 

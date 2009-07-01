@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModelBuilder3D", "..\..\Mod
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parser", "..\..\Parser\Parser.csproj", "{1C34769A-9F7B-4C95-A418-02BB46139EA3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Requirements", "..\..\Requirements\Requirements.csproj", "{FE9FBF9A-C551-4796-9D56-AEF8591AA626}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -79,6 +81,10 @@ Global
 		{1C34769A-9F7B-4C95-A418-02BB46139EA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1C34769A-9F7B-4C95-A418-02BB46139EA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1C34769A-9F7B-4C95-A418-02BB46139EA3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE9FBF9A-C551-4796-9D56-AEF8591AA626}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE9FBF9A-C551-4796-9D56-AEF8591AA626}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE9FBF9A-C551-4796-9D56-AEF8591AA626}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE9FBF9A-C551-4796-9D56-AEF8591AA626}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
