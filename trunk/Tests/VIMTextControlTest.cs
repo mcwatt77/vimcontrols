@@ -4,8 +4,6 @@ using VIMControls;
 using VIMControls.Contracts;
 using VIMControls.Controls.Misc;
 
-//Test Note
-
 namespace Tests
 {
     [TestFixture]
