@@ -1,0 +1,6 @@
+<notes>
+	<note summary="First">There's something in here.  This will display later.
+Now I need to make this longer, so I can test the wrapping functionality.</note>
+	<note summary="Second">Even more!</note>
+	<note summary="More">More better.</note>
+</notes>

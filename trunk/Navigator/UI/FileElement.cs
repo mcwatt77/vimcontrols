@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
@@ -21,8 +22,10 @@ namespace Navigator.UI
 
             _run = new Run(_fileInfo.Name);
             _block = new TextBlock(_run);
+            _block.TextWrapping = TextWrapping.Wrap;
             _bodyRun = new Run(_fileInfo.FullName + "\r\n" + _fileInfo.Length + "\r\n" + _fileInfo.LastWriteTime);
             _bodyBlock = new TextBlock(_bodyRun);
+            _bodyBlock.TextWrapping = TextWrapping.Wrap;
         }
 
         public void Render(IUIContainer container)

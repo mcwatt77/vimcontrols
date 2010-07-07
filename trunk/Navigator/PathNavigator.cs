@@ -15,8 +15,12 @@ namespace Navigator
 
             var modelChildren = _modelElement as IModelChildren;
 
-            foreach (var child in modelChildren == null ? new object[]{} : modelChildren.Children)
+            foreach (var child in modelChildren == null ? new object[] { } : modelChildren.Children)
+            {
+                if (child == null) continue;
+
                 _uiElementLookup[child] = elementFactory.GetUIElement(child);
+            }
 
             _uiElementFactory = new UIElementFactory(elementFactory, _uiElementLookup);
             ((Navigator.UIElementFactory) elementFactory).FactoryForChildren = _uiElementFactory;
@@ -79,7 +83,7 @@ namespace Navigator
         public void MoveVertically(int spaces)
         {
             var modelChildren = _modelElement as IModelChildren;
-            var children = modelChildren == null ? new object[] {} : modelChildren.Children;
+            var children = modelChildren == null ? new object[] {} : modelChildren.Children.Where(child => child != null);
 
             var element = children.ElementAtOrDefault(_index);
             var nextElement = children.ElementAtOrDefault(_index + spaces);
@@ -92,12 +96,21 @@ namespace Navigator
 
         public void Navigate()
         {
+            var modelChildren = _modelElement as IModelChildren;
+            var children = modelChildren == null ? new object[] {} : modelChildren.Children.Where(child => child != null);
+
+            var currentChild = children.ElementAtOrDefault(_index);
+
+            var uiElement = _uiElementFactory.GetUIElement(currentChild) as INavigable;
+            if (uiElement != null)
+            {
+                uiElement.Navigate();
+                return;
+            }
+
             _history.Push(new History(_modelElement, _index));
 
-            var modelChildren = _modelElement as IModelChildren;
-            var children = modelChildren == null ? new object[] {} : modelChildren.Children;
-
-            UpdateView(children.ElementAtOrDefault(_index));
+            UpdateView(currentChild);
         }
 
         public void Back()
@@ -118,7 +131,7 @@ namespace Navigator
             _uiElementLookup.Clear();
 
             var modelChildren = _modelElement as IModelChildren;
-            var children = modelChildren == null ? new object[] {} : modelChildren.Children;
+            var children = modelChildren == null ? new object[] {} : modelChildren.Children.Where(child => child != null);
 
             foreach (var child in children)
                 _uiElementLookup[child] = _uiElementFactory.GetUIElement(child);

@@ -83,9 +83,12 @@
     <Compile Include="Path\Hd\DirectoryPathNode.cs" />
     <Compile Include="Path\Hd\FilePathNode.cs" />
     <Compile Include="Path\Hd\HdPath.cs" />
+    <Compile Include="Path\Notes\NoteCollection.cs" />
+    <Compile Include="Path\Notes\NoteItem.cs" />
     <Compile Include="UI\Attributes\IAttribute.cs" />
     <Compile Include="UI\Attributes\IDescriptionString.cs" />
     <Compile Include="UI\Attributes\IFileViewer.cs" />
+    <Compile Include="UI\Attributes\IHasUrl.cs" />
     <Compile Include="UI\Attributes\IModelChildren.cs" />
     <Compile Include="UI\Attributes\ISummaryString.cs" />
     <Compile Include="UI\FileElement.cs" />
@@ -116,6 +119,7 @@
     <Compile Include="UI\StringWithChildrenElement.cs" />
     <Compile Include="UI\StringSummaryElement.cs" />
     <Compile Include="UIElementFactory.cs" />
+    <Compile Include="UI\StringWithUrlNavigation.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -125,6 +129,9 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="notes.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
