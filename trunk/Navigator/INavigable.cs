@@ -1,8 +1,8 @@
 namespace Navigator
 {
-    public interface INavigable
+    public interface INavigable : INavigableObject
     {
-        void Navigate();
+        void NavigateToCurrentChild();
         void Back();
     }
 }

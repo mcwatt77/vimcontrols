@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using Castle.Core.Interceptor;
 using Castle.DynamicProxy;
 
@@ -84,10 +85,19 @@ namespace Navigator.Containers
             {
                 if (!invocation.Method.DeclaringType.IsAssignableFrom(_oldValue.GetType()))
                 {
-                    var result = invocation.Method.Invoke(InterceptObject, invocation.Arguments);
-                    invocation.ReturnValue = result;
+                    var lambda = ConvertToLambda(invocation);
+                    var message = new Message(lambda);
+                    message.Invoke(InterceptObject);
                 }
                 else invocation.Proceed();
+            }
+
+            private static LambdaExpression ConvertToLambda(IInvocation invocation)
+            {
+                var parameter = Expression.Parameter(invocation.Method.DeclaringType, "x");
+                var invocationExpression = Expression.Call(parameter, invocation.Method, invocation.Arguments.Select(o => Expression.Constant(o)).ToArray());
+                var lambda = Expression.Lambda(invocationExpression, parameter);
+                return lambda;
             }
         }
 

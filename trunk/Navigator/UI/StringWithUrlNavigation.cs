@@ -6,7 +6,7 @@ using System.Windows.Media;
 
 namespace Navigator.UI
 {
-    public class StringWithUrlNavigation : IUIElement, INavigable
+    public class StringWithUrlNavigation : IUIElement, INavigableObject
     {
         private readonly string _url;
 
@@ -15,13 +15,10 @@ namespace Navigator.UI
             _url = url;
             _summaryRun = new Run(summary);
             _summaryBlock = new TextBlock(_summaryRun) {TextWrapping = TextWrapping.Wrap};
-
-            _browser = new WebBrowser();
         }
 
         private readonly TextBlock _summaryBlock;
         private readonly Run _summaryRun;
-        private readonly WebBrowser _browser;
 
         public void Render(IUIContainer container)
         {
@@ -42,10 +39,6 @@ namespace Navigator.UI
         {
             var processStartInfo = new ProcessStartInfo {FileName = _url, Verb = "open"};
             Process.Start(processStartInfo);
-        }
-
-        public void Back()
-        {
         }
     }
 }
