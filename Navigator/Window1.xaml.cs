@@ -87,7 +87,7 @@ namespace Navigator
                     _verticallyNavigable.MoveVertically(-1);
                     break;
                 case Key.Enter:
-                    _navigable.Navigate();
+                    _navigable.NavigateToCurrentChild();
                     break;
                 case Key.Back:
                     _navigable.Back();

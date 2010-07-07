@@ -79,7 +79,10 @@
     <Compile Include="Containers\Container.cs" />
     <Compile Include="Containers\ContainerRegisterType.cs" />
     <Compile Include="Containers\IContainer.cs" />
+    <Compile Include="IMessageable.cs" />
+    <Compile Include="INavigableObject.cs" />
     <Compile Include="IUIPort.cs" />
+    <Compile Include="Message.cs" />
     <Compile Include="Path\Hd\DirectoryPathNode.cs" />
     <Compile Include="Path\Hd\FilePathNode.cs" />
     <Compile Include="Path\Hd\HdPath.cs" />

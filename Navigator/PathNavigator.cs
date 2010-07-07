@@ -6,7 +6,7 @@ using Navigator.UI.Attributes;
 
 namespace Navigator
 {
-    public class PathNavigator : IVerticallyNavigable, INavigable
+    public class PathNavigator : IVerticallyNavigable, INavigable, IMessageable
     {
         public PathNavigator(object modelElement, IUIPort port, IUIElementFactory elementFactory)
         {
@@ -94,14 +94,12 @@ namespace Navigator
             GetUIElement(nextElement).SetFocus(true);
         }
 
-        public void Navigate()
+        //TODO: Modify this method to call GetCurrentChild().Navigate() instead of doing what it does here.
+        public void NavigateToCurrentChild()
         {
-            var modelChildren = _modelElement as IModelChildren;
-            var children = modelChildren == null ? new object[] {} : modelChildren.Children.Where(child => child != null);
+            var currentChild = GetCurrentChild();
 
-            var currentChild = children.ElementAtOrDefault(_index);
-
-            var uiElement = _uiElementFactory.GetUIElement(currentChild) as INavigable;
+            var uiElement = _uiElementFactory.GetUIElement(currentChild) as INavigableObject;
             if (uiElement != null)
             {
                 uiElement.Navigate();
@@ -111,6 +109,19 @@ namespace Navigator
             _history.Push(new History(_modelElement, _index));
 
             UpdateView(currentChild);
+        }
+
+        public void Navigate()
+        {
+            UpdateView(_modelElement);
+        }
+
+        private object GetCurrentChild()
+        {
+            var modelChildren = _modelElement as IModelChildren;
+            var children = modelChildren == null ? new object[] {} : modelChildren.Children.Where(child => child != null);
+
+            return children.ElementAtOrDefault(_index);
         }
 
         public void Back()
@@ -143,6 +154,19 @@ namespace Navigator
 
             _index = 0;
             MoveVertically(_index);
+        }
+
+        public void Execute(Message message)
+        {
+/*            var uiElement = _uiElementFactory.GetUIElement(_modelElement);
+            if (message.CanHandle(uiElement))
+                message.Invoke(uiElement);
+            else*/
+                message.Delegate.DynamicInvoke(this);
+
+/*            var child = GetCurrentChild();
+            if (message.CanHandle(child)) message.Invoke(child);
+            else message.Delegate.DynamicInvoke(this);*/
         }
     }
 }
