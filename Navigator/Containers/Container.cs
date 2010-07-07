@@ -10,6 +10,7 @@ namespace Navigator.Containers
     {
         private readonly Dictionary<Type, Func<object[], object>> _dictionary = new Dictionary<Type, Func<object[], object>>();
         private readonly Dictionary<Type, object> _singletonDictionary = new Dictionary<Type, object>();
+        private readonly Dictionary<string, Func<object[], object>> _nameDictionary = new Dictionary<string, Func<object[], object>>();
 
         public Container()
         {
@@ -54,6 +55,18 @@ namespace Navigator.Containers
         public void RegisterInstance(Type key, object instance)
         {
             _dictionary[key] = objects => instance;
+        }
+
+        public void RegisterByName(string name, Type typeToInstantiate, ContainerRegisterType registerType)
+        {
+            if (registerType != ContainerRegisterType.Instance) throw new InvalidOperationException("Currently only support instance type name registrations");
+
+            _nameDictionary[name] = objects => BuildObject(objects, typeToInstantiate);
+        }
+
+        public TReturn GetByName<TReturn>(string name, params object[] objects)
+        {
+            return (TReturn) _nameDictionary[name](objects);
         }
 
         private class ProxyInterceptor : IInterceptor
@@ -119,6 +132,18 @@ namespace Navigator.Containers
         public TResult Get<TResult>(params object[] objects)
         {
             return (TResult)_dictionary[typeof(TResult)](objects);
+        }
+
+        public TResult GetOrDefault<TResult>(params object[] objects)
+        {
+            try
+            {
+                return (TResult)_dictionary[typeof(TResult)](objects);
+            }
+            catch
+            {
+                return default(TResult);
+            }
         }
     }
 }

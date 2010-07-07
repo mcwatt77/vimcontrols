@@ -18,6 +18,13 @@ namespace Navigator
 
         public IUIElement GetUIElement(object modelElement)
         {
+            if (typeof(IHasUrl).IsAssignableFrom(modelElement.GetType())
+                && typeof(ISummaryString).IsAssignableFrom(modelElement.GetType()))
+            {
+                var summaryString = (ISummaryString) modelElement;
+                var url = (IHasUrl) modelElement;
+                return new StringWithUrlNavigation(summaryString.Summary, url.Url);
+            }
             if (typeof(IModelChildren).IsAssignableFrom(modelElement.GetType())
                 && typeof(ISummaryString).IsAssignableFrom(modelElement.GetType()))
             {

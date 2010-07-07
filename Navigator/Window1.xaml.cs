@@ -5,6 +5,7 @@ using System.Windows.Input;
 using Navigator.Containers;
 using Navigator.Path;
 using Navigator.Path.Hd;
+using Navigator.Path.Notes;
 using Navigator.Path.Rss;
 using Navigator.UI;
 using Navigator.UI.Attributes;
@@ -40,10 +41,11 @@ namespace Navigator
 
                 _uiElementFactory = _container.Get<IUIElementFactory>();
 
-                _navigable = (INavigable)_container.Get<PathCollection>(
-                                                new RssPath("http://www.salon.com/rss/v2/news.rss"),
-                                                new RssPath("http://rss.slashdot.org/Slashdot/slashdot"),
-                                                new HdPath());
+                _navigable = (INavigable) _container.Get<PathCollection>(
+                                              _container.GetOrDefault<RssPath>("http://www.salon.com/rss/v2/news.rss"),
+                                              _container.GetOrDefault<RssPath>("http://rss.slashdot.org/Slashdot/slashdot"),
+                                              _container.GetOrDefault<HdPath>(),
+                                              _container.GetOrDefault<NoteCollection>());
                 _verticallyNavigable = (IVerticallyNavigable) _navigable;
             }
             catch (Exception exception)

@@ -1,3 +1,4 @@
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
@@ -18,6 +19,7 @@ namespace Navigator.UI
             _uiElementFactory = uiElementFactory;
             _run = new Run(name);
             _block = new TextBlock(_run);
+            _block.TextWrapping = TextWrapping.Wrap;
         }
 
         public void Render(IUIContainer container)
@@ -26,11 +28,15 @@ namespace Navigator.UI
 
             if (!stackPanel.DisplaySummary)
             {
+                if (_modelElement == null) return;
+
                 var newStackPanel = new StackPanel();
                 var newStackPanelWrapper = new StackPanelWrapper(newStackPanel, true);
 
                 foreach (var child in _modelElement.Children)
                 {
+                    if (child == null) continue;
+
                     var uiElement = _uiElementFactory.GetUIElement(child);
                     uiElement.Render(newStackPanelWrapper);
                 }
