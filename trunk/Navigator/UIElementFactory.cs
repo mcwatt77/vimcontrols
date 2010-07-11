@@ -29,7 +29,7 @@ namespace Navigator
                 && typeof(ISummaryString).IsAssignableFrom(modelElement.GetType()))
             {
                 var summaryString = (ISummaryString)modelElement;
-                return new StringWithChildrenElement(summaryString.Summary, (IModelChildren)modelElement, FactoryForChildren ?? this);
+                return new StringWithChildrenElement(summaryString.Summary, ((IUIChildren)modelElement).UIElements);
             }
             if (typeof(IDescriptionString).IsAssignableFrom(modelElement.GetType())
                 && typeof(ISummaryString).IsAssignableFrom(modelElement.GetType()))
