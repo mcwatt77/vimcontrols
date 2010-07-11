@@ -10,5 +10,6 @@ namespace Navigator.Containers
         void RegisterByName(string name, Type typeToInstantiate, ContainerRegisterType registerType);
         TResult Get<TResult>(params object[] objects);
         TResult GetOrDefault<TResult>(params object[] objects);
+        object GetOrDefault<TResult>(Func<Exception, object> fn, params object[] objects);
     }
 }
