@@ -41,7 +41,7 @@ namespace Navigator.Containers
 
                                            var generator = new ProxyGenerator();
                                            var options = new ProxyGenerationOptions();
-                                           var interceptor = new ProxyInterceptor(oldValue);
+                                           var interceptor = new ProxyInterceptor(key);
                                            var proxiedObject = generator.CreateClassProxy(key, new[] {typeToInstantiate}, options, parameters, interceptor);
                                            interceptor.InterceptObject = BuildObject(new [] {proxiedObject}, typeToInstantiate);
                                            var initializable = interceptor.InterceptObject as IInitialize;
@@ -70,18 +70,18 @@ namespace Navigator.Containers
 
         private class ProxyInterceptor : IInterceptor
         {
-            private readonly object _oldValue;
+            private readonly Type _oldType;
 
-            public ProxyInterceptor(object oldValue)
+            public ProxyInterceptor(Type type)
             {
-                _oldValue = oldValue;
+                _oldType = type;
             }
 
             public object InterceptObject { get; set; }
 
             public void Intercept(IInvocation invocation)
             {
-                if (!invocation.Method.DeclaringType.IsAssignableFrom(_oldValue.GetType()))
+                if (!invocation.Method.DeclaringType.IsAssignableFrom(_oldType))
                 {
                     var lambda = ConvertToLambda(invocation);
                     var message = new Message(lambda);

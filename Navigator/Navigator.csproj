@@ -91,7 +91,12 @@
     <Compile Include="Path\Hd\DirectoryPathNode.cs" />
     <Compile Include="Path\Hd\FilePathNode.cs" />
     <Compile Include="Path\Hd\HdPath.cs" />
+    <Compile Include="Path\Jobs\CommandInfo.cs" />
+    <Compile Include="Path\Jobs\GetInfoJob.cs" />
+    <Compile Include="Path\Jobs\Job.cs" />
     <Compile Include="Path\Jobs\JobList.cs" />
+    <Compile Include="Path\Jobs\JobProgress.cs" />
+    <Compile Include="Path\Jobs\RunCmd.cs" />
     <Compile Include="Path\Notes\NoteCollection.cs" />
     <Compile Include="Path\Notes\NoteItem.cs" />
     <Compile Include="Path\Schemas\SchemaCollection.cs" />
