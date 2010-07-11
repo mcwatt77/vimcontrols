@@ -1,25 +1,22 @@
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
-using Navigator.UI.Attributes;
 
 namespace Navigator.UI
 {
     public class StringWithChildrenElement : IUIElement
     {
-        private readonly IUIElementFactory _uiElementFactory;
-        private readonly IModelChildren _modelElement;
+        private readonly IEnumerable<IUIElement> _children;
         private readonly TextBlock _block;
         private readonly Run _run;
 
-        public StringWithChildrenElement(string name, IModelChildren modelElement, IUIElementFactory uiElementFactory)
+        public StringWithChildrenElement(string name, IEnumerable<IUIElement> children)
         {
-            _modelElement = modelElement;
-            _uiElementFactory = uiElementFactory;
+            _children = children;
             _run = new Run(name);
-            _block = new TextBlock(_run);
-            _block.TextWrapping = TextWrapping.Wrap;
+            _block = new TextBlock(_run) {TextWrapping = TextWrapping.Wrap};
         }
 
         public void Render(IUIContainer container)
@@ -28,17 +25,16 @@ namespace Navigator.UI
 
             if (!stackPanel.DisplaySummary)
             {
-                if (_modelElement == null) return;
+                if (_children == null) return;
 
                 var newStackPanel = new StackPanel();
                 var newStackPanelWrapper = new StackPanelWrapper(newStackPanel, true);
 
-                foreach (var child in _modelElement.Children)
+                foreach (var child in _children)
                 {
                     if (child == null) continue;
 
-                    var uiElement = _uiElementFactory.GetUIElement(child);
-                    uiElement.Render(newStackPanelWrapper);
+                    child.Render(newStackPanelWrapper);
                 }
 
                 stackPanel.AddChild(newStackPanel);
