@@ -37,17 +37,15 @@ namespace Navigator.Containers
                 var oldValue = _dictionary[key];
                 _dictionary[key] = objects =>
                                        {
-                                           var args = objects;
-                                           var constructor = key.GetConstructors().Single();
-                                           if (constructor.GetParameters().Length == 1
-                                               && constructor.GetParameters().Single().ParameterType == typeof(object[]))
-                                               args = new object[] {objects};
+                                           var parameters = GetParametersList(key, objects);
 
                                            var generator = new ProxyGenerator();
                                            var options = new ProxyGenerationOptions();
                                            var interceptor = new ProxyInterceptor(oldValue);
-                                           var proxiedObject = generator.CreateClassProxy(key, new[] {typeToInstantiate}, options, args, interceptor);
+                                           var proxiedObject = generator.CreateClassProxy(key, new[] {typeToInstantiate}, options, parameters, interceptor);
                                            interceptor.InterceptObject = BuildObject(new [] {proxiedObject}, typeToInstantiate);
+                                           var initializable = interceptor.InterceptObject as IInitialize;
+                                           if (initializable != null) initializable.Initialize();
                                            return proxiedObject;
                                        };
             }
@@ -87,13 +85,14 @@ namespace Navigator.Containers
                 {
                     var lambda = ConvertToLambda(invocation);
                     var message = new Message(lambda);
-                    message.Invoke(InterceptObject);
+                    invocation.ReturnValue = message.Invoke(InterceptObject);
                 }
                 else invocation.Proceed();
             }
 
             private static LambdaExpression ConvertToLambda(IInvocation invocation)
             {
+                Expression<Func<int, int>> fn = x => 1 + x;
                 var parameter = Expression.Parameter(invocation.Method.DeclaringType, "x");
                 var invocationExpression = Expression.Call(parameter, invocation.Method, invocation.Arguments.Select(o => Expression.Constant(o)).ToArray());
                 var lambda = Expression.Lambda(invocationExpression, parameter);
@@ -105,38 +104,50 @@ namespace Navigator.Containers
         {
             try
             {
-                var constructor = typeToInstantiate.GetConstructors().Single();
-                var parameters = constructor.GetParameters();
-                var orderedParameters = Enumerable.Range(0, parameters.Length)
-                    .Select(index => new {Index = index, Parameter = parameters[index]})
-                    .OrderByDescending(
-                    a => parameters.Where(
-                             parameter => parameter.ParameterType.IsAssignableFrom(a.Parameter.ParameterType)).Count())
-                    .ToArray();
-
-                var objectListCopy = objects.ToList();
-
-                var parametersList = orderedParameters
-                    .Select(a =>
-                                {
-                                    var objectToRemove = objectListCopy.SingleOrDefault(o => a.Parameter.ParameterType.IsAssignableFrom(o.GetType()));
-                                    if (objectToRemove == null)
-                                        return new {
-                                                       a.Index,
-                                                       Parameter = _dictionary[a.Parameter.ParameterType](new object[] {})
-                                                   };
-                                    objectListCopy.Remove(objectToRemove);
-                                    return new {a.Index, Parameter = objectToRemove};
-                                })
-                    .OrderBy(a => a.Index)
-                    .Select(a => a.Parameter)
-                    .ToArray();
+                var parametersList = GetParametersList(typeToInstantiate, objects);
                 return Activator.CreateInstance(typeToInstantiate, parametersList);
             }
             catch (Exception e)
             {
                 throw new Exception("Could not instantiate type '" + typeToInstantiate + "' for: " + e.Message, e);
             }
+        }
+
+        private object[] GetParametersList(Type typeToInstantiate, IEnumerable<object> objects)
+        {
+            var constructor = typeToInstantiate.GetConstructors().Single();
+            var parameters = constructor.GetParameters();
+            if (parameters.Length == 1 && parameters.Single().ParameterType == typeof(object[]))
+            {
+                return new object[] {objects};
+            }
+
+            var orderedParameters = Enumerable.Range(0, parameters.Length)
+                .Select(index => new {Index = index, Parameter = parameters[index]})
+                .OrderByDescending(
+                a => parameters.Where(
+                         parameter => parameter.ParameterType.IsAssignableFrom(a.Parameter.ParameterType)).Count())
+                .ToArray();
+
+            var objectListCopy = objects.ToList();
+
+            return orderedParameters
+                .Select(a =>
+                            {
+                                var objectToRemove = objectListCopy
+                                    .Where(o => o != null)
+                                    .SingleOrDefault(o => a.Parameter.ParameterType.IsAssignableFrom(o.GetType()));
+                                if (objectToRemove == null)
+                                    return new {
+                                                   a.Index,
+                                                   Parameter = _dictionary[a.Parameter.ParameterType](new object[] {})
+                                               };
+                                objectListCopy.Remove(objectToRemove);
+                                return new {a.Index, Parameter = objectToRemove};
+                            })
+                .OrderBy(a => a.Index)
+                .Select(a => a.Parameter)
+                .ToArray();
         }
 
         public TResult Get<TResult>(params object[] objects)
@@ -148,11 +159,27 @@ namespace Navigator.Containers
         {
             try
             {
+                if (!_dictionary.ContainsKey(typeof(TResult)))
+                {
+                    Register(typeof (TResult), typeof (TResult), ContainerRegisterType.Instance);
+                }
                 return (TResult)_dictionary[typeof(TResult)](objects);
             }
-            catch
+            catch (Exception e)
             {
                 return default(TResult);
+            }
+        }
+
+        public object GetOrDefault<TResult>(Func<Exception, object> fn, params object[] objects)
+        {
+            try
+            {
+                return (TResult)_dictionary[typeof(TResult)](objects);
+            }
+            catch(Exception e)
+            {
+                return fn(e);
             }
         }
     }
