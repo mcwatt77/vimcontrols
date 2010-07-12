@@ -97,6 +97,7 @@
     <Compile Include="Path\Jobs\JobList.cs" />
     <Compile Include="Path\Jobs\JobProgress.cs" />
     <Compile Include="Path\Jobs\RunCmd.cs" />
+    <Compile Include="Path\Jobs\XmlConverter.cs" />
     <Compile Include="Path\Notes\NoteCollection.cs" />
     <Compile Include="Path\Notes\NoteItem.cs" />
     <Compile Include="Path\Schemas\SchemaCollection.cs" />
