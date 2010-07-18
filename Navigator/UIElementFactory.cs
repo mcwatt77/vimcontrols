@@ -1,5 +1,4 @@
 using System;
-using Navigator.Containers;
 using Navigator.UI;
 using Navigator.UI.Attributes;
 
@@ -7,15 +6,6 @@ namespace Navigator
 {
     public class UIElementFactory : IUIElementFactory
     {
-        private readonly IContainer _container;
-        //TODO: Eliminate this by using a container to inject the appropriate overriden value?
-        public IUIElementFactory FactoryForChildren { get; set; }
-
-        public UIElementFactory(IContainer container)
-        {
-            _container = container;
-        }
-
         public IUIElement GetUIElement(object modelElement)
         {
             if (typeof(IHasUrl).IsAssignableFrom(modelElement.GetType())
