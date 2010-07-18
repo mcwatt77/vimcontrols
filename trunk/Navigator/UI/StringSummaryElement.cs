@@ -1,7 +1,9 @@
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace Navigator.UI
 {
@@ -11,6 +13,19 @@ namespace Navigator.UI
         private readonly Run _summaryRun;
         private readonly TextBlock _bodyBlock;
         private readonly Run _bodyRun;
+
+        public string Message
+        {
+            get
+            {
+                return _summaryRun.Text;
+            }
+            set
+            {
+                _summaryRun.Dispatcher.Invoke(DispatcherPriority.Normal,
+                                              (ThreadStart) delegate { _summaryRun.Text = value; });
+            }
+        }
 
         public StringSummaryElement(string summary, string bodyText)
         {

@@ -7,7 +7,6 @@ using Navigator.Path;
 using Navigator.Path.Hd;
 using Navigator.Path.Jobs;
 using Navigator.Path.Notes;
-using Navigator.Path.Rss;
 using Navigator.Path.Schemas;
 using Navigator.UI;
 using Navigator.UI.Attributes;
@@ -24,10 +23,16 @@ namespace Navigator
         private INavigable _navigable;
         private INavigableHistory _navigableHistory;
         private IVerticallyNavigable _verticallyNavigable;
+        private IUIElement _activeElement;
 
         public Window1()
         {
             InitializeComponent();
+        }
+
+        public INavigableHistory NavigableHistory
+        {
+            get { return _navigableHistory; }
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -46,11 +51,11 @@ namespace Navigator
                 _container.Get<IUIElementFactory>();
 
                 _navigable = (INavigable) _container.Get<PathCollection>(
-                                              _container.GetOrDefault<RssPath>("http://www.salon.com/rss/v2/news.rss"),
-                                              _container.GetOrDefault<RssPath>("http://rss.slashdot.org/Slashdot/slashdot"),
+//                                              _container.GetOrDefault<RssPath>("http://www.salon.com/rss/v2/news.rss"),
+//                                              _container.GetOrDefault<RssPath>("http://rss.slashdot.org/Slashdot/slashdot"),
 //                                              _container.GetOrDefault<RssPath>(ex => new ExceptionModel(ex), "http://feeds.feedblitz.com/alternet"),
-                                              _container.GetOrDefault<RssPath>("http://feeds.huffingtonpost.com/huffingtonpost/raw_feed"),
-                                              _container.GetOrDefault<RssPath>("http://blogs.msdn.com/ericlippert/rss.xml"),
+//                                              _container.GetOrDefault<RssPath>("http://feeds.huffingtonpost.com/huffingtonpost/raw_feed"),
+//                                              _container.GetOrDefault<RssPath>("http://blogs.msdn.com/ericlippert/rss.xml"),
                                               _container.GetOrDefault<HdPath>(),
                                               _container.GetOrDefault<NoteCollection>(),
                                               _container.GetOrDefault<SchemaCollection>(),
@@ -86,13 +91,18 @@ namespace Navigator
         {
             MainStack.Children.Clear();
 
-            var element = _container.Get<IUIElementFactory>().GetUIElement(navObject);
+            _activeElement = _container.Get<IUIElementFactory>().GetUIElement(navObject);
 
             _verticallyNavigable = navObject as IVerticallyNavigable;
             _navigable = navObject as INavigable;
             _navigableHistory = navObject as INavigableHistory;
 
-            element.Render(_stackPanelWrapper);
+            _activeElement.Render(_stackPanelWrapper);
+        }
+
+        public object ActiveModel
+        {
+            get { return _navigable; }
         }
 
         protected override void OnKeyDown(KeyEventArgs e)

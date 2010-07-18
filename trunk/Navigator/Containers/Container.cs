@@ -32,9 +32,9 @@ namespace Navigator.Containers
 
             if (registerType == ContainerRegisterType.Instance)
                 _dictionary[key] = objects => { return BuildObject(objects, typeToInstantiate); };
+
             if (registerType == ContainerRegisterType.Intercept)
             {
-                var oldValue = _dictionary[key];
                 _dictionary[key] = objects =>
                                        {
                                            var parameters = GetParametersList(key, objects);
