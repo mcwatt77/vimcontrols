@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{C4CBE469-7AFB-44CD-91F6-EACB0A603CCF}</ProjectGuid>
+    <ProjectGuid>{8AC5CCF8-F205-414E-A658-E3672EC8E134}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>KeyStringParser</RootNamespace>
-    <AssemblyName>KeyStringParser</AssemblyName>
+    <RootNamespace>VIControls.Commands</RootNamespace>
+    <AssemblyName>VIControls.Commands</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -31,10 +31,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="nunit.framework, Version=2.4.7.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Navigator\external-bin\nunit.framework.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -47,25 +43,10 @@
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="WindowsBase">
-      <RequiredTargetFramework>3.0</RequiredTargetFramework>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Mapper.cs" />
-    <Compile Include="Parser.cs" />
+    <Compile Include="ICharacterEdit.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SequencedDictionary.cs" />
-    <Compile Include="SequencedDictionaryTest.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="key.map" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\UtilityCore\UtilityCore.csproj">
-      <Project>{AEB6E54A-DCCC-4C77-A4B3-81580A945B0E}</Project>
-      <Name>UtilityCore</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

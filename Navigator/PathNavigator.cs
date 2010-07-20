@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Navigator.UI;
@@ -5,20 +6,11 @@ using Navigator.UI.Attributes;
 
 namespace Navigator
 {
-    public class NavigatorHistory : INavigableHistory
-    {
-        public void Back()
-        {
-        }
-    }
-
     public class PathNavigator : IVerticallyNavigable, INavigable, IMessageable, IUIChildren, IInitialize
     {
         public void Initialize()
         {
-            MoveVertically(_index);
-
-            _port.Navigate(_modelElement);
+            Navigate();
         }
 
         public PathNavigator(object modelElement, IUIPort port, IUIElementFactory elementFactory)
@@ -47,22 +39,10 @@ namespace Navigator
             }
         }
 
-        private readonly Stack<History> _history = new Stack<History>();
-        private object _modelElement;
+        private readonly object _modelElement;
         private readonly IUIPort _port;
         private readonly IUIElementFactory _elementFactory;
         private int _index;
-
-        private class History
-        {
-            public History(object element, int index)
-            {
-                Element = element;
-                Index = index;
-            }
-            public object Element { get; private set; }
-            public int Index { get; private set; }
-        }
 
         public void MoveVertically(int spaces)
         {
@@ -78,26 +58,14 @@ namespace Navigator
 
         public void NavigateToCurrentChild()
         {
-            var currentChild = GetCurrentChild();
-
-            var uiElement = currentChild as INavigableObject;
-            if (uiElement != null)
-            {
-                uiElement.Navigate();
-                return;
-            }
-
-            _history.Push(new History(_modelElement, _index));
-
-            var currentModelChild = GetCurrentModelChild() as INavigableObject;
-
-            if (currentModelChild == null) return;
-
-            currentModelChild.Navigate();
+            var uiElement = (INavigableObject)GetCurrentModelChild();
+            if (uiElement != null) uiElement.Navigate();
         }
 
         public void Navigate()
         {
+            MoveVertically(_index);
+
             _port.Navigate(_modelElement);
         }
 
@@ -109,38 +77,17 @@ namespace Navigator
             return modelChildren.Children.Where(child => child != null).ElementAtOrDefault(_index);
         }
 
-        private IUIElement GetCurrentChild()
-        {
-            return UIElements.ElementAtOrDefault(_index);
-        }
-
-        public void Back()
-        {
-            if (_history.Count == 0) return;
-
-            var history = _history.Pop();
-            _modelElement = history.Element;
-            _index = history.Index;
-
-
-            var currentModelChild = _modelElement as INavigableObject;
-
-            if (currentModelChild == null) return;
-
-            currentModelChild.Navigate();
-        }
-
         public object Execute(Message message)
         {
-/*            var uiElement = _uiElementFactory.GetUIElement(_modelElement);
-            if (message.CanHandle(uiElement))
-                message.Invoke(uiElement);
-            else*/
-                return message.Delegate.DynamicInvoke(this);
+            if (!message.CanHandle(this)) return null;
 
-/*            var child = GetCurrentChild();
-            if (message.CanHandle(child)) message.Invoke(child);
-            else message.Delegate.DynamicInvoke(this);*/
+            //TODO: Figure out what the hell is going on here
+            return message.Delegate.DynamicInvoke(this);
+        }
+
+        public bool CanHandle(Message message)
+        {
+            return true;
         }
     }
 }

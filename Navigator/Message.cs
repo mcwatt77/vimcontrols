@@ -33,9 +33,9 @@ namespace Navigator
 
         public object Invoke(object @object)
         {
-//            return Delegate.DynamicInvoke(@object);
             var messagable = @object as IMessageable;
-            return messagable != null ? messagable.Execute(this) : Delegate.DynamicInvoke(@object);
+            if (messagable == null || !messagable.CanHandle(this)) return Delegate.DynamicInvoke(@object);
+            return messagable.Execute(this);
         }
     }
 }

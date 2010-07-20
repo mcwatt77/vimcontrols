@@ -6,5 +6,6 @@ namespace Navigator.UI
     {
         void AddChild(UIElement element);
         bool DisplaySummary { get; }
+        void EnsureVisible(UIElement element);
     }
 }

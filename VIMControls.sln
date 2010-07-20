@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AcceptanceTests", "Acceptan
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeyCommandMapper", "KeyStringParser\KeyCommandMapper.csproj", "{C4CBE469-7AFB-44CD-91F6-EACB0A603CCF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UtilityCore", "..\UtilityCore\UtilityCore.csproj", "{AEB6E54A-DCCC-4C77-A4B3-81580A945B0E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UtilityCore", "UtilityCore\UtilityCore.csproj", "{AEB6E54A-DCCC-4C77-A4B3-81580A945B0E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

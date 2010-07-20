@@ -10,42 +10,35 @@ using Navigator.Path.Notes;
 using Navigator.Path.Schemas;
 using Navigator.UI;
 using Navigator.UI.Attributes;
+using VIControls.Commands;
 
 namespace Navigator
 {
     /// <summary>
     /// Interaction logic for Window1.xaml
     /// </summary>
-    public partial class Window1 : IUIPort
+    public partial class Window1
     {
-        private StackPanelWrapper _stackPanelWrapper;
         private readonly IContainer _container = new Container();
         private INavigable _navigable;
-        private INavigableHistory _navigableHistory;
         private IVerticallyNavigable _verticallyNavigable;
-        private IUIElement _activeElement;
+        private UIPort _port;
 
         public Window1()
         {
             InitializeComponent();
         }
 
-        public INavigableHistory NavigableHistory
-        {
-            get { return _navigableHistory; }
-        }
-
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            _stackPanelWrapper = new StackPanelWrapper(MainStack, false);
-
             try
             {
+                _port = new UIPort(_container, null, MainStack, UpdateObject);
                 _container.Register(typeof (IUIElementFactory), typeof (UIElementFactory), ContainerRegisterType.Instance);
                 _container.Register(typeof (PathNavigator), typeof (PathNavigator), ContainerRegisterType.Instance);
-                _container.RegisterInstance(typeof (IUIPort), this);
+                _container.RegisterInstance(typeof (IUIPort), _port);
+
                 RegisterPathNavigator();
-                _container.Register(typeof (PathNavigator), typeof(NavigatorHistory), ContainerRegisterType.Intercept);
                 _container.Register(typeof (JobProgress), typeof (JobProgress), ContainerRegisterType.Singleton);
 
                 _container.Get<IUIElementFactory>();
@@ -61,8 +54,9 @@ namespace Navigator
                                               _container.GetOrDefault<SchemaCollection>(),
                                               _container.GetOrDefault<JobList>());
                 _verticallyNavigable = (IVerticallyNavigable) _navigable;
-                _navigableHistory = _navigable as INavigableHistory;
-//                _navigableHistory = (INavigableHistory) _navigable;
+
+                var initialize = (IInitialize) _navigable;
+                initialize.Initialize();
             }
             catch (Exception exception)
             {
@@ -84,44 +78,37 @@ namespace Navigator
             }
         }
 
-        //TODO: History has to be managed from here.  With the new (more appropriate) model of calling navigate on the object I wish to see,
-        //they no longer have access to history
-
-        public void Navigate(object navObject)
+        public void UpdateObject(object navObject)
         {
-            MainStack.Children.Clear();
-
-            _activeElement = _container.Get<IUIElementFactory>().GetUIElement(navObject);
-
             _verticallyNavigable = navObject as IVerticallyNavigable;
             _navigable = navObject as INavigable;
-            _navigableHistory = navObject as INavigableHistory;
-
-            _activeElement.Render(_stackPanelWrapper);
-        }
-
-        public object ActiveModel
-        {
-            get { return _navigable; }
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
         {
+            Message message;
             switch (e.Key)
             {
                 case Key.J:
-                    _verticallyNavigable.MoveVertically(1);
+                    message = Message.Build<IVerticallyNavigable>(x => x.MoveVertically(1));
                     break;
                 case Key.K:
-                    _verticallyNavigable.MoveVertically(-1);
+                    message = Message.Build<IVerticallyNavigable>(x => x.MoveVertically(-1));
+                    break;
+                case Key.L:
+                    message = Message.Build<ICharacterEdit>(x => x.Output('l'));
                     break;
                 case Key.Enter:
-                    _navigable.NavigateToCurrentChild();
+                    message = Message.Build<INavigable>(x => x.NavigateToCurrentChild());
                     break;
                 case Key.Back:
-//                    _navigableHistory.Back();
-                    break;
+                    _port.Back();
+                    return;
+                default:
+                    return;
             }
+
+            message.Invoke(_navigable);
         }
     }
 }
