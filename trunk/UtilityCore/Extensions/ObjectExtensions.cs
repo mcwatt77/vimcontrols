@@ -28,7 +28,26 @@ namespace Utility.Core
             }
         }
 
-		public static PropertyInfo Property(this object instance, string propertyName)
+        public static IEnumerable<T> Descendants<T>(this T e, Func<T, IEnumerable<T>> fn) where T : class
+        {
+            var existingList = new HashSet<T>();
+            Descendants(existingList, e, fn);
+            return existingList.Where(type => type != e);
+        }
+
+	    private static void Descendants<T>(HashSet<T> existingList, T e, Func<T, IEnumerable<T>> fn)
+	    {
+            if (existingList.Contains(e)) return;
+
+	        existingList.Add(e);
+	        var newE = fn(e);
+	        if (newE == null) return;
+
+            foreach (var item in newE)
+                Descendants(existingList, item, fn);
+	    }
+
+	    public static PropertyInfo Property(this object instance, string propertyName)
 		{
 			if (instance == null)
 				throw new ArgumentNullException("instance");

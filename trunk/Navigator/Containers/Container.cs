@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using Castle.Core.Interceptor;
 using Castle.DynamicProxy;
+using Utility.Core;
 
 namespace Navigator.Containers
 {
@@ -12,6 +14,7 @@ namespace Navigator.Containers
         private readonly Dictionary<Type, Func<object[], object>> _dictionary = new Dictionary<Type, Func<object[], object>>();
         private readonly Dictionary<Type, object> _singletonDictionary = new Dictionary<Type, object>();
         private readonly Dictionary<string, Func<object[], object>> _nameDictionary = new Dictionary<string, Func<object[], object>>();
+        private readonly Dictionary<Type, HashSet<Type>> _interceptTypeChain = new Dictionary<Type, HashSet<Type>>();
 
         public Container()
         {
@@ -23,8 +26,6 @@ namespace Navigator.Containers
             if (registerType == ContainerRegisterType.Singleton)
                 _dictionary[key] = objects =>
                                        {
-                                           if (objects.Length > 0)
-                                               throw new InvalidOperationException( "Singleton objects can't take parameters");
                                            if (!_singletonDictionary.ContainsKey(key))
                                                _singletonDictionary[key] = BuildObject(objects, typeToInstantiate);
                                            return _singletonDictionary[key];
@@ -35,20 +36,31 @@ namespace Navigator.Containers
 
             if (registerType == ContainerRegisterType.Intercept)
             {
-                _dictionary[key] = objects =>
-                                       {
-                                           var parameters = GetParametersList(key, objects);
+                var list = _interceptTypeChain.ContainsKey(key)
+                               ? _interceptTypeChain[key]
+                               : (_interceptTypeChain[key] = new HashSet<Type>());
 
-                                           var generator = new ProxyGenerator();
-                                           var options = new ProxyGenerationOptions();
-                                           var interceptor = new ProxyInterceptor(key);
-                                           var proxiedObject = generator.CreateClassProxy(key, new[] {typeToInstantiate}, options, parameters, interceptor);
-                                           interceptor.InterceptObject = BuildObject(new [] {proxiedObject}, typeToInstantiate);
-                                           var initializable = interceptor.InterceptObject as IInitialize;
-                                           if (initializable != null) initializable.Initialize();
-                                           return proxiedObject;
-                                       };
+                if (!list.Contains(typeToInstantiate)) list.Add(typeToInstantiate);
+
+                _dictionary[key] = objects => { return GetProxiedObject(key, objects, typeToInstantiate); };
             }
+        }
+
+        private object GetProxiedObject(Type key, IEnumerable<object> objects, Type typeToInstantiate)
+        {
+            var parameters = GetParametersList(key, objects);
+
+            var generator = new ProxyGenerator();
+            var options = new ProxyGenerationOptions();
+            var interceptor = new ProxyInterceptor(key);
+
+            var descendants = key
+                .Descendants(type => _interceptTypeChain.ContainsKey(type) ? _interceptTypeChain[type] : null)
+                .ToArray();
+
+            var proxiedObject = generator.CreateClassProxy(key, descendants, options, parameters, interceptor);
+            interceptor.InterceptObject = Get(typeToInstantiate, new[] {proxiedObject});
+            return proxiedObject;
         }
 
         public void RegisterInstance(Type key, object instance)
@@ -77,7 +89,7 @@ namespace Navigator.Containers
                 _oldType = type;
             }
 
-            public object InterceptObject { get; set; }
+            public object InterceptObject { private get; set; }
 
             public void Intercept(IInvocation invocation)
             {
@@ -92,7 +104,6 @@ namespace Navigator.Containers
 
             private static LambdaExpression ConvertToLambda(IInvocation invocation)
             {
-                Expression<Func<int, int>> fn = x => 1 + x;
                 var parameter = Expression.Parameter(invocation.Method.DeclaringType, "x");
                 var invocationExpression = Expression.Call(parameter, invocation.Method, invocation.Arguments.Select(o => Expression.Constant(o)).ToArray());
                 var lambda = Expression.Lambda(invocationExpression, parameter);
@@ -115,7 +126,19 @@ namespace Navigator.Containers
 
         private object[] GetParametersList(Type typeToInstantiate, IEnumerable<object> objects)
         {
-            var constructor = typeToInstantiate.GetConstructors().Single();
+            var parameterCount = typeToInstantiate
+                .GetConstructors()
+                .Max(constructorInfo => constructorInfo.GetParameters().Count());
+
+            var constructor = typeToInstantiate
+                .GetConstructors()
+                .Single(constructorInfo => constructorInfo.GetParameters().Count() == parameterCount);
+
+            return GetListForConstructor(constructor, objects);
+        }
+
+        private object[] GetListForConstructor(ConstructorInfo constructor, IEnumerable<object> objects)
+        {
             var parameters = constructor.GetParameters();
             if (parameters.Length == 1 && parameters.Single().ParameterType == typeof(object[]))
             {
@@ -148,6 +171,15 @@ namespace Navigator.Containers
                 .OrderBy(a => a.Index)
                 .Select(a => a.Parameter)
                 .ToArray();
+        }
+
+        private object Get(Type type, params object[] objects)
+        {
+            return typeof (Container)
+                .GetMethods()
+                .Single(method => method.Name == "GetOrDefault" && method.GetParameters().Count() == 1)
+                .MakeGenericMethod(type)
+                .Invoke(this, new object[] {objects});
         }
 
         public TResult Get<TResult>(params object[] objects)

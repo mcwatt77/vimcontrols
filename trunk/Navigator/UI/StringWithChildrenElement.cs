@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -8,48 +7,56 @@ namespace Navigator.UI
 {
     public class StringWithChildrenElement : IUIElement
     {
-        private readonly IEnumerable<IUIElement> _children;
+        private readonly IUIChildren _hasChildren;
         private readonly TextBlock _block;
         private readonly Run _run;
+        private IStackPanel _stackPanel;
 
-        public StringWithChildrenElement(string name, IEnumerable<IUIElement> children)
+        public StringWithChildrenElement(string name, IUIChildren hasChildren)
         {
-            _children = children;
+            _hasChildren = hasChildren;
             _run = new Run(name);
             _block = new TextBlock(_run) {TextWrapping = TextWrapping.Wrap};
         }
 
         public void Render(IUIContainer container)
         {
-            var stackPanel = container.GetInterface<IStackPanel>();
+            _stackPanel = container.GetInterface<IStackPanel>();
 
-            if (!stackPanel.DisplaySummary)
+            if (!_stackPanel.DisplaySummary)
             {
-                if (_children == null) return;
+                if (_hasChildren == null) return;
 
+                var scrollViewer = new ScrollViewer();
                 var newStackPanel = new StackPanel();
-                var newStackPanelWrapper = new StackPanelWrapper(newStackPanel, true);
+                scrollViewer.Content = newStackPanel;
+                scrollViewer.HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
 
-                foreach (var child in _children)
+                var newStackPanelWrapper = new StackPanelWrapper(newStackPanel, scrollViewer, true);
+
+                foreach (var child in _hasChildren.UIElements)
                 {
                     if (child == null) continue;
 
                     child.Render(newStackPanelWrapper);
                 }
 
-                stackPanel.AddChild(newStackPanel);
+                _stackPanel.AddChild(scrollViewer);
             }
             else
             {
                 if (_block.Parent != null)
                     ((StackPanel)_block.Parent).Children.Remove(_block);
-                stackPanel.AddChild(_block);
+                _stackPanel.AddChild(_block);
             }
         }
 
         public void SetFocus(bool on)
         {
             _run.Background = on ? Brushes.Bisque : Brushes.White;
+
+            if (_stackPanel == null || !on) return;
+            _stackPanel.EnsureVisible(_block);
         }
     }
 }

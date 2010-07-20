@@ -13,6 +13,7 @@ namespace Navigator.UI
         private readonly Run _summaryRun;
         private readonly TextBlock _bodyBlock;
         private readonly Run _bodyRun;
+        private IStackPanel _stackPanel;
 
         public string Message
         {
@@ -39,17 +40,20 @@ namespace Navigator.UI
 
         public void Render(IUIContainer container)
         {
-            var stackPanel = container.GetInterface<IStackPanel>();
-            var block = stackPanel.DisplaySummary ? _summaryBlock : _bodyBlock;
+            _stackPanel = container.GetInterface<IStackPanel>();
+            var block = _stackPanel.DisplaySummary ? _summaryBlock : _bodyBlock;
 
             if (block.Parent != null)
                 ((StackPanel)block.Parent).Children.Remove(block);
-            stackPanel.AddChild(block);
+            _stackPanel.AddChild(block);
         }
 
         public void SetFocus(bool on)
         {
             _summaryRun.Background = on ? Brushes.Bisque : Brushes.White;
+
+            if (_stackPanel == null || !on) return;
+            _stackPanel.EnsureVisible(_summaryBlock);
         }
     }
 }

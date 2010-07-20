@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Navigator.Containers;
 using Navigator.UI.Attributes;
 
 namespace Navigator.Path.Hd
@@ -10,10 +11,10 @@ namespace Navigator.Path.Hd
     {
         private readonly IEnumerable<object> _children;
 
-        public HdPath()
+        public HdPath(IContainer container)
         {
             _children = Environment.GetLogicalDrives()
-                .Select(driveName => (object)new DirectoryPathNode(this, new DirectoryInfo(driveName)))
+                .Select(driveName => (object)container.Get<DirectoryPathNode>(this, new DirectoryInfo(driveName)))
                 .ToArray();
         }
 

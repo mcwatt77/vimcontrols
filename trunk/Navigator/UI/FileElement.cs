@@ -15,6 +15,7 @@ namespace Navigator.UI
         private readonly TextBlock _bodyBlock;
         private readonly Run _bodyRun;
         private readonly FileInfo _fileInfo;
+        private IStackPanel _stackPanel;
 
         public FileElement(FileInfo fileInfo)
         {
@@ -30,33 +31,36 @@ namespace Navigator.UI
 
         public void Render(IUIContainer container)
         {
-            var stackPanel = container.GetInterface<IStackPanel>();
+            _stackPanel = container.GetInterface<IStackPanel>();
 
-            if (!stackPanel.DisplaySummary)
+            if (!_stackPanel.DisplaySummary)
             {
                 if (_fileInfo.Extension == ".jpg")
                 {
                     var image = new Image {Source = new BitmapImage(new Uri(_fileInfo.FullName))};
-                    stackPanel.AddChild(image);
+                    _stackPanel.AddChild(image);
                 }
                 else
                 {
                     if (_bodyBlock.Parent != null)
                         ((StackPanel)_bodyBlock.Parent).Children.Remove(_bodyBlock);
-                    stackPanel.AddChild(_bodyBlock);
+                    _stackPanel.AddChild(_bodyBlock);
                 }
             }
             else
             {
                 if (_block.Parent != null)
                     ((StackPanel)_block.Parent).Children.Remove(_block);
-                stackPanel.AddChild(_block);
+                _stackPanel.AddChild(_block);
             }
         }
 
         public void SetFocus(bool on)
         {
             _run.Background = on ? Brushes.Bisque : Brushes.White;
+
+            if (_stackPanel == null || !on) return;
+            _stackPanel.EnsureVisible(_block);
         }
     }
 }

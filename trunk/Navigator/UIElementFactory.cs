@@ -1,6 +1,7 @@
 using System;
 using Navigator.UI;
 using Navigator.UI.Attributes;
+using VIControls.Commands;
 
 namespace Navigator
 {
@@ -19,7 +20,7 @@ namespace Navigator
                 && typeof(ISummaryString).IsAssignableFrom(modelElement.GetType()))
             {
                 var summaryString = (ISummaryString)modelElement;
-                return new StringWithChildrenElement(summaryString.Summary, ((IUIChildren)modelElement).UIElements);
+                return new StringWithChildrenElement(summaryString.Summary, (IUIChildren)modelElement);
             }
             if (typeof(IDescriptionString).IsAssignableFrom(modelElement.GetType())
                 && typeof(ISummaryString).IsAssignableFrom(modelElement.GetType()))

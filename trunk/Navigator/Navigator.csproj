@@ -41,6 +41,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>external-bin\Castle.DynamicProxy2.dll</HintPath>
     </Reference>
+    <Reference Include="nunit.framework, Version=2.4.7.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>external-bin\nunit.framework.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -78,6 +82,8 @@
   <ItemGroup>
     <Compile Include="Containers\Container.cs" />
     <Compile Include="Containers\ContainerRegisterType.cs" />
+    <Compile Include="Path\Notes\EditableText.cs" />
+    <Compile Include="Test\ContainerTest.cs" />
     <Compile Include="Containers\IContainer.cs" />
     <Compile Include="DeferredExecutionList.cs" />
     <Compile Include="IInitialize.cs" />
@@ -102,6 +108,7 @@
     <Compile Include="Path\Notes\NoteItem.cs" />
     <Compile Include="Path\Schemas\SchemaCollection.cs" />
     <Compile Include="Repository\RepositoryFactory.cs" />
+    <Compile Include="UIPort.cs" />
     <Compile Include="UI\Attributes\IAttribute.cs" />
     <Compile Include="UI\Attributes\IDescriptionString.cs" />
     <Compile Include="UI\Attributes\IFileViewer.cs" />
@@ -149,6 +156,16 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="notes.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\UtilityCore\UtilityCore.csproj">
+      <Project>{AEB6E54A-DCCC-4C77-A4B3-81580A945B0E}</Project>
+      <Name>UtilityCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="VIControls.Commands\VIControls.Commands.csproj">
+      <Project>{8AC5CCF8-F205-414E-A658-E3672EC8E134}</Project>
+      <Name>VIControls.Commands</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

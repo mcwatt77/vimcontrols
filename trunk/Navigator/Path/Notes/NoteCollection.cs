@@ -2,17 +2,20 @@
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+using Navigator.Containers;
 using Navigator.UI.Attributes;
 
 namespace Navigator.Path.Notes
 {
     public class NoteCollection : ISummaryString, IModelChildren
     {
+        private readonly IContainer _container;
         private readonly XDocument _document;
         private readonly IEnumerable<object> _children;
 
-        public NoteCollection()
+        public NoteCollection(IContainer container)
         {
+            _container = container;
 #if DEBUG
             var file = new FileInfo(@"..\..\notes.xml");
 #else
@@ -27,7 +30,7 @@ namespace Navigator.Path.Notes
                 .Elements("notes")
                 .Single()
                 .Elements("note")
-                .Select(noteElement => (object) new NoteItem(noteElement))
+                .Select(noteElement => (object) _container.Get<NoteItem>(noteElement))
                 .ToArray();
         }
 
