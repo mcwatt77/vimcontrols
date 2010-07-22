@@ -5,6 +5,7 @@ using System.Threading;
 using System.Windows;
 using Navigator.Containers;
 using Navigator.UI.Attributes;
+using VIControls.Commands.Interfaces;
 
 namespace Navigator.Path.Jobs
 {

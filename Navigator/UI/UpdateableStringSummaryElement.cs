@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -8,8 +9,10 @@ using VIControls.Commands.Interfaces;
 
 namespace Navigator.UI
 {
-    public class StringSummaryElement : IUIElement
+    public class UpdateableStringSummaryElement : IUIElement, IUIElementOnNavigate
     {
+        private readonly IHasInsertMode _insertMode;
+        private readonly Func<string> _fnBodyText;
         private readonly TextBlock _summaryBlock;
         private readonly Run _summaryRun;
         private readonly TextBlock _bodyBlock;
@@ -29,12 +32,14 @@ namespace Navigator.UI
             }
         }
 
-        public StringSummaryElement(string summary, string bodyText)
+        public UpdateableStringSummaryElement(IHasInsertMode insertMode, Func<string> fnSummary, Func<string> fnBodyText)
         {
-            _summaryRun = new Run(summary);
+            _insertMode = insertMode;
+            _fnBodyText = fnBodyText;
+            _summaryRun = new Run(fnSummary());
             _summaryBlock = new TextBlock(_summaryRun);
             _summaryBlock.TextWrapping = TextWrapping.Wrap;
-            _bodyRun = new Run(bodyText);
+            _bodyRun = new Run(fnBodyText());
             _bodyBlock = new TextBlock(_bodyRun);
             _bodyBlock.TextWrapping = TextWrapping.Wrap;
         }
@@ -59,7 +64,12 @@ namespace Navigator.UI
 
         public void Update()
         {
-            MessageBox.Show("Here!");
+            _bodyRun.Text = _fnBodyText();
+        }
+
+        public void OnNavigate()
+        {
+            _insertMode.EnterInsertMode();
         }
     }
 }

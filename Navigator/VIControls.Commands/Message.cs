@@ -1,8 +1,9 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
+using VIControls.Commands.Interfaces;
 
-namespace Navigator
+namespace VIControls.Commands
 {
     public class Message
     {

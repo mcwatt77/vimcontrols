@@ -1,24 +1,26 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using Navigator.Containers;
 using Navigator.UI;
 using Navigator.UI.Attributes;
+using VIControls.Commands;
+using VIControls.Commands.Interfaces;
 
 namespace Navigator
 {
-    public class PathNavigator : IVerticallyNavigable, INavigable, IMessageable, IUIChildren, IInitialize
+    public class PathNavigator : IVerticallyNavigable, INavigable, IMessageable, IUIChildren, IInitialize, IContainerIntercept
     {
-        public void Initialize()
-        {
-            Navigate();
-        }
 
-        public PathNavigator(object modelElement, IUIPort port, IUIElementFactory elementFactory)
+        public PathNavigator(IContainer container, IUIPort port, IUIElementFactory elementFactory)
         {
-            _modelElement = modelElement;
+            _container = container;
             _port = port;
             _elementFactory = elementFactory;
+        }
 
+        public void Initialize(object overridenObject)
+        {
+            _modelElement = overridenObject;
         }
 
         private IEnumerable<IUIElement> _uiElements;
@@ -39,9 +41,11 @@ namespace Navigator
             }
         }
 
-        private readonly object _modelElement;
+        private readonly IContainer _container;
+        private object _modelElement;
         private readonly IUIPort _port;
         private readonly IUIElementFactory _elementFactory;
+        private MessageBroadcaster _messageBroadcaster;
         private int _index;
 
         public void MoveVertically(int spaces)
@@ -67,6 +71,13 @@ namespace Navigator
             MoveVertically(_index);
 
             _port.Navigate(_modelElement);
+
+            var onNavigate = _port.ActiveUIElement as IUIElementOnNavigate;
+            if (onNavigate != null)
+                onNavigate.OnNavigate();
+
+            if (_messageBroadcaster != null)
+                _messageBroadcaster.UpdateElement = _port.ActiveUIElement;
         }
 
         private object GetCurrentModelChild()
@@ -88,6 +99,14 @@ namespace Navigator
         public bool CanHandle(Message message)
         {
             return true;
+        }
+
+        public TResult Get<TResult>(params object[] objects)
+        {
+            var @object = _container.Get<TResult>();
+            if (typeof(TResult) == typeof(MessageBroadcaster))
+                _messageBroadcaster = (MessageBroadcaster)(object)@object;
+            return @object;
         }
     }
 }

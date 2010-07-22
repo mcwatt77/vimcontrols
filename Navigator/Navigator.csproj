@@ -80,19 +80,21 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Containers\ComponentNotFound.cs" />
     <Compile Include="Containers\Container.cs" />
     <Compile Include="Containers\ContainerRegisterType.cs" />
+    <Compile Include="Containers\IReadContainer.cs" />
+    <Compile Include="IContainerIntercept.cs" />
+    <Compile Include="MessageBroadcaster.cs" />
+    <Compile Include="Path\KevinBacon\KevinBaconCollection.cs" />
+    <Compile Include="Path\KevinBacon\KevinBaconItem.cs" />
     <Compile Include="Path\Notes\EditableText.cs" />
     <Compile Include="Test\ContainerTest.cs" />
     <Compile Include="Containers\IContainer.cs" />
     <Compile Include="DeferredExecutionList.cs" />
     <Compile Include="IInitialize.cs" />
-    <Compile Include="IMessageable.cs" />
     <Compile Include="INavigableHistory.cs" />
-    <Compile Include="INavigableObject.cs" />
     <Compile Include="IUIChildren.cs" />
-    <Compile Include="IUIPort.cs" />
-    <Compile Include="Message.cs" />
     <Compile Include="Path\Exceptions\ExceptionModel.cs" />
     <Compile Include="Path\Hd\DirectoryPathNode.cs" />
     <Compile Include="Path\Hd\FilePathNode.cs" />
@@ -116,15 +118,11 @@
     <Compile Include="UI\Attributes\IModelChildren.cs" />
     <Compile Include="UI\Attributes\ISummaryString.cs" />
     <Compile Include="UI\FileElement.cs" />
-    <Compile Include="UI\IUIContainer.cs" />
     <Compile Include="UI\IStackPanel.cs" />
     <Compile Include="UI\IUIElementFactory.cs" />
     <Compile Include="Path\PathCollection.cs" />
     <Compile Include="Path\Rss\RssItem.cs" />
     <Compile Include="Path\Rss\RssPath.cs" />
-    <Compile Include="INavigable.cs" />
-    <Compile Include="UI\IUIElement.cs" />
-    <Compile Include="IVerticallyNavigable.cs" />
     <Compile Include="PathNavigator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
@@ -144,6 +142,7 @@
     <Compile Include="UI\StringSummaryElement.cs" />
     <Compile Include="UIElementFactory.cs" />
     <Compile Include="UI\StringWithUrlNavigation.cs" />
+    <Compile Include="UI\UpdateableStringSummaryElement.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

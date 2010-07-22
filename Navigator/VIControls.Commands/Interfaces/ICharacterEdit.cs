@@ -1,4 +1,4 @@
-﻿namespace VIControls.Commands
+﻿namespace VIControls.Commands.Interfaces
 {
     public interface ICharacterEdit
     {

@@ -1,4 +1,4 @@
-namespace Navigator
+namespace VIControls.Commands.Interfaces
 {
     public interface IVerticallyNavigable
     {

@@ -32,22 +32,22 @@ namespace Navigator.Path.Jobs
                                                                        CommandName = "Test trunk"
                                                                    }),
                                 container.GetOrDefault<RunCmd>(new CommandInfo
-                                                                   (@"D:\development\casemax\cmsdotnet\framework\branches\10.2.0\database")
+                                                                   (@"D:\development\casemax\cmsdotnet\framework\branches\10.2.1\database")
                                                                    {
                                                                        Command = @"nant -buildfile:database.build full-upgrade",
-                                                                       CommandName = "Build 10.2.0 database"
+                                                                       CommandName = "Build 10.2.1 database"
                                                                    }),
                                 container.GetOrDefault<RunCmd>(new CommandInfo
-                                                                   (@"D:\development\casemax\cmsdotnet\framework\branches\10.2.0")
+                                                                   (@"D:\development\casemax\cmsdotnet\framework\branches\10.2.1")
                                                                    {
                                                                        Command = @"config.bat",
-                                                                       CommandName = "Switch to 10.2.0 configuration"
+                                                                       CommandName = "Switch to 10.2.1 configuration"
                                                                    }),
                                 container.GetOrDefault<RunCmd>(new CommandInfo
-                                                                   (@"D:\development\casemax\cmsdotnet\framework\branches\10.2.0\PRS.CMS")
+                                                                   (@"D:\development\casemax\cmsdotnet\framework\branches\10.2.1\PRS.CMS")
                                                                    {
                                                                        Command = @"nant build test",
-                                                                       CommandName = "Test 10.2.0"
+                                                                       CommandName = "Test 10.2.1"
                                                                    })
                             };
         }

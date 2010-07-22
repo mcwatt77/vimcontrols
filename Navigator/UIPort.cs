@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Windows.Controls;
 using Navigator.Containers;
 using Navigator.UI;
+using VIControls.Commands.Interfaces;
 
 namespace Navigator
 {
@@ -15,10 +16,13 @@ namespace Navigator
         private object _navObject;
         private readonly StackPanelWrapper _stackPanelWrapper;
         private readonly Stack<History> _history = new Stack<History>();
+        private readonly IHasNormalMode _normalMode;
 
         public UIPort(IContainer container, ScrollViewer scrollViewer, StackPanel mainStack, Action<object> fnUpdateObject)
         {
             _container = container;
+            _normalMode = _container.Get<IHasNormalMode>();
+
             _mainStack = mainStack;
             _fnUpdateObject = fnUpdateObject;
 
@@ -36,6 +40,8 @@ namespace Navigator
 
         public void Navigate(object navObject)
         {
+            _normalMode.EnterNormalMode();
+
             _history.Push(new History(navObject, 0));
 
             _navObject = navObject;
@@ -52,6 +58,11 @@ namespace Navigator
         public object ActiveModel
         {
             get { return _navObject; }
+        }
+
+        public IUIElement ActiveUIElement
+        {
+            get { return _activeElement; }
         }
 
         private class History

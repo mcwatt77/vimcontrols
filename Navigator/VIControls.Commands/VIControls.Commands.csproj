@@ -43,9 +43,29 @@
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ICharacterEdit.cs" />
+    <Compile Include="CommandMode.cs" />
+    <Compile Include="Interfaces\IHasInsertMode.cs" />
+    <Compile Include="Interfaces\IHasNormalMode.cs" />
+    <Compile Include="Interfaces\IMessageable.cs" />
+    <Compile Include="Interfaces\ICharacterEdit.cs" />
+    <Compile Include="Interfaces\IHasSearchMode.cs" />
+    <Compile Include="Interfaces\IIsIncrementallySearchable.cs" />
+    <Compile Include="Interfaces\IIsSearchable.cs" />
+    <Compile Include="Interfaces\INavigable.cs" />
+    <Compile Include="Interfaces\INavigableObject.cs" />
+    <Compile Include="Interfaces\ISearchEdit.cs" />
+    <Compile Include="Interfaces\IUIContainer.cs" />
+    <Compile Include="Interfaces\IUIElement.cs" />
+    <Compile Include="Interfaces\IUIElementOnNavigate.cs" />
+    <Compile Include="Interfaces\IUIPort.cs" />
+    <Compile Include="Interfaces\IVerticallyNavigable.cs" />
+    <Compile Include="KeyMap.cs" />
+    <Compile Include="Message.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

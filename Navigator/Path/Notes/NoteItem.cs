@@ -1,16 +1,20 @@
 using System.Linq;
 using System.Xml.Linq;
 using Navigator.UI.Attributes;
+using VIControls.Commands;
+using VIControls.Commands.Interfaces;
 
 namespace Navigator.Path.Notes
 {
     public class NoteItem : ISummaryString, IDescriptionString, IMessageable
     {
+        private readonly MessageBroadcaster _messageBroadcaster;
         private readonly XElement _noteElement;
         private readonly EditableText _text;
 
-        public NoteItem(XElement noteElement)
+        public NoteItem(MessageBroadcaster messageBroadcaster, XElement noteElement)
         {
+            _messageBroadcaster = messageBroadcaster;
             _noteElement = noteElement;
             _text = new EditableText(_noteElement.Value);
         }
@@ -22,12 +26,14 @@ namespace Navigator.Path.Notes
 
         public string Description
         {
-            get { return _noteElement.Value; }
+            get { return _text.Text; }
         }
 
         public object Execute(Message message)
         {
-            return message.Invoke(_text);
+            var ret = message.Invoke(_text);
+            _messageBroadcaster.Update();
+            return ret;
         }
 
         public bool CanHandle(Message message)
