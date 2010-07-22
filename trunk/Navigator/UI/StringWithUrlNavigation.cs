@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
+using VIControls.Commands.Interfaces;
 
 namespace Navigator.UI
 {
@@ -33,6 +34,10 @@ namespace Navigator.UI
         public void SetFocus(bool on)
         {
             _summaryRun.Background = on ? Brushes.Bisque : Brushes.White;
+        }
+
+        public void Update()
+        {
         }
 
         public void Navigate()

@@ -31,7 +31,7 @@ namespace Navigator.Path.Jobs
             while (thread.IsAlive)
             {
                 UpdateSummary("Running: " + _info.CommandName + " (" + (int)DateTime.Now.Subtract(startTime).TotalSeconds + ")");
-                Thread.Sleep(5000);
+                Thread.Sleep(1000);
             }
             UpdateSummary("Run Command: " + _info.CommandName + " (Complete)");
         }

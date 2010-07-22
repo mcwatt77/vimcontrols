@@ -1,4 +1,5 @@
 using System.Windows;
+using VIControls.Commands.Interfaces;
 
 namespace Navigator.UI
 {

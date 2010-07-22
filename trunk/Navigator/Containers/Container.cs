@@ -6,6 +6,7 @@ using System.Reflection;
 using Castle.Core.Interceptor;
 using Castle.DynamicProxy;
 using Utility.Core;
+using VIControls.Commands;
 
 namespace Navigator.Containers
 {
@@ -19,6 +20,19 @@ namespace Navigator.Containers
         public Container()
         {
             _dictionary[typeof (IContainer)] = objects => this;
+        }
+
+        private object ExecuteForType(Type type, object[] objects, IContainerIntercept intercept)
+        {
+            if (intercept != null)
+                return typeof (IContainerIntercept)
+                    .GetMethod("Get")
+                    .MakeGenericMethod(type)
+                    .Invoke(intercept, new object[] {objects});
+
+            if (!_dictionary.ContainsKey(type)) throw new ComponentNotFound(type);
+
+            return _dictionary[type](objects);
         }
 
         public void Register(Type key, Type typeToInstantiate, ContainerRegisterType registerType)
@@ -48,7 +62,9 @@ namespace Navigator.Containers
 
         private object GetProxiedObject(Type key, IEnumerable<object> objects, Type typeToInstantiate)
         {
-            var parameters = GetParametersList(key, objects);
+            var interceptObject = Get(typeToInstantiate) as IContainerIntercept;
+
+            var parameters = GetParametersList(key, objects, interceptObject);
 
             var generator = new ProxyGenerator();
             var options = new ProxyGenerationOptions();
@@ -59,7 +75,11 @@ namespace Navigator.Containers
                 .ToArray();
 
             var proxiedObject = generator.CreateClassProxy(key, descendants, options, parameters, interceptor);
-            interceptor.InterceptObject = Get(typeToInstantiate, new[] {proxiedObject});
+            interceptor.InterceptObject = interceptObject;
+
+            var initialize = interceptor.InterceptObject as IInitialize;
+            if (initialize != null) initialize.Initialize(proxiedObject);
+
             return proxiedObject;
         }
 
@@ -89,7 +109,7 @@ namespace Navigator.Containers
                 _oldType = type;
             }
 
-            public object InterceptObject { private get; set; }
+            public object InterceptObject { get; set; }
 
             public void Intercept(IInvocation invocation)
             {
@@ -115,7 +135,7 @@ namespace Navigator.Containers
         {
             try
             {
-                var parametersList = GetParametersList(typeToInstantiate, objects);
+                var parametersList = GetParametersList(typeToInstantiate, objects, null);
                 return Activator.CreateInstance(typeToInstantiate, parametersList);
             }
             catch (Exception e)
@@ -124,20 +144,25 @@ namespace Navigator.Containers
             }
         }
 
-        private object[] GetParametersList(Type typeToInstantiate, IEnumerable<object> objects)
+        private object[] GetParametersList(Type typeToInstantiate, IEnumerable<object> objects, IContainerIntercept containerIntercept)
+        {
+            var constructor = GetConstructor(typeToInstantiate);
+
+            return GetListForConstructor(constructor, objects, containerIntercept);
+        }
+
+        private static ConstructorInfo GetConstructor(Type typeToInstantiate)
         {
             var parameterCount = typeToInstantiate
                 .GetConstructors()
                 .Max(constructorInfo => constructorInfo.GetParameters().Count());
 
-            var constructor = typeToInstantiate
+            return typeToInstantiate
                 .GetConstructors()
                 .Single(constructorInfo => constructorInfo.GetParameters().Count() == parameterCount);
-
-            return GetListForConstructor(constructor, objects);
         }
 
-        private object[] GetListForConstructor(ConstructorInfo constructor, IEnumerable<object> objects)
+        private object[] GetListForConstructor(ConstructorInfo constructor, IEnumerable<object> objects, IContainerIntercept intercept)
         {
             var parameters = constructor.GetParameters();
             if (parameters.Length == 1 && parameters.Single().ParameterType == typeof(object[]))
@@ -163,7 +188,7 @@ namespace Navigator.Containers
                                 if (objectToRemove == null)
                                     return new {
                                                    a.Index,
-                                                   Parameter = _dictionary[a.Parameter.ParameterType](new object[] {})
+                                                   Parameter = ExecuteForType(a.Parameter.ParameterType, new object[]{}, intercept)
                                                };
                                 objectListCopy.Remove(objectToRemove);
                                 return new {a.Index, Parameter = objectToRemove};
@@ -184,7 +209,18 @@ namespace Navigator.Containers
 
         public TResult Get<TResult>(params object[] objects)
         {
-            return (TResult)_dictionary[typeof(TResult)](objects);
+            try
+            {
+                return (TResult) ExecuteForType(typeof (TResult), objects, null);
+            }
+            catch (ComponentNotFound e)
+            {
+                throw new Exception("Failed instantiating '" + typeof (TResult) + "' for " + e.Message, e);
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Failed instantiating '" + typeof(TResult).Name + "'", e);
+            }
         }
 
         public TResult GetOrDefault<TResult>(params object[] objects)

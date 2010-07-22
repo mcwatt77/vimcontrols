@@ -3,6 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Windows;
 using Navigator.UI;
+using VIControls.Commands.Interfaces;
 
 namespace Navigator.Path.Jobs
 {

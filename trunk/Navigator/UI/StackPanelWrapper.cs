@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using VIControls.Commands.Interfaces;
 
 namespace Navigator.UI
 {
@@ -46,18 +47,6 @@ namespace Navigator.UI
                 tb.BringIntoView();
 
             return;
-
-            var verticalOffset = _stackPanel
-                .Children
-                .Cast<UIElement>()
-                .TakeWhile(uiElement => uiElement != element)
-                .Sum(uiElement => uiElement.RenderSize.Height);
-
-            var scrollViewer = ((ScrollViewer) _stackPanel.Parent);
-//            scrollViewer.BringIntoView();
-//            _stackPanel.SetVerticalOffset(_stackPanel.VerticalOffset + 5);
-//            _stackPanel.VerticalOffset = 20;
-            var debug = 0;
         }
     }
 }

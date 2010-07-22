@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using VIControls.Commands.Interfaces;
 
 namespace Navigator.UI
 {
@@ -61,6 +62,10 @@ namespace Navigator.UI
 
             if (_stackPanel == null || !on) return;
             _stackPanel.EnsureVisible(_block);
+        }
+
+        public void Update()
+        {
         }
     }
 }

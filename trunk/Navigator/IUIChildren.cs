@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Navigator.UI;
+using VIControls.Commands.Interfaces;
 
 namespace Navigator
 {

@@ -39,6 +39,9 @@ namespace Navigator.Test
 
         public void IfTwoInterceptorsAreRegisteredOnSameTypeBothSetsOfInterfacesAreAvailableOnFinalObject()
         {}
+
+        public void IfAnInstanceObjectIsSuppliedToATypeTheInterceptorGetsTheSameObject()
+        {}
     }
 
     public partial class ContainerTest
