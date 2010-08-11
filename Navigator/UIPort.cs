@@ -1,30 +1,28 @@
-using System;
 using System.Collections.Generic;
 using System.Windows.Controls;
 using Navigator.Containers;
 using Navigator.UI;
+using VIControls.Commands;
 using VIControls.Commands.Interfaces;
 
 namespace Navigator
 {
-    public class UIPort : IUIPort
+    public class UIPort : IUIPort, IMessageable
     {
         private readonly IContainer _container;
         private readonly StackPanel _mainStack;
-        private readonly Action<object> _fnUpdateObject;
         private IUIElement _activeElement;
         private object _navObject;
         private readonly StackPanelWrapper _stackPanelWrapper;
         private readonly Stack<History> _history = new Stack<History>();
         private readonly IHasNormalMode _normalMode;
 
-        public UIPort(IContainer container, ScrollViewer scrollViewer, StackPanel mainStack, Action<object> fnUpdateObject)
+        public UIPort(IContainer container, ScrollViewer scrollViewer, StackPanel mainStack)
         {
             _container = container;
             _normalMode = _container.Get<IHasNormalMode>();
 
             _mainStack = mainStack;
-            _fnUpdateObject = fnUpdateObject;
 
             _stackPanelWrapper = new StackPanelWrapper(mainStack, scrollViewer, false);
         }
@@ -43,15 +41,11 @@ namespace Navigator
             _normalMode.EnterNormalMode();
 
             _history.Push(new History(navObject, 0));
-
             _navObject = navObject;
 
             _mainStack.Children.Clear();
 
             _activeElement = _container.Get<IUIElementFactory>().GetUIElement(navObject);
-
-            _fnUpdateObject(navObject);
-
             _activeElement.Render(_stackPanelWrapper);
         }
 
@@ -75,6 +69,13 @@ namespace Navigator
             public object Element { get; private set; }
             //TODO: Index doesn't work here.  I need to replace this with some sort of Path memory, much like the status updates will work
             public int Index { get; private set; }
+        }
+
+        public object Execute(Message message)
+        {
+            if (message.CanHandle(this))
+                return message.Delegate.DynamicInvoke(this);
+            return message.Invoke(_navObject);
         }
     }
 }

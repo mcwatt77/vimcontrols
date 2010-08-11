@@ -13,6 +13,7 @@ namespace Navigator.Containers
     public class Container : IContainer
     {
         private readonly Dictionary<Type, Func<object[], object>> _dictionary = new Dictionary<Type, Func<object[], object>>();
+        private readonly Dictionary<Type, Func<object[], Type, object>> _genericDictionary = new Dictionary<Type, Func<object[], Type, object>>();
         private readonly Dictionary<Type, object> _singletonDictionary = new Dictionary<Type, object>();
         private readonly Dictionary<string, Func<object[], object>> _nameDictionary = new Dictionary<string, Func<object[], object>>();
         private readonly Dictionary<Type, HashSet<Type>> _interceptTypeChain = new Dictionary<Type, HashSet<Type>>();
@@ -30,9 +31,22 @@ namespace Navigator.Containers
                     .MakeGenericMethod(type)
                     .Invoke(intercept, new object[] {objects});
 
-            if (!_dictionary.ContainsKey(type)) throw new ComponentNotFound(type);
+            if (!_dictionary.ContainsKey(type) && type.IsGenericType)
+            {
+                if (_genericDictionary.ContainsKey(type.GetGenericTypeDefinition()))
+                    return _genericDictionary[type.GetGenericTypeDefinition()](objects, type);
+            }
+            if (!_dictionary.ContainsKey(type))
+                Register(type, type, ContainerRegisterType.Instance);
 
             return _dictionary[type](objects);
+        }
+
+        public void RegisterGeneric<TFactoryType>(Type key, Func<TFactoryType, Type, Func<object>> fnFactoryMethod)
+        {
+            var factory = Get<TFactoryType>();
+
+            _genericDictionary[key] = (objects, type) => fnFactoryMethod(factory, type)();
         }
 
         public void Register(Type key, Type typeToInstantiate, ContainerRegisterType registerType)
@@ -198,7 +212,7 @@ namespace Navigator.Containers
                 .ToArray();
         }
 
-        private object Get(Type type, params object[] objects)
+        public object Get(Type type, params object[] objects)
         {
             return typeof (Container)
                 .GetMethods()
@@ -231,7 +245,7 @@ namespace Navigator.Containers
                 {
                     Register(typeof (TResult), typeof (TResult), ContainerRegisterType.Instance);
                 }
-                return (TResult)_dictionary[typeof(TResult)](objects);
+                return (TResult) ExecuteForType(typeof (TResult), objects, null);
             }
             catch (Exception e)
             {
@@ -243,7 +257,7 @@ namespace Navigator.Containers
         {
             try
             {
-                return (TResult)_dictionary[typeof(TResult)](objects);
+                return (TResult) ExecuteForType(typeof (TResult), objects, null);
             }
             catch(Exception e)
             {

@@ -35,7 +35,7 @@ namespace VIControls.Commands
         public object Invoke(object @object)
         {
             var messagable = @object as IMessageable;
-            if (messagable == null || !messagable.CanHandle(this)) return Delegate.DynamicInvoke(@object);
+            if (messagable == null || /*!messagable.*/CanHandle(@object)) return Delegate.DynamicInvoke(@object);
             return messagable.Execute(this);
         }
     }

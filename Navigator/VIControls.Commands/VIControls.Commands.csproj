@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="CommandMode.cs" />
     <Compile Include="Interfaces\IHasInsertMode.cs" />
+    <Compile Include="Interfaces\IHasModes.cs" />
     <Compile Include="Interfaces\IHasNormalMode.cs" />
     <Compile Include="Interfaces\IMessageable.cs" />
     <Compile Include="Interfaces\ICharacterEdit.cs" />
