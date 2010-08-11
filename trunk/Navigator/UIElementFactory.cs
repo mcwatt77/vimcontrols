@@ -63,6 +63,11 @@ namespace Navigator
                 var url = (IHasUrl) modelElement;
                 return new StringWithUrlNavigation(summaryString.Summary, url.Url);
             }
+            if (typeProfile.ImplementsAllInterfaces(typeof(IHasXml)))
+            {
+                var xml = (IHasXml) modelElement;
+                return new HtmlToWPF(xml.Xml);
+            }
             if (typeof(IModelChildren).IsAssignableFrom(modelElement.GetType())
                 && typeof(ISummaryString).IsAssignableFrom(modelElement.GetType()))
             {

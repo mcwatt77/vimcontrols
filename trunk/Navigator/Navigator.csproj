@@ -57,15 +57,28 @@
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="WindowsBase" />
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
+    <Reference Include="UIAutomationProvider">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="PresentationCore">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="PresentationFramework">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="PasswordPrompt.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Window1.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -86,9 +99,30 @@
     <Compile Include="Containers\IReadContainer.cs" />
     <Compile Include="IContainerIntercept.cs" />
     <Compile Include="MessageBroadcaster.cs" />
+    <Compile Include="PageCacher.cs" />
+    <Compile Include="PasswordPrompt.xaml.cs">
+      <DependentUpon>PasswordPrompt.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Path\Agile\AgileDownloader.cs" />
+    <Compile Include="Path\Agile\AgileLink.cs" />
+    <Compile Include="Path\Agile\AgileLinks.cs" />
+    <Compile Include="Path\Jobs\JsonToXmlConvert.cs" />
     <Compile Include="Path\KevinBacon\KevinBaconCollection.cs" />
     <Compile Include="Path\KevinBacon\KevinBaconItem.cs" />
+    <Compile Include="Path\KevinBacon\KevinBaconSearch.cs" />
     <Compile Include="Path\Notes\EditableText.cs" />
+    <Compile Include="Repository\IdentityLookup.cs" />
+    <Compile Include="Repository\IHasSerializer.cs" />
+    <Compile Include="Repository\ImplementationBuilder.cs" />
+    <Compile Include="Repository\PartitionedFile\PartitionedFile.cs" />
+    <Compile Include="Repository\PartitionedFile\PartitionedFileHeader.cs" />
+    <Compile Include="Repository\PartitionedFile\PartitionedFileStream.cs" />
+    <Compile Include="Repository\PartitionedFile\PartitionedFileStreamFactory.cs" />
+    <Compile Include="Repository\Repository.cs" />
+    <Compile Include="Repository\RepositorySerializer.cs" />
+    <Compile Include="Repository\RepositoryTest.cs" />
+    <Compile Include="Repository\Serializer.cs" />
+    <Compile Include="Repository\TypeTable.cs" />
     <Compile Include="Test\ContainerTest.cs" />
     <Compile Include="Containers\IContainer.cs" />
     <Compile Include="DeferredExecutionList.cs" />
@@ -110,14 +144,17 @@
     <Compile Include="Path\Notes\NoteItem.cs" />
     <Compile Include="Path\Schemas\SchemaCollection.cs" />
     <Compile Include="Repository\RepositoryFactory.cs" />
+    <Compile Include="Test\KevinBaconCollectionTest.cs" />
     <Compile Include="UIPort.cs" />
     <Compile Include="UI\Attributes\IAttribute.cs" />
     <Compile Include="UI\Attributes\IDescriptionString.cs" />
     <Compile Include="UI\Attributes\IFileViewer.cs" />
     <Compile Include="UI\Attributes\IHasUrl.cs" />
+    <Compile Include="UI\Attributes\IHasXml.cs" />
     <Compile Include="UI\Attributes\IModelChildren.cs" />
     <Compile Include="UI\Attributes\ISummaryString.cs" />
     <Compile Include="UI\FileElement.cs" />
+    <Compile Include="UI\HtmlToWPF.cs" />
     <Compile Include="UI\IStackPanel.cs" />
     <Compile Include="UI\IUIElementFactory.cs" />
     <Compile Include="Path\PathCollection.cs" />

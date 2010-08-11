@@ -35,10 +35,5 @@ namespace Navigator.Path.Notes
             _messageBroadcaster.Update();
             return ret;
         }
-
-        public bool CanHandle(Message message)
-        {
-            return message.CanHandle(_text);
-        }
     }
 }

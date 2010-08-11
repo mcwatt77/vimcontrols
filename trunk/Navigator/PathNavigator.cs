@@ -36,6 +36,9 @@ namespace Navigator
                         .Where(child => child != null)
                         .Select(child => _elementFactory.GetUIElement(child))
                         .ToArray();
+
+                    if (_uiElements.Count() > 0)
+                        _uiElements.ElementAt(_index).SetFocus(true);
                 }
                 return _uiElements;
             }
@@ -62,7 +65,7 @@ namespace Navigator
 
         public void NavigateToCurrentChild()
         {
-            var uiElement = (INavigableObject)GetCurrentModelChild();
+            var uiElement = GetCurrentModelChild() as INavigableObject;
             if (uiElement != null) uiElement.Navigate();
         }
 
@@ -94,11 +97,6 @@ namespace Navigator
 
             //TODO: Figure out what the hell is going on here
             return message.Delegate.DynamicInvoke(this);
-        }
-
-        public bool CanHandle(Message message)
-        {
-            return true;
         }
 
         public TResult Get<TResult>(params object[] objects)

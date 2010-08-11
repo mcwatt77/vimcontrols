@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -43,6 +44,10 @@ namespace Navigator.UI
                 }
 
                 _stackPanel.AddChild(scrollViewer);
+
+                var grid = (Grid) ((StackPanel) scrollViewer.Parent).Parent;
+                var parent = (Window)grid.Parent;
+                parent.SizeChanged += ParentSizeChanged;
             }
             else
             {
@@ -50,6 +55,18 @@ namespace Navigator.UI
                     ((StackPanel)_block.Parent).Children.Remove(_block);
                 _stackPanel.AddChild(_block);
             }
+        }
+
+        //TODO: This is pretty whack.  Why do I have to do this?
+        private static void ParentSizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            var window = (Window) sender;
+            var grid = (Grid) window.Content;
+            var stackPanel = (StackPanel) grid.Children.Cast<UIElement>().First();
+            var scrollViewer = (ScrollViewer)stackPanel.Children.Cast<UIElement>().First();
+
+            scrollViewer.Height = grid.ActualHeight;
+            scrollViewer.Width = grid.ActualWidth;
         }
 
         public void SetFocus(bool on)

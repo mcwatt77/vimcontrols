@@ -236,18 +236,7 @@ I should be able to navigate to the subject, and see all related media and data.
 
         public string GetCachedPage(string url, params string[] cookies)
         {
-            var replace = url.Replace("/", "%2F").Replace(":", "%3A").Replace(";", "%3B").Replace("=", "%3D").Replace("&", "%26")
-                .Replace("?", "%3F");
-            var file = new FileInfo(replace);
-            if (!file.Exists)
-            {
-                var webClient = new WebClient();
-                webClient.Headers.Add("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
-                if (cookies != null)
-                    webClient.Headers.Add("Cookie", cookies.Aggregate("", (s, a) => s + a));
-                webClient.DownloadFile(url, file.FullName);
-            }
-            return file.OpenText().ReadToEnd();
+            return PageCacher.GetCachedPage(url, cookies);
         }
     }
 

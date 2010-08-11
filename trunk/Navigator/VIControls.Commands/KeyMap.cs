@@ -12,6 +12,9 @@ namespace VIControls.Commands
         private static readonly List<KeyMap> KeyMaps
             = new List<KeyMap>
                   {
+                      new Map<IHasNormalMode>(CommandMode.Insert, Key.Escape, x => x.EnterNormalMode()),
+                      new Map<IHasNormalMode>(CommandMode.Search, Key.Escape, x => x.EnterNormalMode()),
+
                       new Map<IVerticallyNavigable>(CommandMode.Normal, Key.J, x => x.MoveVertically(1)),
                       new Map<IVerticallyNavigable>(CommandMode.Normal, Key.K, x => x.MoveVertically(-1)),
 
@@ -47,7 +50,9 @@ namespace VIControls.Commands
                       new Map<ICharacterEdit>(CommandMode.Insert, Key.X, x => x.Output('x')),
                       new Map<ICharacterEdit>(CommandMode.Insert, Key.Y, x => x.Output('y')),
                       new Map<ICharacterEdit>(CommandMode.Insert, Key.Z, x => x.Output('z')),
+                      new Map<ICharacterEdit>(CommandMode.Insert, Key.Space, x => x.Output(' ')),
                       new Map<ICharacterEdit>(CommandMode.Insert, Key.Enter, x => x.NewLine()),
+                      new Map<ICharacterEdit>(CommandMode.Insert, Key.Back, x => x.Backspace()),
 
                       new Map<ISearchEdit>(CommandMode.Search, Key.A, x => x.Output('a')),
                       new Map<ISearchEdit>(CommandMode.Search, Key.B, x => x.Output('b')),
@@ -75,6 +80,9 @@ namespace VIControls.Commands
                       new Map<ISearchEdit>(CommandMode.Search, Key.X, x => x.Output('x')),
                       new Map<ISearchEdit>(CommandMode.Search, Key.Y, x => x.Output('y')),
                       new Map<ISearchEdit>(CommandMode.Search, Key.Z, x => x.Output('z')),
+                      new Map<ISearchEdit>(CommandMode.Search, Key.Space, x => x.Output(' ')),
+                      new Map<ISearchEdit>(CommandMode.Search, Key.Enter, x => x.ExecuteSearch()),
+                      new Map<ISearchEdit>(CommandMode.Search, Key.Back, x => x.Backspace()),
                   };
 
         private static readonly Dictionary<CommandMode, Dictionary<Key, Message>> CompiledKeyMap = GetCompiledKeyMap();

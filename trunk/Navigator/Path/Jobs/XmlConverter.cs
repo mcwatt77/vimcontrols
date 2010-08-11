@@ -9,6 +9,11 @@ namespace Navigator.Path.Jobs
     {
         public static XDocument ConvertToXml(string source)
         {
+            return new XmlConverter().Convert(source);
+        }
+
+        public XDocument Convert(string source)
+        {
             var tokens = GetTokens(source).ToArray();
 
             var currentElement = new XElement("root");
@@ -60,9 +65,14 @@ namespace Navigator.Path.Jobs
             return document;
         }
 
-        private static IEnumerable<Token> GetTokens(IEnumerable<char> source)
+        protected virtual ParseState StartToken()
         {
-            ParseState parseState = new ElementStart();
+            return new ElementStart();
+        }
+
+        private IEnumerable<Token> GetTokens(IEnumerable<char> source)
+        {
+            var parseState = StartToken();
 
             foreach (var c in source)
             {
@@ -79,7 +89,7 @@ namespace Navigator.Path.Jobs
                 yield return token;
         }
 
-        private class ParseResult
+        public class ParseResult
         {
             public ParseState NextParseState { get; set; }
             public Token TokenResult { get; set; }
@@ -107,7 +117,7 @@ namespace Navigator.Path.Jobs
             }
         }
 
-        private class ElementStart : ParseState
+        public class ElementStart : ParseState
         {
             public override ParseResult Process(char c)
             {
@@ -236,7 +246,7 @@ namespace Navigator.Path.Jobs
             }
         }
 
-        private abstract class ParseState
+        public abstract class ParseState
         {
             public abstract ParseResult Process(char c);
 
@@ -251,15 +261,15 @@ namespace Navigator.Path.Jobs
             }
         }
 
-        private enum TokenType
+        public enum TokenType
         {
             EndElement, Element, Attribute, AttributeValue, Text
         }
 
-        private class Token
+        public class Token
         {
             private int _length;
-            private StringBuilder TextData { get; set; }
+            protected StringBuilder TextData { get; set; }
             private bool _pureWhitespace = true;
 
             public Token(TokenType type)
@@ -273,7 +283,7 @@ namespace Navigator.Path.Jobs
                 TextData.Append(c);
                 _length++;
 
-                if (_pureWhitespace) return;
+                if (!_pureWhitespace) return;
                 _pureWhitespace = ParseState.IsWhitespace(c);
             }
 
