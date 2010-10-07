@@ -10,6 +10,7 @@ using Navigator.Path.Jobs;
 using Navigator.Path.KevinBacon;
 using Navigator.Path.Notes;
 using Navigator.Path.Schemas;
+using Navigator.Path.Wow;
 using Navigator.UI;
 using Navigator.UI.Attributes;
 using VIControls.Commands;
@@ -53,18 +54,20 @@ namespace Navigator
 
                 _container.Get<IUIElementFactory>();
 
-                var navigable = (INavigable) _container.Get<PathCollection>(
-                                              _container.GetOrDefault<JobList>(),
-                                              _container.GetOrDefault<AgileLinks>(),
-//                                              _container.GetOrDefault<RssPath>("http://www.salon.com/rss/v2/news.rss"),
-//                                              _container.GetOrDefault<RssPath>("http://rss.slashdot.org/Slashdot/slashdot"),
-//                                              _container.GetOrDefault<RssPath>(ex => new ExceptionModel(ex), "http://feeds.feedblitz.com/alternet"),
-//                                              _container.GetOrDefault<RssPath>("http://feeds.huffingtonpost.com/huffingtonpost/raw_feed"),
-//                                              _container.GetOrDefault<RssPath>("http://blogs.msdn.com/ericlippert/rss.xml"),
-                                              _container.GetOrDefault<HdPath>(),
-                                              _container.GetOrDefault<NoteCollection>(),
-                                              _container.GetOrDefault<SchemaCollection>(),
-                                              _container.GetOrDefault<KevinBaconCollection>());
+                var navigable = _container.Get<PathCollection>(
+                    _container.GetOrDefault<JobList>(),
+                    _container.GetOrDefault<AgileLinks>(),
+                    //                                              _container.GetOrDefault<RssPath>("http://www.salon.com/rss/v2/news.rss"),
+                    //                                              _container.GetOrDefault<RssPath>("http://rss.slashdot.org/Slashdot/slashdot"),
+                    //                                              _container.GetOrDefault<RssPath>(ex => new ExceptionModel(ex), "http://feeds.feedblitz.com/alternet"),
+                    //                                              _container.GetOrDefault<RssPath>("http://feeds.huffingtonpost.com/huffingtonpost/raw_feed"),
+                    //                                              _container.GetOrDefault<RssPath>("http://blogs.msdn.com/ericlippert/rss.xml"),
+                    _container.GetOrDefault<HdPath>(),
+                    _container.GetOrDefault<NoteCollection>(),
+                    _container.GetOrDefault<SchemaCollection>(),
+                    _container.GetOrDefault<KevinBaconCollection>(),
+                    _container.GetOrDefault<SpellCollectionPath>(),
+                    _container.GetOrDefault<TalentCollectionPath>());
 
                 _port.Navigate(navigable);
             }

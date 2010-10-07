@@ -48,6 +48,42 @@ namespace Navigator.Path.Jobs
                                                                    {
                                                                        Command = @"nant build test",
                                                                        CommandName = "Test 10.2.1"
+                                                                   }),
+                                container.GetOrDefault<RunCmd>(new CommandInfo
+                                                                   (@"D:\development\casemax\cmsdotnet\framework\branches\10.2.2\database")
+                                                                   {
+                                                                       Command = @"nant -buildfile:database.build full-upgrade",
+                                                                       CommandName = "Build 10.2.2 database"
+                                                                   }),
+                                container.GetOrDefault<RunCmd>(new CommandInfo
+                                                                   (@"D:\development\casemax\cmsdotnet\framework\branches\10.2.2")
+                                                                   {
+                                                                       Command = @"config.bat",
+                                                                       CommandName = "Switch to 10.2.2 configuration"
+                                                                   }),
+                                container.GetOrDefault<RunCmd>(new CommandInfo
+                                                                   (@"D:\development\casemax\cmsdotnet\framework\branches\10.2.2\PRS.CMS")
+                                                                   {
+                                                                       Command = @"nant build test",
+                                                                       CommandName = "Test 10.2.2"
+                                                                   }),
+                                container.GetOrDefault<RunCmd>(new CommandInfo
+                                                                   (@"D:\development\casemax\cmsdotnet\framework\branches\10.2.3\database")
+                                                                   {
+                                                                       Command = @"nant -buildfile:database.build full-upgrade",
+                                                                       CommandName = "Build 10.2.3 database"
+                                                                   }),
+                                container.GetOrDefault<RunCmd>(new CommandInfo
+                                                                   (@"D:\development\casemax\cmsdotnet\framework\branches\10.2.3")
+                                                                   {
+                                                                       Command = @"config.bat",
+                                                                       CommandName = "Switch to 10.2.3 configuration"
+                                                                   }),
+                                container.GetOrDefault<RunCmd>(new CommandInfo
+                                                                   (@"D:\development\casemax\cmsdotnet\framework\branches\10.2.3\PRS.CMS")
+                                                                   {
+                                                                       Command = @"nant build test",
+                                                                       CommandName = "Test 10.2.3"
                                                                    })
                             };
         }
