@@ -20,6 +20,14 @@ namespace Navigator
 
         public bool ImplementsInterface(Type type)
         {
+            if (type.IsGenericType)
+            {
+                return _object
+                    .GetType()
+                    .GetInterfaces()
+                    .Where(i => i.IsGenericType)
+                    .Any(t => t.GetGenericTypeDefinition() == type);
+            }
             return type.IsAssignableFrom(_object.GetType());
         }
 
@@ -57,6 +65,21 @@ namespace Navigator
         {
             var typeProfile = new TypeProfile(modelElement);
 
+            if (typeProfile.ImplementsAllInterfaces(typeof(IHasRows<>), typeof(ISummaryString)))
+            {
+                var typeofRowList = modelElement
+                    .GetType()
+                    .GetInterfaces()
+                    .Where(i => i.IsGenericType)
+                    .Single(t => t.GetGenericTypeDefinition() == typeof (IHasRows<>));
+
+                var tableToMake = typeof (TableViewier<>)
+                    .MakeGenericType(typeofRowList.GetGenericArguments().Single());
+
+                var summary = (ISummaryString) modelElement;
+
+                return (IUIElement) Activator.CreateInstance(tableToMake, summary.Summary, modelElement);
+            }
             if (typeProfile.ImplementsAllInterfaces(typeof(IHasUrl), typeof(ISummaryString)))
             {
                 var summaryString = (ISummaryString) modelElement;

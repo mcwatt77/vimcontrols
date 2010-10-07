@@ -111,6 +111,10 @@
     <Compile Include="Path\KevinBacon\KevinBaconItem.cs" />
     <Compile Include="Path\KevinBacon\KevinBaconSearch.cs" />
     <Compile Include="Path\Notes\EditableText.cs" />
+    <Compile Include="Path\Wow\AhDownloader.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Path\Wow\SpellPath.cs" />
     <Compile Include="Repository\IdentityLookup.cs" />
     <Compile Include="Repository\IHasSerializer.cs" />
     <Compile Include="Repository\ImplementationBuilder.cs" />
@@ -149,6 +153,8 @@
     <Compile Include="UI\Attributes\IAttribute.cs" />
     <Compile Include="UI\Attributes\IDescriptionString.cs" />
     <Compile Include="UI\Attributes\IFileViewer.cs" />
+    <Compile Include="UI\Attributes\IHasColumns.cs" />
+    <Compile Include="UI\Attributes\IHasRows.cs" />
     <Compile Include="UI\Attributes\IHasUrl.cs" />
     <Compile Include="UI\Attributes\IHasXml.cs" />
     <Compile Include="UI\Attributes\IModelChildren.cs" />
